@@ -10,15 +10,15 @@
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
           <!-- DM Messages -->
-          <q-btn round dense flat color="grey" icon="send" />
+          <q-btn round dense flat color="grey" icon="far fa-paper-plane" />
           <!-- Likes Button -->
-          <q-btn round dense flat color="grey" icon="favorite_border" />
+          <q-btn round dense flat color="grey" icon="far fa-heart" />
           <!-- Search button -->
           <q-btn-dropdown
             dense
             flat
             rounded
-            dropdown-icon="search"
+            dropdown-icon="fas fa-search"
             color="grey"
             no-icon-animation
           >
@@ -35,7 +35,7 @@
             flat
             color="grey"
             no-icon-animation
-            dropdown-icon="face"
+            dropdown-icon="far fa-user"
           >
             <q-list>
               <!-- Profile -->
