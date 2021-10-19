@@ -48,7 +48,7 @@
           >
             <q-list>
               <!-- Profile -->
-              <q-item clickable v-close-popup @click="onItemClick">
+              <q-item clickable v-close-popup @click="sendToUserPage">
                 <q-item-section>
                   <q-item-label>Profile</q-item-label>
                 </q-item-section>
@@ -60,7 +60,7 @@
                 </q-item-section>
               </q-item>
               <!-- Log out -->
-              <q-item clickable v-close-popup @click="onItemClick">
+              <q-item clickable v-close-popup @click="logOut">
                 <q-item-section>
                   <q-item-label>Log out</q-item-label>
                 </q-item-section>
@@ -93,11 +93,23 @@
   </q-layout>
 </template>
 <script>
+import { firebaseAuth } from "src/boot/firebase";
 export default {
   data() {
     return {
       tab: "mails",
     };
+  },
+  methods: {
+    logOut() {
+      firebaseAuth.signOut();
+    },
+    sendToUserPage() {
+      this.$router.push({
+        name: "User",
+        params: { userId: firebaseAuth.currentUser.uid },
+      });
+    },
   },
 };
 </script>

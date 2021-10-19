@@ -2,9 +2,17 @@
   <router-view />
 </template>
 <script>
-import { defineComponent } from 'vue';
+import { firebaseAuth } from "./boot/firebase";
 
-export default defineComponent({
-  name: 'App'
-})
+export default {
+  name: "App",
+  mounted() {
+    firebaseAuth.onAuthStateChanged((user) => {
+      if (user) {
+      } else {
+        this.$router.push("/auth");
+      }
+    });
+  },
+};
 </script>

@@ -4,14 +4,14 @@
     <div class="row flex myCardBaseUser items-center justify-between q-pa-md">
       <!-- Img -->
       <q-avatar class="imgBaseUser shadow-5">
-        <img src="https://cdn.quasar.dev/img/avatar.png" class="imageMyCard" />
+        <img :src="userInfomation.img" class="imageMyCard" />
       </q-avatar>
       <!-- Info Upper -->
       <div class="column">
         <!-- Username -->
         <div class="userNameUpperBase items-center">
           <div class="text-weight-thin text-h4 q-mb-sm usernameDesktop">
-            hans___chris
+            {{ userInfomation.name }}
           </div>
           <q-btn
             class="full-width showButtonMobile"
@@ -92,7 +92,28 @@
   </div>
 </template>
 <script>
-export default {};
+import { firebaseAuth, firebaseDb } from "src/boot/firebase";
+export default {
+  data() {
+    return {
+      userInfomation: {},
+    };
+  },
+  beforeCreate() {
+    let currentUserId = this.$route.params.userId;
+    let currentUserInformationRef = firebaseDb.ref(
+      "toneygram/users/" + currentUserId
+    );
+    currentUserInformationRef.once("value", (userInPage) => {
+      let userInformation = userInPage.val();
+      this.userInfomation = {
+        id: userInformation.userInformation.id,
+        img: userInformation.userInformation.img,
+        name: userInformation.userInformation.name,
+      };
+    });
+  },
+};
 </script>
 <style lang="scss">
 .userPageBase {

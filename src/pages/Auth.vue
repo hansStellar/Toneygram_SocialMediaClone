@@ -14,7 +14,6 @@
         <q-tab class="text-grey-5" name="login" label="Log in" />
         <q-tab class="text-grey-5" name="register" label="Register" />
       </q-tabs>
-
       <!-- Tab -->
       <q-tab-panels
         v-model="tab"
@@ -75,6 +74,7 @@
               autofocus
               label-color="grey-5"
               dense
+              autocapitalize="none"
               lazy-rules
               type="text"
               v-model="register.username"
@@ -221,13 +221,13 @@ export default {
             );
             registeredUser.user
               .updateProfile({
-                displayName: this.register.username,
+                displayName: this.register.username.toLowerCase(),
                 photoURL: "https://i.ibb.co/hyqwWJD/default.png",
               })
               .then(() => {
                 usersRef.set({
                   img: registeredUser.user.photoURL,
-                  name: registeredUser.user.displayName,
+                  name: registeredUser.user.displayName.toLowerCase(),
                   id: registeredUser.user.uid,
                 });
               });
@@ -250,7 +250,7 @@ export default {
               color: "negative",
             });
           });
-      } else {
+      } else if (this.register.password !== this.register.confirmPassword) {
         Notify.create({
           message: "Passwords does not match",
           color: "negative",
