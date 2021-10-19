@@ -10,15 +10,23 @@
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
           <!-- DM Messages -->
-          <q-btn round dense flat color="grey" icon="far fa-paper-plane" />
+          <q-btn round dense flat color="grey" icon="mail_outline" />
           <!-- Likes Button -->
-          <q-btn round dense flat color="grey" icon="far fa-heart" />
+          <q-btn
+            class="buttonFooter"
+            round
+            dense
+            flat
+            color="grey"
+            icon="favorite_border"
+          />
           <!-- Search button -->
           <q-btn-dropdown
             dense
+            class="buttonFooter"
             flat
             rounded
-            dropdown-icon="fas fa-search"
+            dropdown-icon="search"
             color="grey"
             no-icon-animation
           >
@@ -31,11 +39,12 @@
           <!-- Profile button -->
           <q-btn-dropdown
             rounded
+            class="buttonFooter"
             dense
             flat
             color="grey"
             no-icon-animation
-            dropdown-icon="far fa-user"
+            dropdown-icon="face"
           >
             <q-list>
               <!-- Profile -->
@@ -65,20 +74,57 @@
     <q-page-container>
       <router-view />
     </q-page-container>
+
+    <q-footer reveal elevated class="bg-grey-8 text-white baseFooter">
+      <q-tabs
+        v-model="tab"
+        indicator-color="transparent"
+        active-color="cyan-8"
+        active-bg-color="cyan-2"
+        class="bg-white full-width text-grey-5 shadow-2"
+      >
+        <q-tab alert="red" name="home" icon="apartment" />
+        <q-tab alert="red" name="search" icon="search" />
+        <q-tab alert="red" name="add" icon="add_circle_outline" />
+        <q-tab alert="red" name="likes" icon="favorite_border" />
+        <q-tab alert="red" name="user" icon="face" />
+      </q-tabs>
+    </q-footer>
   </q-layout>
 </template>
+<script>
+export default {
+  data() {
+    return {
+      tab: "mails",
+    };
+  },
+};
+</script>
 <style lang="scss">
 .buttonsLayerBase {
 }
 //iPhone
 @media (max-width: 480px) {
+  .buttonFooter {
+    display: none;
+  }
+  .baseFooter {
+    display: flex;
+  }
 }
 
 //Tablet
 @media (min-width: 480px) {
+  .baseFooter {
+    display: none;
+  }
 }
 
 //Desktop
 @media (min-width: 768px) {
+  .baseFooter {
+    display: none;
+  }
 }
 </style>
