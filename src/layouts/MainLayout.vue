@@ -85,7 +85,7 @@
       >
         <q-tab alert="red" name="home" icon="apartment" />
         <q-tab alert="red" name="search" icon="search" />
-        <q-tab alert="red" name="add" icon="add_circle_outline" />
+
         <q-tab alert="red" name="likes" icon="favorite_border" />
         <q-tab alert="red" name="user" icon="face" />
       </q-tabs>
