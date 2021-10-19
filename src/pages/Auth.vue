@@ -25,9 +25,10 @@
       >
         <!-- Login -->
         <q-tab-panel name="login" class="q-py-none q-pb-md">
-          <q-form @submit="logInAction">
+          <q-form style="overflow: hidden">
             <q-input
               color="grey-3"
+              autofocus
               label-color="grey-5"
               type="email"
               lazy-rules
@@ -58,19 +59,24 @@
               color="green-3"
               class="full-width"
               text-color="white"
+              @keyup.enter.prevent="logInUser"
+              @click="logInUser"
+              ref="logInButton"
+              :disable="loginButtonActive"
             />
           </q-form>
         </q-tab-panel>
         <!-- Register -->
         <q-tab-panel name="register" class="q-py-none q-pb-md">
-          <q-form @submit="registerAction">
+          <q-form>
             <!-- username -->
             <q-input
               color="grey-3"
+              autofocus
               label-color="grey-5"
               dense
               lazy-rules
-              type="username"
+              type="text"
               v-model="register.username"
               :rules="[
                 (val) =>
@@ -86,6 +92,7 @@
               label-color="grey-5"
               lazy-rules
               dense
+              type="email"
               v-model="register.email"
               :rules="[
                 (val) => validateEmail(val) || 'Please insert a valid email',
@@ -126,8 +133,11 @@
             <q-btn
               label="Register"
               color="green-3"
+              :disable="registerButtonActive"
               type="submit"
               class="col full-width"
+              @keyup.enter.prevent="registerUser"
+              @click="registerUser"
             />
           </q-form>
         </q-tab-panel>
@@ -150,6 +160,9 @@
           class="col full-width"
         />
       </div>
+      <q-inner-loading :showing="visible">
+        <q-spinner-ios size="50px" color="grey-6" />
+      </q-inner-loading>
     </div>
     <!-- Footer -->
     <q-separator
@@ -161,10 +174,14 @@
     <div class="text-body1 text-grey-5">© 2021 Toneygram</div>
   </div>
 </template>
+
 <script>
+import { Notify, LoadingBar } from "quasar";
+import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 export default {
   data() {
     return {
+      visible: false,
       tab: "login",
       login: {
         email: "",
@@ -176,6 +193,8 @@ export default {
         password: "",
         confirmPassword: "",
       },
+      loginButtonActive: false,
+      registerButtonActive: false,
     };
   },
   methods: {
@@ -184,11 +203,85 @@ export default {
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(String(email).toLowerCase());
     },
-    registerAction() {
-      this.registerUser(this.register);
+    registerUser() {
+      if (this.register.password === this.register.confirmPassword) {
+        this.registerButtonActive = true;
+        this.visible = true;
+        firebaseAuth
+          .createUserWithEmailAndPassword(
+            this.register.email,
+            this.register.password
+          )
+          .then((registeredUser) => {
+            this.visible = false;
+            // Setting the user in the Database
+            const actualUserId = firebaseAuth.currentUser.uid;
+            const usersRef = firebaseDb.ref(
+              "toneygram/users/" + actualUserId + "/userInformation"
+            );
+            registeredUser.user
+              .updateProfile({
+                displayName: this.register.username,
+                photoURL: "https://i.ibb.co/hyqwWJD/default.png",
+              })
+              .then(() => {
+                usersRef.set({
+                  img: registeredUser.user.photoURL,
+                  name: registeredUser.user.displayName,
+                  id: registeredUser.user.uid,
+                });
+              });
+            LoadingBar.start();
+            setTimeout(() => {
+              // Notification
+              Notify.create({
+                avatar: firebaseAuth.currentUser.photoURL,
+                message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
+                color: "positive",
+              });
+              this.$router.push({ name: "Home" });
+            }, 1000);
+          })
+          .catch((error) => {
+            this.registerButtonActive = false;
+            this.visible = false;
+            Notify.create({
+              message: error.message,
+              color: "negative",
+            });
+          });
+      } else {
+        Notify.create({
+          message: "Passwords does not match",
+          color: "negative",
+        });
+      }
     },
-    logInAction() {
-      this.logInUser(this.login);
+    logInUser() {
+      this.loginButtonActive = true;
+      this.visible = true;
+      firebaseAuth
+        .signInWithEmailAndPassword(this.login.email, this.login.password)
+        .then((userCredentials) => {
+          this.visible = false;
+          LoadingBar.start();
+          setTimeout(() => {
+            this.$router.push({ name: "Home" });
+            Notify.create({
+              avatar: userCredentials.user.photoURL,
+              message: `Welcome, ${userCredentials.user.displayName}`,
+              color: "positive",
+            });
+          }, 1000);
+        })
+        .catch((error) => {
+          this.loginButtonActive = false;
+          this.visible = false;
+          Notify.create({
+            message: error.message,
+            color: "negative",
+          });
+        });
     },
   },
 };

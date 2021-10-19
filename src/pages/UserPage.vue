@@ -9,7 +9,7 @@
       <!-- Info Upper -->
       <div class="column">
         <!-- Username -->
-        <div class="userNameUpperBase">
+        <div class="userNameUpperBase items-center">
           <div class="text-weight-thin text-h4 q-mb-sm usernameDesktop">
             hans___chris
           </div>
@@ -21,7 +21,9 @@
           <q-btn
             class="full-width showButtonDesktop"
             dense
-            label="Edit Profile"
+            color="grey-5"
+            flat
+            icon="settings"
             style="max-height: 2rem"
           />
         </div>
@@ -157,7 +159,7 @@ export default {};
   .imgBaseUser {
     height: 150px;
     width: 150px;
-    margin-right: 10rem;
+    margin-right: 7rem;
   }
   .userNameUpperBase {
     display: flex;
