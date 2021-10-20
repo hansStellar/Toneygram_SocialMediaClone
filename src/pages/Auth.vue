@@ -84,6 +84,22 @@
                   'Your username has to be longer than 3 characters',
               ]"
               label="Username"
+            />
+            <!-- full name -->
+            <q-input
+              color="grey-3"
+              label-color="grey-5"
+              dense
+              autocapitalize="none"
+              lazy-rules
+              type="text"
+              v-model="register.fullName"
+              :rules="[
+                (val) =>
+                  val.length >= 3 ||
+                  'Your name has to be longer than 3 characters',
+              ]"
+              label="Full name"
             >
             </q-input>
             <!-- email -->
@@ -192,6 +208,7 @@ export default {
         email: "",
         password: "",
         confirmPassword: "",
+        fullName: "",
       },
       loginButtonActive: false,
       registerButtonActive: false,
@@ -229,6 +246,7 @@ export default {
                   img: registeredUser.user.photoURL,
                   name: registeredUser.user.displayName.toLowerCase(),
                   id: registeredUser.user.uid,
+                  fullname: this.register.fullName,
                 });
               });
             LoadingBar.start();

@@ -48,22 +48,26 @@
         <!-- Resume -->
         <div class="resumeBaseUpper">
           <!-- Name -->
-          <div class="text-weight-medium">Hans Chris</div>
+          <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
           <!-- Description -->
-          <div>Reformado por el Cristo.</div>
+          <div v-if="userInfomation.description">
+            {{ userInfomation.description }}
+          </div>
           <!-- Pagina web -->
-          <div>hanswindu.github.io/ijs-mp</div>
+          <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
         </div>
       </div>
     </div>
     <!-- Resume -->
     <div class="q-pa-md resumeBase">
       <!-- Name -->
-      <div class="text-weight-medium">Hans Chris</div>
+      <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
       <!-- Description -->
-      <div>Reformado por el Cristo.</div>
+      <div v-if="userInfomation.description">
+        {{ userInfomation.description }}
+      </div>
       <!-- Pagina web -->
-      <div>hanswindu.github.io/ijs-mp</div>
+      <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
     </div>
     <!-- Post, following and followers -->
     <div class="followersPostBase">
@@ -89,16 +93,66 @@
     </div>
     <!-- Bar Desktop -->
     <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
+    <!-- Images -->
+    <div class="postsBase">
+      <img
+        v-for="(posts, index) in posts"
+        :key="index"
+        :src="posts[0]"
+        class="imgFromPost"
+        @click="goToPost(index)"
+      />
+    </div>
+    <!-- Add File -->
+    <input type="file" @change="addFile($event)" />
   </div>
 </template>
 <script>
-import { firebaseAuth, firebaseDb } from "src/boot/firebase";
+import { uid } from "quasar";
+import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
 export default {
   data() {
     return {
       userInfomation: {},
+      posts: {},
     };
   },
+  methods: {
+    addFile(event) {
+      let randomId = uid();
+      // Path for the image
+      let filePath = `${firebaseAuth.currentUser.uid}/posts/${randomId}`;
+      //
+      const imagesStorageRef = firebaseStorage
+        .ref()
+        .child(filePath)
+        .put(event.target.files[0], MediaMetadata)
+        .then((data) => {
+          firebaseStorage
+            .ref()
+            .child(filePath)
+            .getDownloadURL()
+            .then((url) => {
+              const userPosts = firebaseDb.ref(
+                "toneygram/users/" +
+                  firebaseAuth.currentUser.uid +
+                  "/posts/" +
+                  randomId
+              );
+              userPosts.set({
+                0: url,
+              });
+            });
+        });
+    },
+    goToPost(indexPost) {
+      this.$router.push({
+        name: "Post",
+        params: { userId: firebaseAuth.currentUser.uid, postId: indexPost },
+      });
+    },
+  },
+
   beforeCreate() {
     let currentUserId = this.$route.params.userId;
     let currentUserInformationRef = firebaseDb.ref(
@@ -106,11 +160,15 @@ export default {
     );
     currentUserInformationRef.once("value", (userInPage) => {
       let userInformation = userInPage.val();
+      // User information
       this.userInfomation = {
         id: userInformation.userInformation.id,
         img: userInformation.userInformation.img,
         name: userInformation.userInformation.name,
+        fullname: userInformation.userInformation.fullname,
       };
+      // User pictures
+      this.posts = userInformation.posts;
     });
   },
 };
@@ -140,6 +198,14 @@ export default {
   }
   .barOnlyDesktop {
     display: none;
+  }
+  .postsBase {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .imgFromPost {
+    width: 33%;
   }
 }
 //Tablet
