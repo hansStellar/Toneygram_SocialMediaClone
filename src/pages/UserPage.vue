@@ -104,7 +104,7 @@
       />
     </div>
     <!-- Add File -->
-    <input type="file" @change="addFile($event)" />
+    <input type="file" @change="addFile($event)" multiple="multiple" />
   </div>
 </template>
 <script>
@@ -114,36 +114,37 @@ export default {
   data() {
     return {
       userInfomation: {},
-      posts: {},
+      posts: [],
     };
   },
   methods: {
     addFile(event) {
-      let randomId = uid();
-      // Path for the image
-      let filePath = `${firebaseAuth.currentUser.uid}/posts/${randomId}`;
-      //
-      const imagesStorageRef = firebaseStorage
-        .ref()
-        .child(filePath)
-        .put(event.target.files[0], MediaMetadata)
-        .then((data) => {
-          firebaseStorage
-            .ref()
-            .child(filePath)
-            .getDownloadURL()
-            .then((url) => {
-              const userPosts = firebaseDb.ref(
-                "toneygram/users/" +
-                  firebaseAuth.currentUser.uid +
-                  "/posts/" +
-                  randomId
-              );
-              userPosts.set({
-                0: url,
+      const uniqueId = uid();
+      let images = [];
+      Object.values(event.target.files).forEach((file) => {
+        let randomId = uid();
+        const imagesStirageRef = firebaseStorage
+          .ref(firebaseAuth.currentUser.uid + "/posts/" + randomId)
+          .put(file)
+          .then((data) => {
+            firebaseStorage
+              .ref(firebaseAuth.currentUser.uid + "/posts/" + randomId)
+              .getDownloadURL()
+              .then((url) => {
+                images.push(url);
+                console.log(images);
+                const userPosts = firebaseDb
+                  .ref()
+                  .child(
+                    "toneygram/users/" +
+                      firebaseAuth.currentUser.uid +
+                      "/posts/" +
+                      uniqueId
+                  );
+                userPosts.set({ images });
               });
-            });
-        });
+          });
+      });
     },
     goToPost(indexPost) {
       this.$router.push({
@@ -206,6 +207,7 @@ export default {
   }
   .imgFromPost {
     width: 33%;
+    cursor: pointer;
   }
 }
 //Tablet
