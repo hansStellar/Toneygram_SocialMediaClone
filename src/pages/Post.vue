@@ -1,7 +1,7 @@
 <template>
   <div class="cardBase shadow-2 q-mb-xl">
     <!-- Header -->
-    <div>
+    <div @click="goToUser(userInfoPost.userId)">
       <q-banner rounded class="bg-white">
         <template v-slot:avatar>
           <q-avatar class="shadow-2">
@@ -56,7 +56,9 @@
     </div>
     <!-- Description -->
     <div class="q-mb-sm q-mx-sm">
-      <span class="text-weight-bold">{{ userInfoPost.userName }}</span>
+      <span class="text-weight-bold" @click="goToUser(userInfoPost.userId)">{{
+        userInfoPost.userName
+      }}</span>
       {{ descriptionPost }}
     </div>
     <!-- Comments -->
@@ -71,7 +73,10 @@
       </q-avatar>
       <!-- Username -->
       <div class="">
-        <span class="text-weight-bold">{{ comment.userName }}</span
+        <span
+          class="text-weight-bold cursor-pointer"
+          @click="goToUser(comment.idUser)"
+          >{{ comment.userName }}</span
         >&nbsp;
         <span>{{ comment.message }}</span>
       </div>
@@ -182,6 +187,14 @@ export default {
       });
       this.showText = false;
       this.textMessage = "";
+    },
+    goToUser(id) {
+      this.$router.push({
+        name: "User",
+        params: {
+          userId: id,
+        },
+      });
     },
   },
   beforeCreate() {
