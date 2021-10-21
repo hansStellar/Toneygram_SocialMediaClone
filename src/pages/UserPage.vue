@@ -118,6 +118,16 @@ export default {};
   .barOnlyDesktop {
     display: none;
   }
+  .postsBase {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .imgFromPost {
+    width: 33%;
+    cursor: pointer;
+  }
 }
 //Tablet
 @media (min-width: 480px) {
