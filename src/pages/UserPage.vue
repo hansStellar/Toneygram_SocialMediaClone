@@ -98,13 +98,19 @@
       <img
         v-for="(posts, index) in posts"
         :key="index"
-        :src="posts[0]"
+        :src="posts.images[0]"
         class="imgFromPost"
         @click="goToPost(index)"
       />
     </div>
     <!-- Add File -->
-    <input type="file" @change="addFile($event)" multiple="multiple" />
+    <input
+      type="file"
+      @change="addFile($event)"
+      multiple="multiple"
+      :disabled="descriptionPost.length <= 0"
+    />
+    <input type="text" v-model="descriptionPost" />
   </div>
 </template>
 <script>
@@ -115,6 +121,7 @@ export default {
     return {
       userInfomation: {},
       posts: [],
+      descriptionPost: "",
     };
   },
   methods: {
@@ -132,7 +139,6 @@ export default {
               .getDownloadURL()
               .then((url) => {
                 images.push(url);
-                console.log(images);
                 const userPosts = firebaseDb
                   .ref()
                   .child(
@@ -141,7 +147,15 @@ export default {
                       "/posts/" +
                       uniqueId
                   );
-                userPosts.set({ images });
+                userPosts.set({
+                  images,
+                  userInfo: {
+                    userName: firebaseAuth.currentUser.displayName,
+                    userId: firebaseAuth.currentUser.uid,
+                    userImg: firebaseAuth.currentUser.photoURL,
+                  },
+                  description: this.descriptionPost,
+                });
               });
           });
       });
