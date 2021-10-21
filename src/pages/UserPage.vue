@@ -225,7 +225,8 @@ export default {
   .postsBase {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
   }
   .imgFromPost {
     width: 33%;
