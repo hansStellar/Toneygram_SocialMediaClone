@@ -9,6 +9,15 @@
         <div class="text-h5 text-black">toneygram</div>
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
+          <!-- Add Post -->
+          <q-btn
+            round
+            dense
+            flat
+            color="grey"
+            icon="add_box"
+            @click="this.$router.push({ name: 'Add' })"
+          />
           <!-- DM Messages -->
           <q-btn round dense flat color="grey" icon="mail_outline" />
           <!-- Likes Button -->

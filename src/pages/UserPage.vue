@@ -1,7 +1,16 @@
 <template>
   <div class="items-center userPageBase">
     <!-- My Card -->
-    <div class="row flex myCardBaseUser items-center justify-between q-pa-md">
+    <div
+      class="
+        row
+        flex
+        myCardBaseUser
+        items-center
+        justify-evenly
+        q-px-md q-pt-md
+      "
+    >
       <!-- Img -->
       <q-avatar class="imgBaseUser shadow-5">
         <img :src="userInfomation.img" class="imageMyCard" />
@@ -10,7 +19,7 @@
       <div class="column">
         <!-- Username -->
         <div class="userNameUpperBase items-center">
-          <div class="text-weight-thin text-h4 q-mb-sm usernameDesktop">
+          <div class="text-weight-thin text-h4 usernameDesktop ellipsis">
             {{ userInfomation.name }}
           </div>
           <q-btn
@@ -24,18 +33,18 @@
             color="grey-5"
             flat
             icon="settings"
-            style="max-height: 2rem"
+            style="max-height: 2rem; max-width: 1rem"
           />
         </div>
         <!-- Followers, following and posts -->
-        <div class="row justify-between q-py-md text-center followers">
+        <div class="row q-py-md text-center followers">
           <!-- Post -->
-          <div class="row">
+          <div class="row q-mr-md">
             <div class="text-weight-medium q-mr-sm">5</div>
             <div class="text-black text-weight-light">posts</div>
           </div>
           <!-- Following -->
-          <div class="row">
+          <div class="row q-mr-md">
             <div class="text-weight-medium q-mr-sm">34</div>
             <div class="text-black text-weight-light">following</div>
           </div>
@@ -95,22 +104,14 @@
     <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
     <!-- Images -->
     <div class="postsBase">
-      <img
-        v-for="(posts, index) in posts"
+      <div
+        class="cursor-pointer imgPost shadow-2"
+        v-for="(post, index) in posts"
         :key="index"
-        :src="posts.images[0]"
-        class="imgFromPost"
+        :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
         @click="goToPost(index)"
       />
     </div>
-    <!-- Add File -->
-    <input
-      type="file"
-      @change="addFile($event)"
-      multiple="multiple"
-      :disabled="descriptionPost.length <= 0"
-    />
-    <input type="text" v-model="descriptionPost" />
   </div>
 </template>
 <script>
@@ -121,53 +122,9 @@ export default {
     return {
       userInfomation: {},
       posts: [],
-      descriptionPost: "",
     };
   },
   methods: {
-    addFile(event) {
-      const uniqueId = uid();
-      let images = [];
-      Object.values(event.target.files).forEach((file) => {
-        let randomId = uid();
-        const imagesStirageRef = firebaseStorage
-          .ref(firebaseAuth.currentUser.uid + "/posts/" + randomId)
-          .put(file)
-          .then((data) => {
-            firebaseStorage
-              .ref(firebaseAuth.currentUser.uid + "/posts/" + randomId)
-              .getDownloadURL()
-              .then((url) => {
-                images.push(url);
-                const userPosts = firebaseDb
-                  .ref()
-                  .child(
-                    "toneygram/users/" +
-                      firebaseAuth.currentUser.uid +
-                      "/posts/" +
-                      uniqueId
-                  );
-                let dateOfPost =
-                  new Date().getDate() +
-                  "/" +
-                  (new Date().getMonth() + 1) +
-                  "/" +
-                  new Date().getFullYear();
-
-                userPosts.set({
-                  images,
-                  userInfo: {
-                    userName: firebaseAuth.currentUser.displayName,
-                    userId: firebaseAuth.currentUser.uid,
-                    userImg: firebaseAuth.currentUser.photoURL,
-                  },
-                  description: this.descriptionPost,
-                  dateOfPost: dateOfPost,
-                });
-              });
-          });
-      });
-    },
     goToPost(indexPost) {
       this.$router.push({
         name: "Post",
@@ -175,7 +132,6 @@ export default {
       });
     },
   },
-
   beforeCreate() {
     let currentUserId = this.$route.params.userId;
     let currentUserInformationRef = firebaseDb.ref(
@@ -225,12 +181,14 @@ export default {
   .postsBase {
     display: flex;
     flex-direction: row;
-    justify-content: flex-start;
+    justify-content: center;
     flex-wrap: wrap;
   }
-  .imgFromPost {
+  .imgPost {
     width: 33%;
     cursor: pointer;
+    height: 8rem;
+    background-repeat: round;
   }
 }
 //Tablet
@@ -244,7 +202,6 @@ export default {
     margin-right: 4rem;
   }
   .myCardBaseUser {
-    justify-content: start;
   }
   .resumeBaseUpper {
     display: none;
@@ -258,15 +215,25 @@ export default {
   .followers {
     display: none;
   }
+  .postsBase {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .imgPost {
+    width: 33%;
+    cursor: pointer;
+    height: 12rem;
+    background-repeat: round;
+  }
 }
 //Desktop
 @media (min-width: 768px) {
   .barOnlyDesktop {
     display: block;
-  }
-  .myCardBaseUser {
-    justify-content: start;
-    padding-left: 5.5rem;
+    width: 93.5%;
+    margin: 4rem auto 0;
   }
   .imgBaseUser {
     height: 150px;
@@ -299,7 +266,21 @@ export default {
   }
   .userPageBase {
     padding: 1rem 0;
-    font-size: 0.8rem;
+    font-size: 1rem;
+  }
+  .postsBase {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 1rem 0;
+  }
+  .imgPost {
+    width: 29%;
+    cursor: pointer;
+    margin: 1rem;
+    height: 18rem;
+    background-repeat: round;
   }
 }
 </style>

@@ -192,7 +192,7 @@
 </template>
 
 <script>
-import { Notify, LoadingBar } from "quasar";
+import { Notify } from "quasar";
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 export default {
   data() {
@@ -249,7 +249,7 @@ export default {
                   fullname: this.register.fullName,
                 });
               });
-            LoadingBar.start();
+
             setTimeout(() => {
               // Notification
               Notify.create({
@@ -282,7 +282,7 @@ export default {
         .signInWithEmailAndPassword(this.login.email, this.login.password)
         .then((userCredentials) => {
           this.visible = false;
-          LoadingBar.start();
+
           setTimeout(() => {
             this.$router.push({ name: "Home" });
             Notify.create({

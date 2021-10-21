@@ -1,21 +1,29 @@
 <template>
-  <div class="cardBase shadow-2 q-mb-xl">
+  <div class="cardBase shadow-1">
     <!-- Header -->
     <div @click="goToUser(userInfoPost.userId)">
-      <q-banner rounded class="bg-white">
+      <q-banner rounded class="bg-white items-center q-py-md">
         <template v-slot:avatar>
-          <q-avatar class="shadow-2">
+          <q-avatar class="shadow-2 imgUserTop">
             <img :src="userInfoPost.userImg" />
           </q-avatar>
         </template>
 
-        <span class="text-weight-bold">{{ userInfoPost.userName }}</span>
+        <span class="text-weight-medium">{{ userInfoPost.userName }}</span>
       </q-banner>
     </div>
     <q-separator color="grey-5" />
     <!-- Image/Caroussel -->
-    <q-carousel animated v-model="slide" arrows navigation infinite>
+    <q-carousel
+      animated
+      v-model="slide"
+      arrows
+      navigation
+      infinite
+      class="baseCarousel"
+    >
       <q-carousel-slide
+        style="background-position-y: top"
         v-for="(image, index) in images"
         :key="index"
         :name="index"
@@ -61,6 +69,7 @@
       }}</span>
       {{ descriptionPost }}
     </div>
+    <q-separator color="grey-4" size="1px" class="q-mb-sm" />
     <!-- Comments -->
     <div
       v-for="(comment, index) in comments"
@@ -207,15 +216,19 @@ export default {
     postRef.once("value", (post) => {
       const postInfo = post.val();
       // User Info
-      this.userInfoPost = postInfo.userInfo;
+      if (postInfo.userInfo) {
+        this.userInfoPost = postInfo.userInfo;
+      }
       //Description
       if (postInfo.description) {
         this.descriptionPost = postInfo.description;
       }
       // Images
-      postInfo.images.forEach((img) => {
-        this.images.push(img);
-      });
+      if (postInfo.imagesUploaded) {
+        postInfo.imagesUploaded.forEach((img) => {
+          this.images.push(img);
+        });
+      }
       // Likes
       if (postInfo.likes) {
         Object.values(postInfo.likes).forEach((user) => {
@@ -229,7 +242,9 @@ export default {
         });
       }
       // Date of Post
-      this.dateOfPost = postInfo.dateOfPost;
+      if (postInfo.dateOfPost) {
+        this.dateOfPost = postInfo.dateOfPost;
+      }
     });
   },
   mounted() {
@@ -245,11 +260,42 @@ export default {
   .userCommentImg {
     display: none;
   }
+  .imgUserTop {
+    width: 2rem;
+    height: 2rem;
+  }
+  .baseCarousel {
+    height: 20rem;
+  }
 }
 //Tablet
 @media (min-width: 480px) {
+  .userCommentImg {
+    display: none;
+  }
+  .imgUserTop {
+    width: 2rem;
+    height: 2rem;
+  }
+  .baseCarousel {
+    height: 25rem;
+  }
 }
 //Desktop
 @media (min-width: 768px) {
+  .cardBase {
+    max-width: 940px;
+    margin: auto;
+  }
+  .userCommentImg {
+    display: none;
+  }
+  .imgUserTop {
+    width: 2rem;
+    height: 2rem;
+  }
+  .baseCarousel {
+    height: 35rem;
+  }
 }
 </style>

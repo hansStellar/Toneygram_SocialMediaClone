@@ -7,6 +7,7 @@ const routes = [
       { path: '', component: () => import('pages/Index.vue'), name: 'Home' },
       { path: '/:userId', component: () => import('pages/UserPage.vue'), name: 'User' },
       { path: '/:userId/:postId', component: () => import('pages/Post.vue'), name: 'Post' },
+      { path: '/newpost', component: () => import('pages/AddPost.vue'), name: 'Add' },
     ]
     
   },
