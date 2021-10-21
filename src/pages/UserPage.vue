@@ -147,6 +147,13 @@ export default {
                       "/posts/" +
                       uniqueId
                   );
+                let dateOfPost =
+                  new Date().getDate() +
+                  "/" +
+                  (new Date().getMonth() + 1) +
+                  "/" +
+                  new Date().getFullYear();
+
                 userPosts.set({
                   images,
                   userInfo: {
@@ -155,6 +162,7 @@ export default {
                     userImg: firebaseAuth.currentUser.photoURL,
                   },
                   description: this.descriptionPost,
+                  dateOfPost: dateOfPost,
                 });
               });
           });

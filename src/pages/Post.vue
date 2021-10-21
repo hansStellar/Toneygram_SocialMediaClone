@@ -94,7 +94,7 @@
       </q-form>
     </div>
     <!-- Date -->
-    <div class="q-mx-sm q-mb-sm text-grey text-overline">12/02/2021</div>
+    <div class="q-mx-sm q-mb-sm text-grey text-overline">{{ dateOfPost }}</div>
   </div>
 </template>
 <script>
@@ -112,6 +112,7 @@ export default {
       comments: [],
       descriptionPost: "",
       userInfoPost: {},
+      dateOfPost: "",
     };
   },
   methods: {
@@ -227,6 +228,8 @@ export default {
           this.comments.push(comment);
         });
       }
+      // Date of Post
+      this.dateOfPost = postInfo.dateOfPost;
     });
   },
   mounted() {
