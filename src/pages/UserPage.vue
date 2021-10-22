@@ -1,5 +1,8 @@
 <template>
   <div class="items-center userPageBase">
+    <div class="absolute" style="opacity: 0">
+      {{ getInfoUserPage }}
+    </div>
     <!-- My Card -->
     <div
       class="
@@ -40,7 +43,9 @@
         <div class="row q-py-md text-center followers">
           <!-- Post -->
           <div class="row q-mr-md">
-            <div class="text-weight-medium q-mr-sm">5</div>
+            <div class="text-weight-medium q-mr-sm">
+              {{ Object.values(posts).length }}
+            </div>
             <div class="text-black text-weight-light">posts</div>
           </div>
           <!-- Following -->
@@ -109,7 +114,7 @@
         v-for="(post, index) in posts"
         :key="index"
         :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
-        @click="goToPost(index)"
+        @click="goToPost(index, post.userInfo.userId)"
       />
     </div>
   </div>
@@ -125,14 +130,14 @@ export default {
     };
   },
   methods: {
-    goToPost(indexPost) {
+    goToPost(indexPost, userId) {
       this.$router.push({
         name: "Post",
-        params: { userId: firebaseAuth.currentUser.uid, postId: indexPost },
+        params: { userId: userId, postId: indexPost },
       });
     },
   },
-  beforeCreate() {
+  created() {
     let currentUserId = this.$route.params.userId;
     let currentUserInformationRef = firebaseDb.ref(
       "toneygram/users/" + currentUserId
@@ -147,8 +152,38 @@ export default {
         fullname: userInformation.userInformation.fullname,
       };
       // User pictures
-      this.posts = userInformation.posts;
+      if (!userInformation.posts) {
+        this.posts = [];
+      } else {
+        this.posts = userInformation.posts;
+      }
     });
+  },
+  computed: {
+    getInfoUserPage() {
+      let infoUserPage = {};
+      let currentUserId = this.$route.params.userId;
+      let currentUserInformationRef = firebaseDb.ref(
+        "toneygram/users/" + currentUserId
+      );
+      currentUserInformationRef.once("value", (userInPage) => {
+        let userInformation = userInPage.val();
+        // User information
+        this.userInfomation = {
+          id: userInformation.userInformation.id,
+          img: userInformation.userInformation.img,
+          name: userInformation.userInformation.name,
+          fullname: userInformation.userInformation.fullname,
+        };
+        // User pictures
+        if (!userInformation.posts) {
+          this.posts = [];
+        } else {
+          this.posts = userInformation.posts;
+        }
+      });
+      return infoUserPage;
+    },
   },
 };
 </script>

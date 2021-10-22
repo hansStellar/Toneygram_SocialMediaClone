@@ -1,5 +1,5 @@
 <template>
-  <router-view />
+  <router-view class="baseAll" />
 </template>
 <script>
 import { firebaseAuth } from "./boot/firebase";
@@ -16,3 +16,7 @@ export default {
   },
 };
 </script>
+<style lang="scss">
+.baseAll {
+}
+</style>

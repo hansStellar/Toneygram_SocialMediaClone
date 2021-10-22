@@ -1,12 +1,14 @@
 <template>
-  <q-layout view="hHh lpR fFf">
-    <q-header elevated class="bg-white text-white">
+  <q-layout view="hHh lpR fFf" class="baseLayout">
+    <q-header elevated class="bg-white text-white baseHeader">
       <q-toolbar
         style="max-width: 970px; margin: auto"
         class="row justify-between"
       >
         <!-- Title -->
-        <div class="text-h5 text-black">toneygram</div>
+        <div class="text-h5 text-black cursor-pointer" @click="sendUserToHome">
+          toneygram
+        </div>
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
           <!-- Add Post -->
@@ -19,7 +21,14 @@
             @click="this.$router.push({ name: 'Add' })"
           />
           <!-- DM Messages -->
-          <q-btn round dense flat color="grey" icon="mail_outline" />
+          <q-btn
+            round
+            dense
+            flat
+            color="grey"
+            icon="mail_outline"
+            @click="sendUserToDM"
+          />
           <!-- Likes Button -->
           <q-btn
             class="buttonFooter"
@@ -30,21 +39,15 @@
             icon="favorite_border"
           />
           <!-- Search button -->
-          <q-btn-dropdown
+          <q-btn
             dense
             class="buttonFooter"
+            icon="search"
             flat
-            rounded
-            dropdown-icon="search"
+            round
             color="grey"
-            no-icon-animation
-          >
-            <div class="row no-wrap q-pa-md">
-              <div class="column">
-                <q-input outlined dense v-model="text" label="Search" />
-              </div>
-            </div>
-          </q-btn-dropdown>
+            @click="sendUserToSearch"
+          />
           <!-- Profile button -->
           <q-btn-dropdown
             rounded
@@ -63,7 +66,7 @@
                 </q-item-section>
               </q-item>
               <!-- Settings -->
-              <q-item clickable v-close-popup @click="onItemClick">
+              <q-item clickable v-close-popup @click="sendToUserSettings">
                 <q-item-section>
                   <q-item-label>Settings</q-item-label>
                 </q-item-section>
@@ -92,11 +95,26 @@
         active-bg-color="cyan-2"
         class="bg-white full-width text-grey-5 shadow-2"
       >
-        <q-tab alert="red" name="home" icon="apartment" />
-        <q-tab alert="red" name="search" icon="search" />
+        <q-tab
+          alert="red"
+          name="home"
+          icon="apartment"
+          @click="sendUserToHome"
+        />
+        <q-tab
+          alert="red"
+          name="search"
+          icon="search"
+          @click="sendUserToSearch"
+        />
 
-        <q-tab alert="red" name="likes" icon="favorite_border" />
-        <q-tab alert="red" name="user" icon="face" />
+        <q-tab
+          alert="red"
+          name="likes"
+          icon="favorite_border"
+          @click="sendUserToLikes"
+        />
+        <q-tab alert="red" name="user" icon="face" @click="sendToUserPage" />
       </q-tabs>
     </q-footer>
   </q-layout>
@@ -119,11 +137,37 @@ export default {
         params: { userId: firebaseAuth.currentUser.uid },
       });
     },
+    sendUserToHome() {
+      this.$router.push({
+        name: "Home",
+      });
+    },
+    sendToUserSettings() {
+      this.$router.push({
+        name: "Settings",
+      });
+    },
+    sendUserToSearch() {
+      this.$router.push({
+        name: "Search",
+      });
+    },
+    sendUserToDM() {
+      this.$router.push({
+        name: "DM",
+      });
+    },
+    sendUserToLikes() {
+      this.$router.push({
+        name: "Likes",
+      });
+    },
   },
 };
 </script>
 <style lang="scss">
-.buttonsLayerBase {
+.baseLayout {
+  font-family: "Roboto";
 }
 //iPhone
 @media (max-width: 480px) {
@@ -132,6 +176,7 @@ export default {
   }
   .baseFooter {
     display: flex;
+    font-family: "Roboto";
   }
 }
 

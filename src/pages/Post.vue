@@ -38,7 +38,7 @@
         round
         flat
         @click="likePost()"
-        v-if="!likeUsers.includes(currentUserId)"
+        v-if="!likeUsers.includes(actualUserId)"
         icon="favorite_border"
       />
       <q-btn
@@ -92,14 +92,25 @@
     </div>
     <!-- Create Comment -->
     <div v-show="showText" class="q-px-sm full-width">
-      <q-form class="row justify-between q-gutter-sm items-center">
+      <q-form class="row justify-between items-center">
         <q-input
           v-model="textMessage"
           dense
           label="Type your message"
-          class="col-9"
+          class="inputForm"
+          autofocus
+          color="positive"
+          autocomplete="off"
         />
-        <q-btn icon="send" dense flat round class="col-2" @click="sendText" />
+        <q-btn
+          icon="send"
+          dense
+          flat
+          color="positive"
+          class="btnForm"
+          @click="sendText"
+          :disable="textMessage.length <= 0"
+        />
       </q-form>
     </div>
     <!-- Date -->
@@ -115,13 +126,13 @@ export default {
       images: [],
       slide: 0,
       likeUsers: [],
-      currentUserId: "",
       showText: false,
       textMessage: "",
       comments: [],
       descriptionPost: "",
       userInfoPost: {},
       dateOfPost: "",
+      actualUserId: "",
     };
   },
   methods: {
@@ -160,13 +171,16 @@ export default {
       let nuevoArray = [];
       // Read from firebase database
       const postLikeRemoveRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes/")
-        .once("child_removed", (likeBase) => {
-          nuevoArray = this.likeUsers.filter((like) => {
-            return likeBase.key !== like;
-          });
+        .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes")
+        .once("value", (likeBase) => {
+          if (likeBase.val() === null) {
+            return (this.likeUsers = []);
+          } else {
+            this.likeUsers = Object.values(likeBase.val()).filter((like) => {
+              return this.likeUsers !== like;
+            });
+          }
         });
-      this.likeUsers = nuevoArray;
     },
     sendText() {
       let userId = this.$route.params.userId;
@@ -207,10 +221,10 @@ export default {
       });
     },
   },
-  beforeCreate() {
+  created() {
     let userId = this.$route.params.userId;
     let postId = this.$route.params.postId;
-    const postRef = firebaseDb.ref(
+    let postRef = firebaseDb.ref(
       "toneygram/users/" + userId + "/posts/" + postId
     );
     postRef.once("value", (post) => {
@@ -249,8 +263,9 @@ export default {
   },
   mounted() {
     setTimeout(() => {
-      this.currentUserId = firebaseAuth.currentUser.uid;
-    }, 500);
+      let actualUserId = firebaseAuth.currentUser.uid;
+      this.actualUserId = actualUserId;
+    }, 200);
   },
 };
 </script>
@@ -267,6 +282,12 @@ export default {
   .baseCarousel {
     height: 20rem;
   }
+  .inputForm {
+    width: 85%;
+  }
+  .btnForm {
+    width: 15%;
+  }
 }
 //Tablet
 @media (min-width: 480px) {
@@ -279,6 +300,12 @@ export default {
   }
   .baseCarousel {
     height: 25rem;
+  }
+  .inputForm {
+    width: 91%;
+  }
+  .btnForm {
+    width: 9%;
   }
 }
 //Desktop
@@ -296,6 +323,12 @@ export default {
   }
   .baseCarousel {
     height: 35rem;
+  }
+  .inputForm {
+    width: 95%;
+  }
+  .btnForm {
+    width: 4%;
   }
 }
 </style>
