@@ -83,7 +83,7 @@
         {{ descriptionPost }}
       </div>
       <q-skeleton class="q-ma-md" width="200px" v-else />
-      <q-separator color="grey-4" size="1px" class="q-mb-sm" />
+      <q-separator color="grey-6" size="1px" class="q-mb-sm" />
       <!-- Comments -->
       <div v-if="comments.length" style="height: 5rem; overflow: auto">
         <div
