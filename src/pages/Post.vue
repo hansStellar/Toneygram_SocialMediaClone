@@ -7,34 +7,46 @@
       <div @click="goToUser(userInfoPost.userId)">
         <q-banner rounded class="bg-white items-center q-py-md">
           <template v-slot:avatar>
-            <q-avatar class="shadow-2 imgUserTop cursor-pointer">
+            <q-avatar
+              class="shadow-2 imgUserTop cursor-pointer"
+              v-if="userInfoPost.userImg"
+            >
               <img :src="userInfoPost.userImg" />
             </q-avatar>
+            <q-skeleton type="circle" size="2rem" v-else />
           </template>
 
-          <span class="text-weight-medium cursor-pointer">{{
-            userInfoPost.userName
-          }}</span>
+          <span
+            v-if="userInfoPost.userName"
+            class="text-weight-medium cursor-pointer"
+            >{{ userInfoPost.userName }}</span
+          >
+          <q-skeleton width="150px" v-else />
         </q-banner>
       </div>
       <q-separator color="grey-5" />
       <!-- Image/Caroussel -->
-      <q-carousel
-        animated
-        v-model="slide"
-        arrows
-        navigation
-        infinite
-        class="baseCarousel"
-      >
-        <q-carousel-slide
-          style="background-position-y: top"
-          v-for="(image, index) in images"
-          :key="index"
-          :name="index"
-          :img-src="image"
-        />
-      </q-carousel>
+      <div class="baseCarousel">
+        <q-carousel
+          animated
+          v-model="slide"
+          arrows
+          navigation
+          infinite
+          class="baseCarousel"
+          v-if="images.length"
+        >
+          <q-carousel-slide
+            style="background-position-y: top"
+            v-for="(image, index) in images"
+            :key="index"
+            :name="index"
+            :img-src="image"
+          />
+        </q-carousel>
+        <q-skeleton width="100%" height="100%" v-else />
+      </div>
+      <!-- Skeleton -->
       <q-separator color="grey-5" />
       <!-- Like and Comment-->
       <div class="q-my-sm">
@@ -62,7 +74,7 @@
         {{ likeUsers.length }} likes
       </div>
       <!-- Description -->
-      <div class="q-mb-sm q-mx-sm">
+      <div class="q-mb-sm q-mx-sm" v-if="descriptionPost">
         <span
           class="text-weight-bold cursor-pointer"
           @click="goToUser(userInfoPost.userId)"
@@ -70,9 +82,10 @@
         >
         {{ descriptionPost }}
       </div>
+      <q-skeleton class="q-ma-md" width="200px" v-else />
       <q-separator color="grey-4" size="1px" class="q-mb-sm" />
       <!-- Comments -->
-      <div style="height: 5rem; overflow: auto">
+      <div v-if="comments.length" style="height: 5rem; overflow: auto">
         <div
           v-for="(comment, index) in comments"
           :key="index"
@@ -125,7 +138,6 @@
   <div style="">
     <!-- Model -->
     <div
-      v-if="showPost"
       class="desktopBasePost row flex justify-center"
       style="
         max-width: 970px;
@@ -136,6 +148,7 @@
     >
       <!-- Image/Caroussel -->
       <div class="col-7">
+        <!-- Img -->
         <q-carousel
           animated
           v-model="slide"
@@ -143,6 +156,7 @@
           navigation
           infinite
           class="baseCarousel"
+          v-if="images.length"
         >
           <q-carousel-slide
             style="background-position-y: top"
@@ -152,26 +166,35 @@
             :img-src="image"
           />
         </q-carousel>
+        <!-- Skeleton -->
+        <q-skeleton width="100%" height="100%" v-else />
       </div>
       <!-- Right Side -->
-      <div class="col-4 shadow-2">
+      <div class="col-4 shadow-2 bg-white">
         <!-- Header -->
         <div @click="goToUser(userInfoPost.userId)">
           <q-banner rounded class="bg-white items-center q-py-md">
             <template v-slot:avatar>
-              <q-avatar class="shadow-2 imgUserTop cursor-pointer">
+              <q-avatar
+                class="shadow-2 imgUserTop cursor-pointer"
+                v-if="userInfoPost.userImg"
+              >
                 <img :src="userInfoPost.userImg" />
               </q-avatar>
+              <q-skeleton type="circle" size="2rem" v-else />
             </template>
 
-            <span class="text-weight-medium cursor-pointer">{{
-              userInfoPost.userName
-            }}</span>
+            <span
+              v-if="userInfoPost.userName"
+              class="text-weight-medium cursor-pointer"
+              >{{ userInfoPost.userName }}</span
+            >
+            <q-skeleton width="150px" v-else />
           </q-banner>
         </div>
         <q-separator color="grey-4" />
         <!-- Description -->
-        <div class="q-px-sm q-pt-sm bg-white">
+        <div class="q-px-sm q-pt-sm bg-white" v-if="descriptionPost">
           <span
             class="text-weight-bold cursor-pointer"
             @click="goToUser(userInfoPost.userId)"
@@ -179,6 +202,7 @@
           >
           {{ descriptionPost }}
         </div>
+        <q-skeleton class="q-ma-md" width="200px" v-else />
         <!-- Comments -->
         <div class="bg-white" style="height: 18.58rem; overflow: auto">
           <div
@@ -252,40 +276,6 @@
         </div>
       </div>
     </div>
-    <!-- Skeleton -->
-    <q-card
-      class="desktopShowPost"
-      style="
-        max-width: 970px;
-        margin: 10rem auto;
-        align-content: center;
-        width: 30rem;
-        height: 20rem;
-      "
-      v-else
-    >
-      <q-item>
-        <q-item-section avatar>
-          <q-skeleton type="QAvatar" />
-        </q-item-section>
-
-        <q-item-section>
-          <q-item-label>
-            <q-skeleton type="text" />
-          </q-item-label>
-          <q-item-label caption>
-            <q-skeleton type="text" />
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-
-      <q-skeleton height="200px" square />
-
-      <q-card-actions align="right" class="q-gutter-md">
-        <q-skeleton type="QBtn" />
-        <q-skeleton type="QBtn" />
-      </q-card-actions>
-    </q-card>
   </div>
 </template>
 <script>

@@ -16,16 +16,24 @@
       "
     >
       <!-- Img -->
-      <q-avatar class="imgBaseUser shadow-5">
+      <q-avatar
+        v-if="Object.values(userInfomation).length"
+        class="imgBaseUser shadow-5"
+      >
         <img :src="userInfomation.img" class="imageMyCard" />
       </q-avatar>
+      <q-skeleton type="circle" size="120px" v-else />
       <!-- Info Upper -->
       <div class="column">
         <!-- Username -->
         <div class="userNameUpperBase items-center">
-          <div class="text-weight-thin text-h4 usernameDesktop ellipsis">
+          <div
+            class="text-weight-thin text-h4 usernameDesktop ellipsis"
+            v-if="userInfomation.name"
+          >
             {{ userInfomation.name }}
           </div>
+          <q-skeleton width="150px" v-else class="q-mb-sm" />
           <q-btn
             class="full-width showButtonMobile"
             dense
@@ -35,27 +43,21 @@
           >
             Edit Profile
           </q-btn>
-          <q-btn
-            class="full-width showButtonDesktop"
-            dense
-            color="grey-5"
-            flat
-            icon="settings"
-            style="max-height: 2rem; max-width: 1rem"
-          />
         </div>
       </div>
     </div>
     <!-- Resume -->
     <div class="q-pa-md resumeBase">
       <!-- Name -->
-      <div class="text-weight-medium upperName">
+      <div class="text-weight-medium upperName" v-if="userInfomation.fullname">
         {{ userInfomation.fullname }}
       </div>
+      <q-skeleton width="150px" v-else />
       <!-- Description -->
       <div class="upperDescription" v-if="userInfomation.description">
         {{ userInfomation.description }}
       </div>
+
       <!-- Pagina web -->
       <div class="upperWeb" v-if="userInfomation.url">
         {{ userInfomation.url }}
@@ -66,27 +68,32 @@
       <q-separator color="grey-4" size="1px" />
       <div class="followersPost q-py-sm">
         <!-- Post -->
-        <div>
-          <div class="text-weight-medium">5</div>
+        <div v-if="userInfomation.id">
+          <div class="text-weight-medium">
+            {{ Object.values(posts).length }}
+          </div>
           <div class="text-grey">posts</div>
         </div>
+        <q-skeleton width="150px" v-else class="q-my-sm" />
         <!-- Following -->
-        <div>
+        <div v-if="userInfomation.id">
           <div class="text-weight-medium">34</div>
           <div class="text-grey">following</div>
         </div>
+        <q-skeleton width="150px" v-else class="q-my-sm" />
         <!-- Followers -->
-        <div>
+        <div v-if="userInfomation.id">
           <div class="text-weight-medium">1023</div>
           <div class="text-grey">followers</div>
         </div>
+        <q-skeleton width="150px" v-else class="q-my-sm" />
       </div>
       <q-separator color="grey-4" size="1px" />
     </div>
     <!-- Bar Desktop -->
     <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
     <!-- Images -->
-    <div class="postsBase">
+    <div class="postsBase" v-if="userInfomation.id">
       <div
         class="cursor-pointer imgPost shadow-2"
         v-for="(post, index) in posts"
@@ -94,6 +101,16 @@
         :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
         @click="goToPost(index, post.userInfo.userId)"
       />
+    </div>
+    <div class="postsBase" style="height: 30rem" v-else>
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
     </div>
   </div>
   <!-- Desktop -->
@@ -216,7 +233,7 @@
     <!-- Bar Desktop -->
     <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
     <!-- Images -->
-    <div class="postsBase" v-if="Object.values(posts).length">
+    <div class="postsBase" v-if="userInfomation.id">
       <div
         class="cursor-pointer imgPost shadow-2"
         v-for="(post, index) in posts"
@@ -378,6 +395,7 @@ export default {
     grid-template-rows: 1fr 1fr 1fr;
     gap: 0.5rem;
     width: 100%;
+
     margin: auto;
   }
   .imgPost {
@@ -401,14 +419,14 @@ export default {
 @media (min-width: 480px) {
   .resumeBase {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
     gap: 0px 0px;
-    justify-items: start;
+    justify-items: center;
     grid-template-areas:
-      "primero . ."
-      "segundo . ."
-      "tercero . .";
+      "primero . "
+      "segundo . "
+      "tercero . ";
     text-align: center;
   }
   .upperName {
@@ -451,12 +469,12 @@ export default {
   }
   .myCardBaseUser {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr;
     gap: 0px 0px;
-    grid-template-areas: ". . .";
+    grid-template-areas: ". . ";
     align-items: center;
-    justify-items: start;
+    justify-items: center;
   }
   .postsBase {
     display: grid;
