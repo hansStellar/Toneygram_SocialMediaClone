@@ -281,6 +281,7 @@
 <script>
 import { uid } from "quasar";
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -292,7 +293,6 @@ export default {
       dateOfPost: "",
       actualUserId: "",
       showPost: true,
-      //
       slide: 0,
       textMessage: "",
     };
@@ -426,18 +426,11 @@ export default {
       }
     });
   },
+  computed: {
+    ...mapState("settingsUser", ["currentUserId"]),
+  },
   mounted() {
-    setTimeout(() => {
-      let actualUserId = firebaseAuth.currentUser.uid;
-      this.actualUserId = actualUserId;
-      // images: [],
-      // likeUsers: [],
-      // comments: [],
-      // userInfoPost: {},
-      // descriptionPost: "",
-      // dateOfPost: "",
-      // actualUserId: "",
-    });
+    this.actualUserId = this.currentUserId;
   },
 };
 </script>

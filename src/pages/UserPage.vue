@@ -195,10 +195,10 @@
               v-if="currentUserId === userInfomation.id"
               class="full-width showButtonDesktop"
               dense
-              color="grey-5"
+              color="black"
               flat
               icon="settings"
-              style="max-height: 2rem; max-width: 1rem"
+              style="max-height: 2rem; max-width: 1.5rem"
             />
             <q-btn
               v-if="
@@ -399,9 +399,10 @@ export default {
 
       // Read from firebase database User Actual Page (Followers)
       const UnfollowerActRef = firebaseDb
-        .ref("toneygram/users/" + currentUserIdPage + "/followers")
-        .once("child_removed", (newFollower) => {
-          console.log(this.followers);
+        .ref(
+          "toneygram/users/" + currentUserIdPage + "/followers/" + currentUserId
+        )
+        .once("value", (newFollower) => {
           delete this.followers[newFollower.key];
         });
     },
@@ -581,7 +582,7 @@ export default {
     gap: 0px 0px;
     grid-template-areas: ". . ";
     align-items: center;
-    justify-items: start;
+    justify-items: center;
   }
   .postsBase {
     display: grid;

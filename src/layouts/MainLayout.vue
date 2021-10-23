@@ -98,6 +98,7 @@
 </template>
 <script>
 import { firebaseAuth } from "src/boot/firebase";
+import { mapState } from "vuex";
 export default {
   data() {
     return {
@@ -141,10 +142,11 @@ export default {
       });
     },
   },
+  computed: {
+    ...mapState("settingsUser", ["currentUserPhoto"]),
+  },
   mounted() {
-    setTimeout(() => {
-      this.userPicture = firebaseAuth.currentUser.photoURL;
-    }, 1000);
+    this.userPicture = this.currentUserPhoto;
   },
 };
 </script>
