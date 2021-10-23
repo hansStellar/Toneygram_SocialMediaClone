@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-center homeBase q-gutter-xl">
+  <div class="flex flex-center bg-grey-2 homeBase q-gutter-xl">
     <!-- Cards -->
     <div>
       <div class="cardBase shadow-2 q-mb-xl">

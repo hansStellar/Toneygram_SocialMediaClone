@@ -1,5 +1,6 @@
 <template>
-  <div class="items-center userPageBase">
+  <!-- iPhone & Tablet -->
+  <div class="items-center userPageBase showMobileUserPage">
     <div class="absolute" style="opacity: 0">
       {{ getInfoUserPage }}
     </div>
@@ -28,8 +29,12 @@
           <q-btn
             class="full-width showButtonMobile"
             dense
-            label="Edit Profile"
-          />
+            outline
+            color="grey-6"
+            no-caps
+          >
+            Edit Profile
+          </q-btn>
           <q-btn
             class="full-width showButtonDesktop"
             dense
@@ -39,36 +44,139 @@
             style="max-height: 2rem; max-width: 1rem"
           />
         </div>
+      </div>
+    </div>
+    <!-- Resume -->
+    <div class="q-pa-md resumeBase">
+      <!-- Name -->
+      <div class="text-weight-medium upperName">
+        {{ userInfomation.fullname }}
+      </div>
+      <!-- Description -->
+      <div class="upperDescription" v-if="userInfomation.description">
+        {{ userInfomation.description }}
+      </div>
+      <!-- Pagina web -->
+      <div class="upperWeb" v-if="userInfomation.url">
+        {{ userInfomation.url }}
+      </div>
+    </div>
+    <!-- Post, following and followers -->
+    <div class="followersPostBase">
+      <q-separator color="grey-4" size="1px" />
+      <div class="followersPost q-py-sm">
+        <!-- Post -->
+        <div>
+          <div class="text-weight-medium">5</div>
+          <div class="text-grey">posts</div>
+        </div>
+        <!-- Following -->
+        <div>
+          <div class="text-weight-medium">34</div>
+          <div class="text-grey">following</div>
+        </div>
+        <!-- Followers -->
+        <div>
+          <div class="text-weight-medium">1023</div>
+          <div class="text-grey">followers</div>
+        </div>
+      </div>
+      <q-separator color="grey-4" size="1px" />
+    </div>
+    <!-- Bar Desktop -->
+    <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
+    <!-- Images -->
+    <div class="postsBase">
+      <div
+        class="cursor-pointer imgPost shadow-2"
+        v-for="(post, index) in posts"
+        :key="index"
+        :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
+        @click="goToPost(index, post.userInfo.userId)"
+      />
+    </div>
+  </div>
+  <!-- Desktop -->
+  <div class="items-center userPageBase showDesktopUserPage">
+    <div class="absolute" style="opacity: 0">
+      {{ getInfoUserPage }}
+    </div>
+    <!-- My Card -->
+    <div class="myCardBaseUser q-px-md q-pt-md">
+      <!-- Img -->
+      <div>
+        <q-avatar
+          v-if="Object.values(userInfomation).length"
+          class="imgBaseUser shadow-5"
+        >
+          <img :src="userInfomation.img" class="imageMyCard" />
+        </q-avatar>
+        <q-skeleton v-else type="circle" size="150px" />
+      </div>
+      <!-- Info Upper -->
+      <div class="column">
+        <!-- Username -->
+        <div class="userNameUpperBase items-center">
+          <!-- Info -->
+          <div v-if="Object.values(userInfomation).length" class="row">
+            <div class="text-weight-thin text-h4 usernameDesktop ellipsis">
+              {{ userInfomation.name }}
+            </div>
+            <q-btn
+              class="full-width showButtonMobile"
+              dense
+              label="Edit Profile"
+            />
+            <q-btn
+              class="full-width showButtonDesktop"
+              dense
+              color="grey-5"
+              flat
+              icon="settings"
+              style="max-height: 2rem; max-width: 1rem"
+            />
+          </div>
+          <!-- Skeleton -->
+          <q-skeleton width="180px" height="2rem" v-else />
+        </div>
         <!-- Followers, following and posts -->
         <div class="row q-py-md text-center followers">
-          <!-- Post -->
-          <div class="row q-mr-md">
-            <div class="text-weight-medium q-mr-sm">
-              {{ Object.values(posts).length }}
+          <div v-if="Object.values(userInfomation).length" class="row">
+            <!-- Post -->
+            <div class="row q-mr-md">
+              <div class="text-weight-medium q-mr-sm">
+                {{ Object.values(posts).length }}
+              </div>
+              <div class="text-black text-weight-light">posts</div>
             </div>
-            <div class="text-black text-weight-light">posts</div>
+            <!-- Following -->
+            <div class="row q-mr-md">
+              <div class="text-weight-medium q-mr-sm">34</div>
+              <div class="text-black text-weight-light">following</div>
+            </div>
+            <!-- Followers -->
+            <div class="row">
+              <div class="text-weight-medium q-mr-sm">1023</div>
+              <div class="text-black text-weight-light">followers</div>
+            </div>
           </div>
-          <!-- Following -->
-          <div class="row q-mr-md">
-            <div class="text-weight-medium q-mr-sm">34</div>
-            <div class="text-black text-weight-light">following</div>
-          </div>
-          <!-- Followers -->
-          <div class="row">
-            <div class="text-weight-medium q-mr-sm">1023</div>
-            <div class="text-black text-weight-light">followers</div>
-          </div>
+          <!-- Skeleton -->
+          <q-skeleton width="250px" height="2rem" v-else />
         </div>
         <!-- Resume -->
         <div class="resumeBaseUpper">
-          <!-- Name -->
-          <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
-          <!-- Description -->
-          <div v-if="userInfomation.description">
-            {{ userInfomation.description }}
+          <div v-if="Object.values(userInfomation).length">
+            <!-- Name -->
+            <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
+            <!-- Description -->
+            <div v-if="userInfomation.description">
+              {{ userInfomation.description }}
+            </div>
+            <!-- Pagina web -->
+            <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
           </div>
-          <!-- Pagina web -->
-          <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
+          <!-- Skeleton -->
+          <q-skeleton width="150px" v-else />
         </div>
       </div>
     </div>
@@ -108,14 +216,25 @@
     <!-- Bar Desktop -->
     <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
     <!-- Images -->
-    <div class="postsBase">
+    <div class="postsBase" v-if="Object.values(posts).length">
       <div
         class="cursor-pointer imgPost shadow-2"
         v-for="(post, index) in posts"
         :key="index"
-        :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
         @click="goToPost(index, post.userInfo.userId)"
-      />
+      >
+        <img style="height: 100%; width: 100%" :src="post.imagesUploaded[0]" />
+      </div>
+    </div>
+    <div class="postsBase" style="height: 50rem" v-else>
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
+      <q-skeleton width="100%" height="100%" />
     </div>
   </div>
 </template>
@@ -194,9 +313,46 @@ export default {
 }
 //iPhone
 @media (max-width: 480px) {
+  .resumeBase {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 0px;
+    justify-items: start;
+    grid-template-areas:
+      "primero . ."
+      "segundo . ."
+      "tercero . .";
+    text-align: center;
+  }
+  .upperName {
+    grid-area: primero;
+  }
+  .upperDescription {
+    grid-area: segundo;
+  }
+  .upperWeb {
+    grid-area: tercero;
+  }
+  .showMobileUserPage {
+    display: block;
+  }
+  .showDesktopUserPage {
+    display: none;
+  }
+  .barOnlyDesktop {
+    display: none;
+  }
   .imgBaseUser {
-    height: 77px;
-    width: 77px;
+    height: 70px;
+    width: 70px;
+  }
+  .imageMyCard {
+    width: 100%;
+    height: 100%;
+  }
+  .resumeBaseUpper {
+    display: none;
   }
   .showButtonMobile {
     display: block;
@@ -207,36 +363,79 @@ export default {
   .followers {
     display: none;
   }
-  .resumeBaseUpper {
-    display: none;
-  }
-  .barOnlyDesktop {
-    display: none;
+  .myCardBaseUser {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-template-areas: ". . ";
+    align-items: center;
+    justify-items: start;
   }
   .postsBase {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+    margin: auto;
   }
   .imgPost {
-    width: 33%;
+    width: 100%;
     cursor: pointer;
-    height: 8rem;
+    height: 6rem;
     background-repeat: round;
+  }
+  .followersPost {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-template-areas: ". . .";
+    justify-items: center;
+    text-align: center;
   }
 }
 //Tablet
 @media (min-width: 480px) {
+  .resumeBase {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0px 0px;
+    justify-items: start;
+    grid-template-areas:
+      "primero . ."
+      "segundo . ."
+      "tercero . .";
+    text-align: center;
+  }
+  .upperName {
+    grid-area: primero;
+  }
+  .upperDescription {
+    grid-area: segundo;
+  }
+  .upperWeb {
+    grid-area: tercero;
+  }
+  .showMobileUserPage {
+    display: block;
+  }
+  .showDesktopUserPage {
+    display: none;
+  }
   .barOnlyDesktop {
     display: none;
   }
   .imgBaseUser {
-    height: 150px;
-    width: 150px;
-    margin-right: 4rem;
+    height: 120px;
+    width: 120px;
   }
-  .myCardBaseUser {
+  .imageMyCard {
+    width: 100%;
+    height: 100%;
   }
   .resumeBaseUpper {
     display: none;
@@ -250,21 +449,57 @@ export default {
   .followers {
     display: none;
   }
+  .myCardBaseUser {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-template-areas: ". . .";
+    align-items: center;
+    justify-items: start;
+  }
   .postsBase {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0.5rem;
+    width: 100%;
+    margin: auto;
   }
   .imgPost {
-    width: 33%;
+    width: 100%;
     cursor: pointer;
     height: 12rem;
     background-repeat: round;
   }
+  .followersPost {
+    display: grid;
+    grid-auto-columns: 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-template-areas: ". . .";
+    justify-items: center;
+    text-align: center;
+  }
 }
 //Desktop
 @media (min-width: 768px) {
+  .myCardBaseUser {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
+    gap: 0px 0px;
+    grid-template-areas: ". . .";
+    justify-items: center;
+    align-items: center;
+  }
+  .showMobileUserPage {
+    display: none;
+  }
+  .showDesktopUserPage {
+    display: block;
+  }
   .barOnlyDesktop {
     display: block;
     width: 93.5%;
@@ -273,7 +508,6 @@ export default {
   .imgBaseUser {
     height: 150px;
     width: 150px;
-    margin-right: 7rem;
   }
   .userNameUpperBase {
     display: flex;
@@ -304,16 +538,17 @@ export default {
     font-size: 1rem;
   }
   .postsBase {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    flex-wrap: wrap;
-    padding: 1rem 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr;
+    gap: 1.5rem;
+    width: 93%;
+    margin: 2rem auto;
   }
   .imgPost {
-    width: 29%;
+    width: 100%;
+    height: 100%;
     cursor: pointer;
-    margin: 1rem;
     height: 18rem;
     background-repeat: round;
   }

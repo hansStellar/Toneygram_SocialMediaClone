@@ -1,5 +1,5 @@
 <template>
-  <router-view class="baseAll" />
+  <router-view class="baseAll bg-grey-2" />
 </template>
 <script>
 import { firebaseAuth } from "./boot/firebase";

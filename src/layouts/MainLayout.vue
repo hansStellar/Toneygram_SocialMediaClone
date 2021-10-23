@@ -1,6 +1,6 @@
 <template>
   <q-layout view="hHh lpR fFf" class="baseLayout">
-    <q-header elevated class="bg-white text-white baseHeader">
+    <q-header bordered class="bg-white text-white baseHeader">
       <q-toolbar
         style="max-width: 970px; margin: auto"
         class="row justify-between"
@@ -16,8 +16,8 @@
             round
             dense
             flat
-            color="grey"
-            icon="add_box"
+            color="black"
+            icon="add_circle_outline"
             @click="this.$router.push({ name: 'Add' })"
           />
           <!-- DM Messages -->
@@ -25,7 +25,7 @@
             round
             dense
             flat
-            color="grey"
+            color="black"
             icon="mail_outline"
             @click="sendUserToDM"
           />
@@ -35,7 +35,7 @@
             round
             dense
             flat
-            color="grey"
+            color="black"
             icon="favorite_border"
           />
           <!-- Search button -->
@@ -45,40 +45,17 @@
             icon="search"
             flat
             round
-            color="grey"
+            color="black"
             @click="sendUserToSearch"
           />
           <!-- Profile button -->
-          <q-btn-dropdown
-            rounded
-            class="buttonFooter"
-            dense
-            flat
-            color="grey"
-            no-icon-animation
-            dropdown-icon="face"
+          <q-avatar
+            size="1.5rem"
+            class="q-ml-md cursor-pointer"
+            @click="sendToUserPage"
           >
-            <q-list>
-              <!-- Profile -->
-              <q-item clickable v-close-popup @click="sendToUserPage">
-                <q-item-section>
-                  <q-item-label>Profile</q-item-label>
-                </q-item-section>
-              </q-item>
-              <!-- Settings -->
-              <q-item clickable v-close-popup @click="sendToUserSettings">
-                <q-item-section>
-                  <q-item-label>Settings</q-item-label>
-                </q-item-section>
-              </q-item>
-              <!-- Log out -->
-              <q-item clickable v-close-popup @click="logOut">
-                <q-item-section>
-                  <q-item-label>Log out</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-btn-dropdown>
+            <img :src="userPicture" />
+          </q-avatar>
         </div>
       </q-toolbar>
     </q-header>
@@ -125,6 +102,7 @@ export default {
   data() {
     return {
       tab: "mails",
+      userPicture: null,
     };
   },
   methods: {
@@ -162,6 +140,11 @@ export default {
         name: "Likes",
       });
     },
+  },
+  mounted() {
+    setTimeout(() => {
+      this.userPicture = firebaseAuth.currentUser.photoURL;
+    }, 1000);
   },
 };
 </script>

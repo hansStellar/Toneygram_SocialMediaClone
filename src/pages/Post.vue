@@ -1,120 +1,291 @@
 <template>
-  <div class="cardBase shadow-1">
-    <!-- Header -->
-    <div @click="goToUser(userInfoPost.userId)">
-      <q-banner rounded class="bg-white items-center q-py-md">
-        <template v-slot:avatar>
-          <q-avatar class="shadow-2 imgUserTop">
-            <img :src="userInfoPost.userImg" />
-          </q-avatar>
-        </template>
+  <!-- iPhone & Tablet -->
+  <div class="shadow-1 phoneBasePost">
+    <!-- Model -->
+    <div>
+      <!-- Header -->
+      <div @click="goToUser(userInfoPost.userId)">
+        <q-banner rounded class="bg-white items-center q-py-md">
+          <template v-slot:avatar>
+            <q-avatar class="shadow-2 imgUserTop cursor-pointer">
+              <img :src="userInfoPost.userImg" />
+            </q-avatar>
+          </template>
 
-        <span class="text-weight-medium">{{ userInfoPost.userName }}</span>
-      </q-banner>
-    </div>
-    <q-separator color="grey-5" />
-    <!-- Image/Caroussel -->
-    <q-carousel
-      animated
-      v-model="slide"
-      arrows
-      navigation
-      infinite
-      class="baseCarousel"
-    >
-      <q-carousel-slide
-        style="background-position-y: top"
-        v-for="(image, index) in images"
-        :key="index"
-        :name="index"
-        :img-src="image"
-      />
-    </q-carousel>
-    <q-separator color="grey-5" />
-    <!-- Like and Comment-->
-    <div class="q-my-sm">
-      <q-btn
-        dense
-        round
-        flat
-        @click="likePost()"
-        v-if="!likeUsers.includes(actualUserId)"
-        icon="favorite_border"
-      />
-      <q-btn
-        dense
-        round
-        flat
-        @click="unlikePost()"
-        v-else
-        icon="favorite"
-        color="red"
-      />
-      <q-btn
-        dense
-        round
-        @click="showText = !showText"
-        flat
-        icon="far fa-comment"
-      />
-    </div>
-    <!-- Likes -->
-    <div class="q-mb-sm q-mx-sm text-weight-bold">
-      {{ likeUsers.length }} likes
-    </div>
-    <!-- Description -->
-    <div class="q-mb-sm q-mx-sm">
-      <span class="text-weight-bold" @click="goToUser(userInfoPost.userId)">{{
-        userInfoPost.userName
-      }}</span>
-      {{ descriptionPost }}
-    </div>
-    <q-separator color="grey-4" size="1px" class="q-mb-sm" />
-    <!-- Comments -->
-    <div
-      v-for="(comment, index) in comments"
-      :key="index"
-      class="row items-center q-gutter-md q-px-sm"
-    >
-      <!-- img -->
-      <q-avatar class="userCommentImg">
-        <img :src="comment.imgUser" />
-      </q-avatar>
-      <!-- Username -->
-      <div class="">
-        <span
-          class="text-weight-bold cursor-pointer"
-          @click="goToUser(comment.idUser)"
-          >{{ comment.userName }}</span
-        >&nbsp;
-        <span>{{ comment.message }}</span>
+          <span class="text-weight-medium cursor-pointer">{{
+            userInfoPost.userName
+          }}</span>
+        </q-banner>
       </div>
-    </div>
-    <!-- Create Comment -->
-    <div v-show="showText" class="q-px-sm full-width">
-      <q-form class="row justify-between items-center">
-        <q-input
-          v-model="textMessage"
+      <q-separator color="grey-5" />
+      <!-- Image/Caroussel -->
+      <q-carousel
+        animated
+        v-model="slide"
+        arrows
+        navigation
+        infinite
+        class="baseCarousel"
+      >
+        <q-carousel-slide
+          style="background-position-y: top"
+          v-for="(image, index) in images"
+          :key="index"
+          :name="index"
+          :img-src="image"
+        />
+      </q-carousel>
+      <q-separator color="grey-5" />
+      <!-- Like and Comment-->
+      <div class="q-my-sm">
+        <q-btn
           dense
-          label="Type your message"
-          class="inputForm"
-          autofocus
-          color="positive"
-          autocomplete="off"
+          round
+          flat
+          @click="likePost()"
+          v-if="!likeUsers.includes(actualUserId)"
+          icon="favorite_border"
         />
         <q-btn
-          icon="send"
           dense
+          round
           flat
-          color="positive"
-          class="btnForm"
-          @click="sendText"
-          :disable="textMessage.length <= 0"
+          @click="unlikePost()"
+          v-else
+          icon="favorite"
+          color="red"
         />
-      </q-form>
+        <q-btn dense round flat icon="far fa-comment" />
+      </div>
+      <!-- Likes -->
+      <div class="q-mb-sm q-mx-sm text-weight-bold">
+        {{ likeUsers.length }} likes
+      </div>
+      <!-- Description -->
+      <div class="q-mb-sm q-mx-sm">
+        <span
+          class="text-weight-bold cursor-pointer"
+          @click="goToUser(userInfoPost.userId)"
+          >{{ userInfoPost.userName }}</span
+        >
+        {{ descriptionPost }}
+      </div>
+      <q-separator color="grey-4" size="1px" class="q-mb-sm" />
+      <!-- Comments -->
+      <div style="height: 5rem; overflow: auto">
+        <div
+          v-for="(comment, index) in comments"
+          :key="index"
+          class="row items-center q-gutter-md q-px-sm"
+        >
+          <!-- img -->
+          <q-avatar class="userCommentImg">
+            <img :src="comment.imgUser" />
+          </q-avatar>
+          <!-- Username -->
+          <div class="">
+            <span
+              class="text-weight-bold cursor-pointer"
+              @click="goToUser(comment.idUser)"
+              >{{ comment.userName }}</span
+            >&nbsp;
+            <span>{{ comment.message }}</span>
+          </div>
+        </div>
+      </div>
+      <!-- Create Comment -->
+      <div class="bg-grey-2 full-width q-px-sm">
+        <q-input
+          color="grey-6"
+          v-model="textMessage"
+          label="Add a comment ..."
+          autofocus
+          autocomplete="off"
+          borderless
+        >
+          <template v-slot:append>
+            <q-btn
+              label="POST"
+              dense
+              flat
+              color="primary"
+              @click="sendText"
+              :disable="textMessage.length <= 0"
+            />
+          </template>
+        </q-input>
+      </div>
+      <!-- Date -->
+      <div class="q-mx-sm q-mb-sm text-grey text-overline">
+        {{ dateOfPost }}
+      </div>
     </div>
-    <!-- Date -->
-    <div class="q-mx-sm q-mb-sm text-grey text-overline">{{ dateOfPost }}</div>
+  </div>
+  <!-- Desktop -->
+  <div style="">
+    <!-- Model -->
+    <div
+      v-if="showPost"
+      class="desktopBasePost row flex justify-center"
+      style="
+        max-width: 970px;
+        margin: auto;
+        height: 90vh;
+        align-content: center;
+      "
+    >
+      <!-- Image/Caroussel -->
+      <div class="col-7">
+        <q-carousel
+          animated
+          v-model="slide"
+          arrows
+          navigation
+          infinite
+          class="baseCarousel"
+        >
+          <q-carousel-slide
+            style="background-position-y: top"
+            v-for="(image, index) in images"
+            :key="index"
+            :name="index"
+            :img-src="image"
+          />
+        </q-carousel>
+      </div>
+      <!-- Right Side -->
+      <div class="col-4 shadow-2">
+        <!-- Header -->
+        <div @click="goToUser(userInfoPost.userId)">
+          <q-banner rounded class="bg-white items-center q-py-md">
+            <template v-slot:avatar>
+              <q-avatar class="shadow-2 imgUserTop cursor-pointer">
+                <img :src="userInfoPost.userImg" />
+              </q-avatar>
+            </template>
+
+            <span class="text-weight-medium cursor-pointer">{{
+              userInfoPost.userName
+            }}</span>
+          </q-banner>
+        </div>
+        <q-separator color="grey-4" />
+        <!-- Description -->
+        <div class="q-px-sm q-pt-sm bg-white">
+          <span
+            class="text-weight-bold cursor-pointer"
+            @click="goToUser(userInfoPost.userId)"
+            >{{ userInfoPost.userName }}</span
+          >
+          {{ descriptionPost }}
+        </div>
+        <!-- Comments -->
+        <div class="bg-white" style="height: 18.58rem; overflow: auto">
+          <div
+            v-for="(comment, index) in comments"
+            :key="index"
+            class="row items-center q-px-sm"
+          >
+            <!-- Username -->
+            <div class="">
+              <span
+                class="text-weight-bold cursor-pointer"
+                @click="goToUser(comment.idUser)"
+                >{{ comment.userName }}</span
+              >&nbsp;
+              <span>{{ comment.message }}</span>
+            </div>
+          </div>
+        </div>
+        <q-separator color="grey-4" />
+        <!-- Like and Comment-->
+        <div class="bg-white q-py-sm">
+          <q-btn
+            dense
+            round
+            flat
+            @click="likePost()"
+            v-if="!likeUsers.includes(actualUserId)"
+            icon="favorite_border"
+          />
+          <q-btn
+            dense
+            round
+            flat
+            @click="unlikePost()"
+            v-else
+            icon="favorite"
+            color="red"
+          />
+          <q-btn dense round flat icon="far fa-comment" />
+        </div>
+        <!-- Likes -->
+        <div class="q-pb-sm q-px-sm bg-white text-weight-bold">
+          {{ likeUsers.length }} likes
+        </div>
+        <!-- Date -->
+        <div class="q-px-sm text-grey bg-white items-bottom text-overline">
+          {{ dateOfPost }}
+        </div>
+        <q-separator color="grey-4" class="" />
+        <!-- Create Comment -->
+        <div class="bg-white full-width q-px-sm">
+          <q-input
+            color="grey-6"
+            v-model="textMessage"
+            label="Add a comment ..."
+            autofocus
+            autocomplete="off"
+            borderless
+          >
+            <template v-slot:append>
+              <q-btn
+                label="POST"
+                dense
+                flat
+                color="primary"
+                @click="sendText"
+                :disable="textMessage.length <= 0"
+              />
+            </template>
+          </q-input>
+        </div>
+      </div>
+    </div>
+    <!-- Skeleton -->
+    <q-card
+      class="desktopShowPost"
+      style="
+        max-width: 970px;
+        margin: 10rem auto;
+        align-content: center;
+        width: 30rem;
+        height: 20rem;
+      "
+      v-else
+    >
+      <q-item>
+        <q-item-section avatar>
+          <q-skeleton type="QAvatar" />
+        </q-item-section>
+
+        <q-item-section>
+          <q-item-label>
+            <q-skeleton type="text" />
+          </q-item-label>
+          <q-item-label caption>
+            <q-skeleton type="text" />
+          </q-item-label>
+        </q-item-section>
+      </q-item>
+
+      <q-skeleton height="200px" square />
+
+      <q-card-actions align="right" class="q-gutter-md">
+        <q-skeleton type="QBtn" />
+        <q-skeleton type="QBtn" />
+      </q-card-actions>
+    </q-card>
   </div>
 </template>
 <script>
@@ -124,15 +295,16 @@ export default {
   data() {
     return {
       images: [],
-      slide: 0,
       likeUsers: [],
-      showText: false,
-      textMessage: "",
       comments: [],
-      descriptionPost: "",
       userInfoPost: {},
+      descriptionPost: "",
       dateOfPost: "",
       actualUserId: "",
+      showPost: true,
+      //
+      slide: 0,
+      textMessage: "",
     };
   },
   methods: {
@@ -209,7 +381,7 @@ export default {
       messagesActRef.once("child_added", (comments) => {
         this.comments.push(comments.val());
       });
-      this.showText = false;
+
       this.textMessage = "";
     },
     goToUser(id) {
@@ -254,6 +426,9 @@ export default {
         Object.values(postInfo.messages).forEach((comment) => {
           this.comments.push(comment);
         });
+        this.comments.sort((a, b) => {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        });
       }
       // Date of Post
       if (postInfo.dateOfPost) {
@@ -265,13 +440,26 @@ export default {
     setTimeout(() => {
       let actualUserId = firebaseAuth.currentUser.uid;
       this.actualUserId = actualUserId;
-    }, 200);
+      // images: [],
+      // likeUsers: [],
+      // comments: [],
+      // userInfoPost: {},
+      // descriptionPost: "",
+      // dateOfPost: "",
+      // actualUserId: "",
+    });
   },
 };
 </script>
 <style lang="scss">
 //iPhone
 @media (max-width: 480px) {
+  .phoneBasePost {
+    display: block;
+  }
+  .desktopBasePost {
+    display: none;
+  }
   .userCommentImg {
     display: none;
   }
@@ -288,9 +476,19 @@ export default {
   .btnForm {
     width: 15%;
   }
+  .desktopShowPost {
+    display: none;
+  }
 }
 //Tablet
 @media (min-width: 480px) {
+  .phoneBasePost {
+    display: flex;
+    flex-direction: column;
+  }
+  .desktopBasePost {
+    display: none;
+  }
   .userCommentImg {
     display: none;
   }
@@ -307,12 +505,17 @@ export default {
   .btnForm {
     width: 9%;
   }
+  .desktopShowPost {
+    display: none;
+  }
 }
 //Desktop
 @media (min-width: 768px) {
-  .cardBase {
-    max-width: 940px;
-    margin: auto;
+  .phoneBasePost {
+    display: none;
+  }
+  .desktopBasePost {
+    display: flex;
   }
   .userCommentImg {
     display: none;
@@ -329,6 +532,9 @@ export default {
   }
   .btnForm {
     width: 4%;
+  }
+  .desktopShowPost {
+    display: block;
   }
 }
 </style>
