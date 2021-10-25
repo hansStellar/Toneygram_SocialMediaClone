@@ -100,6 +100,7 @@ export default {
               .getDownloadURL()
               .then((url) => {
                 imagesUploaded.push(url);
+                // Create post in own user
                 const userPosts = firebaseDb
                   .ref()
                   .child(
@@ -124,6 +125,27 @@ export default {
                   },
                   description: descriptionOfPost,
                   dateOfPost: dateOfPost,
+                  fullD: new Date().getTime(),
+                  scrollIndex: 0,
+                });
+                // Create post outside Users
+                const userPostOutSide = firebaseDb.ref(
+                  "toneygram/posts/" +
+                    firebaseAuth.currentUser.uid +
+                    "/" +
+                    uniqueId
+                );
+                userPostOutSide.set({
+                  imagesUploaded,
+                  userInfo: {
+                    userName: firebaseAuth.currentUser.displayName,
+                    userId: firebaseAuth.currentUser.uid,
+                    userImg: firebaseAuth.currentUser.photoURL,
+                  },
+                  description: descriptionOfPost,
+                  dateOfPost: dateOfPost,
+                  fullD: new Date().getTime(),
+                  scrollIndex: 0,
                 });
                 Loading.hide();
                 Notify.create({

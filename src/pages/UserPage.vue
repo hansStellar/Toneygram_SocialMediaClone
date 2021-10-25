@@ -342,25 +342,27 @@ export default {
       let currentUserId = firebaseAuth.currentUser.uid;
       // Following Steps
       const currentUserRouteFollowing = firebaseDb.ref(
-        "toneygram/users/" + currentUserIdPage + "/userInformation/"
+        "toneygram/users/" + currentUserIdPage
       );
       currentUserRouteFollowing.once("value", (userInfo) => {
+        let user = userInfo.val();
         // Search for our route
         const currentUserRoute = firebaseDb.ref(
           "toneygram/users/" + currentUserId + "/following/" + currentUserIdPage
         );
-        currentUserRoute.set(userInfo.val());
+        currentUserRoute.set(user.userInformation);
       });
       // Followers Steps
       const currentUserRouteFollowers = firebaseDb.ref(
-        "toneygram/users/" + currentUserId + "/userInformation/"
+        "toneygram/users/" + currentUserId
       );
       currentUserRouteFollowers.once("value", (userInfo) => {
+        let user = userInfo.val();
         // Search for his route
         const currentUserRoute = firebaseDb.ref(
           "toneygram/users/" + currentUserIdPage + "/followers/" + currentUserId
         );
-        currentUserRoute.set(userInfo.val());
+        currentUserRoute.set(user.userInformation);
       });
 
       // Read from firebase database User Actual Page (Followers)
@@ -473,9 +475,6 @@ export default {
         this.following = followingUserPage;
       }
     });
-    setTimeout(() => {
-      this.currentUserId = firebaseAuth.currentUser.uid;
-    }, 700);
   },
   computed: {
     getInfoUserPage() {

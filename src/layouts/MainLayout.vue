@@ -103,7 +103,7 @@ export default {
   data() {
     return {
       tab: "mails",
-      userPicture: null,
+      userPicture: "",
     };
   },
   methods: {

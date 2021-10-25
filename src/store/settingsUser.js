@@ -24,6 +24,9 @@ const actions = {
 }
 
 const getters = {
+    getUserId: (state) => {
+        return state.currentUserId
+    }
 }
 
 
