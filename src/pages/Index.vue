@@ -222,8 +222,13 @@
         </div>
       </div>
     </div>
+    <!-- Skeleton -->
     <div v-else>
-      <div class="cardBase shadow-2 q-mb-xl q-pb-md">
+      <div
+        class="cardBase shadow-2 q-mb-xl q-pb-md"
+        v-for="(skeleton, index) in skeletonTimes"
+        :key="index"
+      >
         <!-- Header -->
         <div>
           <q-banner rounded class="bg-white">
@@ -365,6 +370,7 @@ export default {
   name: "PageIndex",
   data() {
     return {
+      skeletonTimes: [1, 2, 3],
       slide: 1,
       actualUserInformation: {},
       followers: [],

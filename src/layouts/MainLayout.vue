@@ -146,7 +146,9 @@ export default {
     ...mapState("settingsUser", ["currentUserPhoto"]),
   },
   mounted() {
-    this.userPicture = this.currentUserPhoto;
+    setTimeout(() => {
+      this.userPicture = firebaseAuth.currentUser.photoURL;
+    }, 1000);
   },
 };
 </script>
