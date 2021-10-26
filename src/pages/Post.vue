@@ -301,6 +301,7 @@ export default {
     likePost() {
       let userId = this.$route.params.userId;
       let postId = this.$route.params.postId;
+      // User ref
       const postRef = firebaseDb.ref(
         "toneygram/users/" +
           userId +
@@ -310,6 +311,16 @@ export default {
           firebaseAuth.currentUser.uid
       );
       postRef.set(firebaseAuth.currentUser.uid);
+      // Posts ref Global
+      const postsGlobalRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          userId +
+          "/" +
+          postId +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postsGlobalRef.set(firebaseAuth.currentUser.uid);
 
       // Read from firebase database
       const postLikeActRef = firebaseDb
@@ -321,6 +332,7 @@ export default {
     unlikePost() {
       let userId = this.$route.params.userId;
       let postId = this.$route.params.postId;
+      // User ref
       const postRef = firebaseDb.ref(
         "toneygram/users/" +
           userId +
@@ -330,7 +342,16 @@ export default {
           firebaseAuth.currentUser.uid
       );
       postRef.remove();
-      let nuevoArray = [];
+      // Posts ref Global
+      const postGlobalRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          userId +
+          "/" +
+          postId +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postGlobalRef.remove();
       // Read from firebase database
       const postLikeRemoveRef = firebaseDb
         .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes")
@@ -347,32 +368,112 @@ export default {
     sendText() {
       let userId = this.$route.params.userId;
       let postId = this.$route.params.postId;
-      let randomId = uid();
-      const messagesRef = firebaseDb.ref(
-        "toneygram/users/" +
-          userId +
-          "/posts/" +
-          postId +
-          "/messages/" +
-          randomId
-      );
-      messagesRef.set({
-        userName: firebaseAuth.currentUser.displayName,
-        imgUser: firebaseAuth.currentUser.photoURL,
-        idUser: firebaseAuth.currentUser.uid,
-        message: this.textMessage,
-        date: new Date().getTime(),
-      });
+      // set on User private
+      const MessagesBaseRef = firebaseDb
+        .ref("toneygram/users/" + userId + "/posts/" + postId)
+        .once("value", (Post) => {
+          if (!Post.hasChild("messages")) {
+            let allMesagesArray = [];
+            let newMessage = {
+              userName: firebaseAuth.currentUser.displayName,
+              imgUser: firebaseAuth.currentUser.photoURL,
+              idUser: firebaseAuth.currentUser.uid,
+              message: this.textMessage,
+              date: new Date().getTime(),
+            };
+            allMesagesArray.push(newMessage);
 
-      // Read Firebase Database
-      const messagesActRef = firebaseDb.ref(
-        "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-      );
-      messagesActRef.once("child_added", (comments) => {
-        this.comments.push(comments.val());
-      });
+            const nuevoRef = firebaseDb.ref(
+              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+            );
+            nuevoRef.set(allMesagesArray);
+            // Read Firebase Database
+            const messagesActRef = firebaseDb.ref(
+              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+            );
+            messagesActRef.once("child_added", (comments) => {
+              this.comments.push(comments.val());
+            });
+            this.textMessage = "";
+          } else {
+            let allMesagesArray = [];
+            const messagesRef = firebaseDb.ref(
+              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+            );
+            messagesRef
+              .once("child_added", (allMesages) => {
+                allMesagesArray.push(allMesages.val());
+              })
+              .then(() => {
+                let newMessage = {
+                  userName: firebaseAuth.currentUser.displayName,
+                  imgUser: firebaseAuth.currentUser.photoURL,
+                  idUser: firebaseAuth.currentUser.uid,
+                  message: this.textMessage,
+                  date: new Date().getTime(),
+                };
+                allMesagesArray.push(newMessage);
+                allMesagesArray.sort((a, b) => {
+                  return a.date - b.date;
+                });
+                messagesRef.set(allMesagesArray);
+                const messagesActRef = firebaseDb.ref(
+                  "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+                );
+                messagesActRef.once("value", (comments) => {
+                  this.comments = comments.val();
+                });
+                this.textMessage = "";
+              });
+          }
+        });
 
-      this.textMessage = "";
+      // set on global
+
+      const MessageGlobalRef = firebaseDb
+        .ref("toneygram/posts/" + userId + "/" + postId)
+        .once("value", (Post) => {
+          if (!Post.hasChild("messages")) {
+            let allMesagesArray = [];
+            let newMessage = {
+              userName: firebaseAuth.currentUser.displayName,
+              imgUser: firebaseAuth.currentUser.photoURL,
+              idUser: firebaseAuth.currentUser.uid,
+              message: this.textMessage,
+              date: new Date().getTime(),
+            };
+            allMesagesArray.push(newMessage);
+
+            const nuevoRef = firebaseDb.ref(
+              "toneygram/posts/" + userId + "/" + postId + "/messages"
+            );
+            nuevoRef.set(allMesagesArray);
+          } else {
+            let allMesagesArray = [];
+            const messagesRef = firebaseDb.ref(
+              "toneygram/posts/" + userId + "/" + postId + "/messages"
+            );
+            messagesRef
+              .once("child_added", (allMesages) => {
+                allMesagesArray.push(allMesages.val());
+              })
+              .then(() => {
+                let newMessage = {
+                  userName: firebaseAuth.currentUser.displayName,
+                  imgUser: firebaseAuth.currentUser.photoURL,
+                  idUser: firebaseAuth.currentUser.uid,
+                  message: this.textMessage,
+                  date: new Date().getTime(),
+                };
+                allMesagesArray.push(newMessage);
+                allMesagesArray.sort((a, b) => {
+                  return a.date - b.date;
+                });
+
+                messagesRef.set(allMesagesArray);
+              });
+          }
+        });
     },
     goToUser(id) {
       this.$router.push({

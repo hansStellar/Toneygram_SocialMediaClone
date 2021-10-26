@@ -199,12 +199,34 @@
         <q-separator color="grey-5" />
         <!-- Like and Comment -->
         <div class="q-my-sm">
-          <q-btn dense round flat icon="favorite_border" />
+          <q-btn
+            dense
+            round
+            flat
+            @click="unlikePost(post.idPost, post.userInfo.userId)"
+            v-if="
+              post.likes &&
+              actualUserInformation.userInformation.id in post.likes
+            "
+            icon="favorite"
+            color="red"
+          />
+          <q-btn
+            dense
+            round
+            flat
+            v-else
+            icon="favorite_border"
+            @click="likePost(post.idPost, post.userInfo.userId)"
+          />
           <q-btn dense round flat icon="far fa-comment" />
         </div>
         <!-- Likes -->
         <div class="q-mb-sm q-mx-sm text-weight-bold" v-if="prueba">
-          21 likes
+          <div v-if="post.likes">
+            {{ Object.values(post.likes).length }} likes
+          </div>
+          <div v-else>0 likes</div>
         </div>
         <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
         <!-- Description -->
@@ -214,8 +236,34 @@
         </div>
         <q-skeleton width="300px" class="q-ml-sm" v-else />
         <!-- Comments -->
-        <div v-if="prueba"></div>
+        <div v-if="prueba">
+          <div v-for="(message, index) in post.messages" :key="index">
+            <span>{{ message.userName }}</span> {{ message.message }}
+          </div>
+        </div>
         <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
+        <!-- Create Comment -->
+        <div class="bg-white full-width q-px-sm">
+          <q-input
+            color="grey-6"
+            v-model="textMessage"
+            label="Add a comment ..."
+            autofocus
+            autocomplete="off"
+            borderless
+          >
+            <template v-slot:append>
+              <q-btn
+                label="POST"
+                dense
+                flat
+                color="primary"
+                @click="sendText(post.userInfo.userId, post.idPost)"
+                :disable="textMessage.length <= 0"
+              />
+            </template>
+          </q-input>
+        </div>
         <!-- Date -->
         <div class="q-mx-sm text-grey text-overline" v-if="prueba">
           {{ post.dateOfPost }}
@@ -366,6 +414,7 @@
 <script>
 import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
 import { mapGetters } from "vuex";
+import { uid } from "quasar";
 export default {
   name: "PageIndex",
   data() {
@@ -373,12 +422,12 @@ export default {
       skeletonTimes: [1, 2, 3],
       slide: 1,
       actualUserInformation: {},
-      followers: [],
       following: {},
       allLoaded: false,
       prueba: false,
       postsToShow: [],
       suggetionsUsers: [],
+      textMessage: "",
     };
   },
   methods: {
@@ -450,6 +499,194 @@ export default {
           delete this.following[newFollower.key];
         });
     },
+    likePost(idPost, idUser) {
+      // User ref
+      const postRef = firebaseDb.ref(
+        "toneygram/users/" +
+          idUser +
+          "/posts/" +
+          idPost +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postRef.set(firebaseAuth.currentUser.uid);
+      // Posts ref Global
+      const postsGlobalRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          idUser +
+          "/" +
+          idPost +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postsGlobalRef.set(firebaseAuth.currentUser.uid);
+
+      // Read from firebase database
+      // Make a loop of this posts to show
+      this.postsToShow.forEach((Post) => {
+        if (Post.idPost === idPost) {
+          const postLikeActRef = firebaseDb
+            .ref(
+              "toneygram/users/" +
+                Post.userInfo.userId +
+                "/posts/" +
+                Post.idPost +
+                "/likes/"
+            )
+            .once("value", (like) => {
+              if (!Post.likes) {
+                Post.likes = like.val();
+              } else {
+                Post.likes = like.val();
+              }
+            });
+        }
+      });
+    },
+    unlikePost(idPost, idUser) {
+      // User ref
+      const postRef = firebaseDb.ref(
+        "toneygram/users/" +
+          idUser +
+          "/posts/" +
+          idPost +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postRef.remove();
+      // Posts ref Global
+      const postGlobalRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          idUser +
+          "/" +
+          idPost +
+          "/likes/" +
+          firebaseAuth.currentUser.uid
+      );
+      postGlobalRef.remove();
+
+      this.postsToShow.forEach((Post) => {
+        if (Post.idPost === idPost) {
+          const postLikeActRef = firebaseDb
+            .ref(
+              "toneygram/users/" +
+                Post.userInfo.userId +
+                "/posts/" +
+                Post.idPost +
+                "/likes/"
+            )
+            .once("value", (like) => {
+              Post.likes = like.val();
+            });
+        }
+      });
+    },
+    sendText(userId, postId) {
+      let randomId = uid();
+      // set on User private
+      const MessagesBaseRef = firebaseDb
+        .ref("toneygram/users/" + userId + "/posts/" + postId)
+        .once("value", (Post) => {
+          if (!Post.hasChild("messages")) {
+            let allMesagesArray = [];
+            let newMessage = {
+              userName: firebaseAuth.currentUser.displayName,
+              imgUser: firebaseAuth.currentUser.photoURL,
+              idUser: firebaseAuth.currentUser.uid,
+              message: this.textMessage,
+              date: new Date().getTime(),
+            };
+            allMesagesArray.push(newMessage);
+
+            const nuevoRef = firebaseDb.ref(
+              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+            );
+            nuevoRef.set(allMesagesArray);
+            this.postsToShow.forEach((post) => {
+              if (post.idPost === Post.key) {
+                post.messages = allMesagesArray;
+              }
+            });
+            this.textMessage = "";
+          } else {
+            let allMesagesArray = [];
+            const messagesRef = firebaseDb.ref(
+              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
+            );
+            messagesRef
+              .once("child_added", (allMesages) => {
+                allMesagesArray.push(allMesages.val());
+              })
+              .then(() => {
+                let newMessage = {
+                  userName: firebaseAuth.currentUser.displayName,
+                  imgUser: firebaseAuth.currentUser.photoURL,
+                  idUser: firebaseAuth.currentUser.uid,
+                  message: this.textMessage,
+                  date: new Date().getTime(),
+                };
+                allMesagesArray.push(newMessage);
+                allMesagesArray.sort((a, b) => {
+                  return a.date - b.date;
+                });
+                messagesRef.set(allMesagesArray);
+                this.postsToShow.forEach((post) => {
+                  if (post.idPost === Post.key) {
+                    post.messages = allMesagesArray;
+                  }
+                });
+                this.textMessage = "";
+              });
+          }
+        });
+
+      // set on global
+
+      const MessageGlobalRef = firebaseDb
+        .ref("toneygram/posts/" + userId + "/" + postId)
+        .once("value", (Post) => {
+          if (!Post.hasChild("messages")) {
+            let allMesagesArray = [];
+            let newMessage = {
+              userName: firebaseAuth.currentUser.displayName,
+              imgUser: firebaseAuth.currentUser.photoURL,
+              idUser: firebaseAuth.currentUser.uid,
+              message: this.textMessage,
+              date: new Date().getTime(),
+            };
+            allMesagesArray.push(newMessage);
+
+            const nuevoRef = firebaseDb.ref(
+              "toneygram/posts/" + userId + "/" + postId + "/messages"
+            );
+            nuevoRef.set(allMesagesArray);
+          } else {
+            let allMesagesArray = [];
+            const messagesRef = firebaseDb.ref(
+              "toneygram/posts/" + userId + "/" + postId + "/messages"
+            );
+            messagesRef
+              .once("child_added", (allMesages) => {
+                allMesagesArray.push(allMesages.val());
+              })
+              .then(() => {
+                let newMessage = {
+                  userName: firebaseAuth.currentUser.displayName,
+                  imgUser: firebaseAuth.currentUser.photoURL,
+                  idUser: firebaseAuth.currentUser.uid,
+                  message: this.textMessage,
+                  date: new Date().getTime(),
+                };
+                allMesagesArray.push(newMessage);
+                allMesagesArray.sort((a, b) => {
+                  return a.date - b.date;
+                });
+
+                messagesRef.set(allMesagesArray);
+              });
+          }
+        });
+    },
   },
   computed: {
     ...mapGetters("settingsUser", ["getUserId"]),
@@ -474,27 +711,75 @@ export default {
         .catch(() => {
           this.allLoaded = false;
         });
-      // Read Posts From Followings
+
+      /*  ------------- Read Posts From Followings  ------------- */
+
       let postsRef = firebaseDb.ref("toneygram/posts/");
+      let currentUserAllInfo = firebaseDb.ref(
+        "toneygram/users/" + firebaseAuth.currentUser.uid
+      );
       let followingCurrentUserPosts = firebaseDb.ref(
         "toneygram/users/" + firebaseAuth.currentUser.uid + "/following"
       );
-      followingCurrentUserPosts.once("value", (UsersFromFollowing) => {
-        let usersFromFollowingVar = UsersFromFollowing.val();
-        postsRef.once("child_added", (users) => {
-          if (users.key in usersFromFollowingVar) {
-            Object.values(users.val()).forEach((post) => {
-              this.postsToShow.push(post);
-              this.postsToShow.sort((a, b) => {
-                return (
-                  new Date(b.fullD).getTime() - new Date(a.fullD).getTime()
-                );
-              });
+      currentUserAllInfo.once("value", (allUserInfo) => {
+        let allUserInfoVar = allUserInfo.val();
+        // If user has following
+        if (allUserInfoVar.following) {
+          followingCurrentUserPosts.once("value", (UsersFromFollowing) => {
+            let usersFromFollowingVar = UsersFromFollowing.val();
+            postsRef.once("child_added", (users) => {
+              if (users.key in usersFromFollowingVar) {
+                Object.values(users.val()).forEach((post) => {
+                  this.postsToShow.push(post);
+                  this.postsToShow.sort((a, b) => {
+                    return (
+                      new Date(b.fullD).getTime() - new Date(a.fullD).getTime()
+                    );
+                  });
+                });
+              }
             });
-          }
-        });
+          });
+          //If user doesn't have any following
+        } else {
+          // Loop on the posts section
+          postsRef.once("value", (allUsers) => {
+            // First we loop on the all users section
+            let allUsersVar = allUsers.val();
+            let allUsersVarArray = Object.values(allUsersVar);
+            let arrayUsers = [];
+
+            // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
+            do {
+              for (let index = 0; index <= 5; index++) {
+                let user =
+                  allUsersVarArray[
+                    Math.floor(Math.random() * allUsersVarArray.length)
+                  ];
+                arrayUsers.push(user);
+                arrayUsers.length = 5;
+              }
+              arrayUsers = arrayUsers.filter(function (item, pos) {
+                return arrayUsers.indexOf(item) == pos;
+              });
+            } while (arrayUsers.length < 5);
+            // We loop every user that is in the array in order to get 1 post of each one of them
+            let lastIndexOfArray = Math.floor(
+              Math.random() * arrayUsers.length
+            );
+            arrayUsers.forEach((User) => {
+              // For every user we must have one post
+              if (Object.values(User).length > 1) {
+                this.postsToShow.push(Object.values(User)[lastIndexOfArray]);
+              } else {
+                this.postsToShow.push(Object.values(User)[0]);
+              }
+            });
+          });
+        }
       });
-      // Read post from current user
+
+      /*  ------------- Read Posts From Current User  ------------- */
       let postsCurrentUser = firebaseDb.ref(
         "toneygram/users/" + firebaseAuth.currentUser.uid + "/posts"
       );
@@ -502,10 +787,11 @@ export default {
         let posts = postsFromCurrentUser.val();
         this.postsToShow.push(posts);
         this.postsToShow.sort((a, b) => {
-          return new Date(b.fullD).getTime() - new Date(a.fullD).getTime();
+          return a.fullD - b.fullD;
         });
       });
-      // Suggestions for the user
+
+      /*  ------------- Suggestion Users  ------------- */
       const allUsers = firebaseDb.ref("toneygram/users");
       allUsers.once("value", (allUsers) => {
         let allUsersVar = allUsers.val();

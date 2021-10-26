@@ -117,6 +117,7 @@ export default {
                   new Date().getFullYear();
 
                 userPosts.set({
+                  idPost: uniqueId,
                   imagesUploaded,
                   userInfo: {
                     userName: firebaseAuth.currentUser.displayName,
@@ -136,6 +137,7 @@ export default {
                     uniqueId
                 );
                 userPostOutSide.set({
+                  idPost: uniqueId,
                   imagesUploaded,
                   userInfo: {
                     userName: firebaseAuth.currentUser.displayName,
