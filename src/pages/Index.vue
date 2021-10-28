@@ -1,315 +1,890 @@
 <template>
   <!-- iPhone and Tablet -->
-  <div class="flex flex-center bg-grey-2 homeBase q-gutter-xl mobileBase">
-    <!-- Cards -->
-    <div>
-      <div class="cardBase shadow-2 q-mb-xl q-pb-md">
-        <!-- Header -->
-        <div>
-          <q-banner rounded class="bg-white">
-            <template v-slot:avatar>
-              <q-avatar class="shadow-2" v-if="prueba">
-                <img src="https://cdn.quasar.dev/img/avatar.png" />
-              </q-avatar>
-              <q-skeleton type="circle" size="50px" v-else />
-            </template>
-            <span class="text-weight-bold" v-if="prueba">hans___chris</span>
-            <q-skeleton width="150px" v-else />
-          </q-banner>
+  <div class="flex flex-center bg-grey-2 homeBase mobileBase">
+    <!-- Top -->
+    <q-tabs
+      v-model="tab"
+      align="justify"
+      dense
+      class="bg-white text-black shadow-2"
+      v-if="postsToShow.length || postsExplore.length"
+    >
+      <q-tab name="feed" icon="home" @click="goToTop" />
+      <q-tab name="explore" icon="explore" @click="goToTop" />
+    </q-tabs>
+    <q-skeleton height="2.2rem" width="100%" v-else />
+
+    <!-- Bottom -->
+    <q-tab-panels v-model="tab" animated>
+      <!-- Feed -->
+      <q-tab-panel name="feed" class="bg-grey-2 no-padding">
+        <div v-if="postsFollowingStatus">
+          <div
+            class="cardBase bg-white shadow-2"
+            v-for="(post, index) in postsToShow"
+            :key="index"
+          >
+            <!-- Header -->
+            <div>
+              <q-banner rounded class="bg-white">
+                <template v-slot:avatar>
+                  <q-avatar
+                    class="shadow-2"
+                    size="2rem"
+                    v-if="postsFollowingStatus"
+                  >
+                    <img :src="post.userInfo.userImg" />
+                  </q-avatar>
+                  <q-skeleton type="circle" size="50px" v-else />
+                </template>
+                <span
+                  class="text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: post.userInfo.userId,
+                      },
+                    })
+                  "
+                  v-if="postsFollowingStatus"
+                  >{{ post.userInfo.userName }}</span
+                >
+                <q-skeleton width="150px" v-else />
+              </q-banner>
+            </div>
+            <q-separator color="grey-5" />
+            <!-- Image/Caroussel -->
+            <q-carousel
+              animated
+              v-model="post.scrollIndex"
+              arrows
+              navigation
+              infinite
+              v-if="postsFollowingStatus"
+              style="height: 30rem"
+            >
+              <q-carousel-slide
+                v-for="(image, index) in post.imagesUploaded"
+                :key="index"
+                :name="index"
+                :img-src="image"
+              />
+            </q-carousel>
+            <q-skeleton height="21rem" v-else />
+            <q-separator color="grey-5" />
+            <!-- Like and Comment -->
+            <div class="q-my-sm">
+              <q-btn
+                dense
+                round
+                flat
+                @click="unlikePost(post.idPost, post.userInfo.userId)"
+                v-if="
+                  post.likes &&
+                  actualUserInformation.userInformation.id in post.likes
+                "
+                icon="favorite"
+                color="red"
+              />
+              <q-btn
+                dense
+                round
+                flat
+                v-else
+                icon="favorite_border"
+                @click="likePost(post.idPost, post.userInfo.userId)"
+              />
+              <q-btn dense round flat icon="far fa-comment" />
+            </div>
+            <!-- Likes -->
+            <div
+              class="q-mb-sm q-mx-sm text-weight-bold"
+              v-if="postsFollowingStatus"
+            >
+              <div v-if="post.likes">
+                {{ Object.values(post.likes).length }} likes
+              </div>
+              <div v-else>0 likes</div>
+            </div>
+            <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
+            <!-- Description -->
+            <div class="q-mb-sm q-mx-sm" v-if="postsFollowingStatus">
+              <span
+                class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                @click="
+                  this.$router.push({
+                    name: 'User',
+                    params: {
+                      userId: post.userInfo.userId,
+                    },
+                  })
+                "
+                >{{ post.userInfo.userName }}</span
+              >
+              {{ post.description }}
+            </div>
+            <q-skeleton width="300px" class="q-ml-sm" v-else />
+            <q-separator color="grey-4" class="q-mb-sm" />
+            <!-- Comments -->
+            <div
+              v-if="postsFollowingStatus"
+              class="q-mb-sm q-mx-sm"
+              style="max-height: 7rem; overflow: auto"
+            >
+              <div v-for="(message, index) in post.messages" :key="index">
+                <span
+                  class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: message.idUser,
+                      },
+                    })
+                  "
+                  >{{ message.userName }}</span
+                >
+                {{ message.message }}
+              </div>
+            </div>
+            <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
+            <q-separator color="grey-4" class="q-mb-sm" />
+            <!-- Create Comment -->
+            <div class="bg-white full-width q-px-sm">
+              <q-input
+                color="grey-6"
+                v-model="textMessage"
+                label="Add a comment ..."
+                autofocus
+                autocomplete="off"
+                borderless
+              >
+                <template v-slot:append>
+                  <q-btn
+                    label="POST"
+                    dense
+                    flat
+                    color="primary"
+                    @click="sendText(post.userInfo.userId, post.idPost)"
+                    :disable="textMessage.length <= 0"
+                  />
+                </template>
+              </q-input>
+            </div>
+            <!-- Date -->
+            <div
+              class="q-mx-sm text-grey text-overline"
+              v-if="postsFollowingStatus"
+            >
+              {{ post.dateOfPost }}
+            </div>
+          </div>
         </div>
-        <q-separator color="grey-5" />
-        <!-- Image/Caroussel -->
-        <q-carousel
-          animated
-          v-model="slide"
-          arrows
-          navigation
-          infinite
-          v-if="prueba"
-          style="height: 21rem"
+        <!-- Skeleton -->
+        <div v-else>
+          <div
+            class="cardBase shadow-2 q-pb-md"
+            v-for="(skeleton, index) in skeletonTimes"
+            :key="index"
+          >
+            <!-- Header -->
+            <div>
+              <q-banner rounded class="bg-white">
+                <template v-slot:avatar>
+                  <q-skeleton type="circle" size="50px" />
+                </template>
+
+                <q-skeleton width="150px" />
+              </q-banner>
+            </div>
+            <q-separator color="grey-5" />
+            <!-- Image/Caroussel -->
+
+            <q-skeleton height="21rem" />
+            <q-separator color="grey-5" />
+            <!-- Like and Comment -->
+            <div class="q-my-sm">
+              <q-btn dense round flat icon="favorite_border" />
+              <q-btn dense round flat icon="far fa-comment" />
+            </div>
+            <!-- Likes -->
+
+            <q-skeleton width="150px" class="q-ml-sm q-mb-md" />
+            <!-- Description -->
+
+            <q-skeleton width="300px" class="q-ml-sm" />
+            <!-- Comments -->
+
+            <q-skeleton width="190px" class="q-ml-sm q-mt-md" />
+          </div>
+        </div>
+        <!-- No activity -->
+        <div
+          class="full-width text-center text-grey-5"
+          v-if="!postsFollowingStatus || postsToShow.length === 0"
         >
-          <q-carousel-slide
-            :name="1"
-            img-src="https://cdn.quasar.dev/img/mountains.jpg"
-          />
-          <q-carousel-slide
-            :name="2"
-            img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-          />
-          <q-carousel-slide
-            :name="3"
-            img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-          />
-          <q-carousel-slide
-            :name="4"
-            img-src="https://cdn.quasar.dev/img/quasar.jpg"
-          />
-        </q-carousel>
-        <q-skeleton height="21rem" v-else />
-        <q-separator color="grey-5" />
-        <!-- Like and Comment-->
-        <div class="q-my-sm">
-          <q-btn dense round flat icon="favorite_border" />
-          <q-btn dense round flat icon="far fa-comment" />
+          <div class="text-center text-h4 q-mb-lg">
+            there is no current activity
+          </div>
+          <q-icon size="2rem" name="sentiment_dissatisfied" />
         </div>
-        <!-- Likes -->
-        <div class="q-mb-sm q-mx-sm text-weight-bold" v-if="prueba">
-          21 likes
+      </q-tab-panel>
+
+      <!-- Explore -->
+      <q-tab-panel name="explore" class="bg-grey-2 no-padding">
+        <div v-if="postsFollowingStatus">
+          <div
+            class="cardBase shadow-2 bg-white"
+            v-for="(post, index) in postsExplore"
+            :key="index"
+          >
+            <!-- Header -->
+            <div>
+              <q-banner rounded class="bg-white">
+                <template v-slot:avatar>
+                  <q-avatar
+                    class="shadow-2"
+                    size="2rem"
+                    v-if="postsFollowingStatus"
+                  >
+                    <img :src="post.userInfo.userImg" />
+                  </q-avatar>
+                  <q-skeleton type="circle" size="50px" v-else />
+                </template>
+                <span
+                  class="text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: post.userInfo.userId,
+                      },
+                    })
+                  "
+                  v-if="postsFollowingStatus"
+                  >{{ post.userInfo.userName }}</span
+                >
+                <q-skeleton width="150px" v-else />
+              </q-banner>
+            </div>
+            <q-separator color="grey-5" />
+            <!-- Image/Caroussel -->
+            <q-carousel
+              animated
+              v-model="post.scrollIndex"
+              arrows
+              navigation
+              infinite
+              v-if="postsFollowingStatus"
+              style="height: 30rem"
+            >
+              <q-carousel-slide
+                v-for="(image, index) in post.imagesUploaded"
+                :key="index"
+                :name="index"
+                :img-src="image"
+              />
+            </q-carousel>
+            <q-skeleton height="21rem" v-else />
+            <q-separator color="grey-5" />
+            <!-- Like and Comment -->
+            <div class="q-my-sm">
+              <q-btn
+                dense
+                round
+                flat
+                @click="unlikePost(post.idPost, post.userInfo.userId)"
+                v-if="
+                  post.likes &&
+                  actualUserInformation.userInformation.id in post.likes
+                "
+                icon="favorite"
+                color="red"
+              />
+              <q-btn
+                dense
+                round
+                flat
+                v-else
+                icon="favorite_border"
+                @click="likePost(post.idPost, post.userInfo.userId)"
+              />
+              <q-btn dense round flat icon="far fa-comment" />
+            </div>
+            <!-- Likes -->
+            <div
+              class="q-mb-sm q-mx-sm text-weight-bold"
+              v-if="postsFollowingStatus"
+            >
+              <div v-if="post.likes">
+                {{ Object.values(post.likes).length }} likes
+              </div>
+              <div v-else>0 likes</div>
+            </div>
+            <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
+            <!-- Description -->
+            <div class="q-mb-sm q-mx-sm" v-if="postsFollowingStatus">
+              <span
+                class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                @click="
+                  this.$router.push({
+                    name: 'User',
+                    params: {
+                      userId: post.userInfo.userId,
+                    },
+                  })
+                "
+                >{{ post.userInfo.userName }}</span
+              >
+              {{ post.description }}
+            </div>
+            <q-skeleton width="300px" class="q-ml-sm" v-else />
+            <q-separator color="grey-4" class="q-mb-sm" />
+            <!-- Comments -->
+            <div
+              v-if="postsFollowingStatus"
+              class="q-mb-sm q-mx-sm"
+              style="max-height: 7rem; overflow: auto"
+            >
+              <div v-for="(message, index) in post.messages" :key="index">
+                <span
+                  class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: message.idUser,
+                      },
+                    })
+                  "
+                  >{{ message.userName }}</span
+                >
+                {{ message.message }}
+              </div>
+            </div>
+            <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
+            <q-separator color="grey-4" class="q-mb-sm" />
+            <!-- Create Comment -->
+            <div class="bg-white full-width q-px-sm">
+              <q-input
+                color="grey-6"
+                v-model="textMessage"
+                label="Add a comment ..."
+                autofocus
+                autocomplete="off"
+                borderless
+              >
+                <template v-slot:append>
+                  <q-btn
+                    label="POST"
+                    dense
+                    flat
+                    color="primary"
+                    @click="sendText(post.userInfo.userId, post.idPost)"
+                    :disable="textMessage.length <= 0"
+                  />
+                </template>
+              </q-input>
+            </div>
+            <!-- Date -->
+            <div
+              class="q-mx-sm text-grey text-overline"
+              v-if="postsFollowingStatus"
+            >
+              {{ post.dateOfPost }}
+            </div>
+          </div>
         </div>
-        <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
-        <!-- Description -->
-        <div class="q-mb-sm q-mx-sm" v-if="prueba">
-          <span class="text-weight-bold">hans___chris</span> Lorem ipsum dolor
-          sit, amet consectetur adipisicing elit. Et pariatur saepe voluptatibus
-          assumenda! Aspernatur enim id libero consequuntur necessitatibus, aut
-          unde accusantium doloremque, ipsum dicta voluptatibus minus? Quasi,
-          itaque corporis.
+        <!-- Skeleton -->
+        <div v-else>
+          <div
+            class="cardBase shadow-2"
+            v-for="(skeleton, index) in skeletonTimes"
+            :key="index"
+          >
+            <!-- Header -->
+            <div>
+              <q-banner rounded class="bg-white">
+                <template v-slot:avatar>
+                  <q-skeleton type="circle" size="50px" />
+                </template>
+
+                <q-skeleton width="150px" />
+              </q-banner>
+            </div>
+            <q-separator color="grey-5" />
+            <!-- Image/Caroussel -->
+
+            <q-skeleton height="21rem" />
+            <q-separator color="grey-5" />
+            <!-- Like and Comment -->
+            <div class="q-my-sm">
+              <q-btn dense round flat icon="favorite_border" />
+              <q-btn dense round flat icon="far fa-comment" />
+            </div>
+            <!-- Likes -->
+
+            <q-skeleton width="150px" class="q-ml-sm q-mb-md" />
+            <!-- Description -->
+
+            <q-skeleton width="300px" class="q-ml-sm" />
+            <!-- Comments -->
+
+            <q-skeleton width="190px" class="q-ml-sm q-mt-md" />
+          </div>
         </div>
-        <q-skeleton width="300px" class="q-ml-sm" v-else />
-        <!-- Comments -->
-        <div v-if="prueba"></div>
-        <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
-        <!-- Date -->
-        <div class="q-mx-sm text-grey text-overline" v-if="prueba">
-          12/02/2021
-        </div>
-      </div>
-    </div>
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
-  <!-- Desktop -->
+  <!-- Desktop New One -->
   <div class="flex flex-center bg-grey-2 homeBase q-gutter-xl desktopBase">
     <!-- Cards -->
     <div>
-      <div class="cardBase shadow-2 q-mb-xl q-pb-md">
-        <!-- Header -->
-        <div>
-          <q-banner rounded class="bg-white">
-            <template v-slot:avatar>
-              <q-avatar class="shadow-2" v-if="prueba">
-                <img src="https://cdn.quasar.dev/img/avatar.png" />
-              </q-avatar>
-              <q-skeleton type="circle" size="50px" v-else />
-            </template>
-            <span class="text-weight-bold" v-if="prueba">hans___chris</span>
-            <q-skeleton width="150px" v-else />
-          </q-banner>
-        </div>
-        <q-separator color="grey-5" />
-        <!-- Image/Caroussel -->
-        <q-carousel
-          animated
-          v-model="slide"
-          arrows
-          navigation
-          infinite
-          v-if="prueba"
-          style="height: 21rem"
-        >
-          <q-carousel-slide
-            :name="1"
-            img-src="https://cdn.quasar.dev/img/mountains.jpg"
-          />
-          <q-carousel-slide
-            :name="2"
-            img-src="https://cdn.quasar.dev/img/parallax1.jpg"
-          />
-          <q-carousel-slide
-            :name="3"
-            img-src="https://cdn.quasar.dev/img/parallax2.jpg"
-          />
-          <q-carousel-slide
-            :name="4"
-            img-src="https://cdn.quasar.dev/img/quasar.jpg"
-          />
-        </q-carousel>
-        <q-skeleton height="21rem" v-else />
-        <q-separator color="grey-5" />
-        <!-- Like and Comment-->
-        <div class="q-my-sm">
-          <q-btn dense round flat icon="favorite_border" />
-          <q-btn dense round flat icon="far fa-comment" />
-        </div>
-        <!-- Likes -->
-        <div class="q-mb-sm q-mx-sm text-weight-bold" v-if="prueba">
-          21 likes
-        </div>
-        <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
-        <!-- Description -->
-        <div class="q-mb-sm q-mx-sm" v-if="prueba">
-          <span class="text-weight-bold">hans___chris</span> Lorem ipsum dolor
-          sit, amet consectetur adipisicing elit. Et pariatur saepe voluptatibus
-          assumenda! Aspernatur enim id libero consequuntur necessitatibus, aut
-          unde accusantium doloremque, ipsum dicta voluptatibus minus? Quasi,
-          itaque corporis.
-        </div>
-        <q-skeleton width="300px" class="q-ml-sm" v-else />
-        <!-- Comments -->
-        <div v-if="prueba"></div>
-        <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
-        <!-- Date -->
-        <div class="q-mx-sm text-grey text-overline" v-if="prueba">
-          12/02/2021
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Desktop New One -->
-  <div class="flex flex-center bg-grey-2 homeBase q-gutter-xl desktopBaseNew">
-    <!-- Cards -->
-    <div v-if="postsToShow.length">
-      <div
-        class="cardBase shadow-2 q-mb-xl q-pb-md"
-        v-for="(post, index) in postsToShow"
-        :key="index"
+      <!-- Top -->
+      <q-tabs
+        v-model="tab"
+        align="justify"
+        dense
+        narrow-indicator
+        class="bg-white text-black shadow-2 q-mt-md q-mb-lg"
+        v-if="postsToShow.length || postsExplore.length"
+        style="width: 42rem"
       >
-        <!-- Header -->
-        <div>
-          <q-banner rounded class="bg-white">
-            <template v-slot:avatar>
-              <q-avatar class="shadow-2" v-if="prueba">
-                <img :src="post.userInfo.userImg" />
-              </q-avatar>
-              <q-skeleton type="circle" size="50px" v-else />
-            </template>
-            <span class="text-weight-bold" v-if="prueba">{{
-              post.userInfo.userName
-            }}</span>
-            <q-skeleton width="150px" v-else />
-          </q-banner>
-        </div>
-        <q-separator color="grey-5" />
-        <!-- Image/Caroussel -->
-        <q-carousel
-          animated
-          v-model="post.scrollIndex"
-          arrows
-          navigation
-          infinite
-          v-if="prueba"
-          style="height: 21rem"
-        >
-          <q-carousel-slide
-            v-for="(image, index) in post.imagesUploaded"
-            :key="index"
-            :name="index"
-            :img-src="image"
-          />
-        </q-carousel>
-        <q-skeleton height="21rem" v-else />
-        <q-separator color="grey-5" />
-        <!-- Like and Comment -->
-        <div class="q-my-sm">
-          <q-btn
-            dense
-            round
-            flat
-            @click="unlikePost(post.idPost, post.userInfo.userId)"
-            v-if="
-              post.likes &&
-              actualUserInformation.userInformation.id in post.likes
-            "
-            icon="favorite"
-            color="red"
-          />
-          <q-btn
-            dense
-            round
-            flat
-            v-else
-            icon="favorite_border"
-            @click="likePost(post.idPost, post.userInfo.userId)"
-          />
-          <q-btn dense round flat icon="far fa-comment" />
-        </div>
-        <!-- Likes -->
-        <div class="q-mb-sm q-mx-sm text-weight-bold" v-if="prueba">
-          <div v-if="post.likes">
-            {{ Object.values(post.likes).length }} likes
+        <q-tab name="feed" icon="home" @click="goToTop" />
+        <q-tab name="explore" icon="explore" @click="goToTop" />
+      </q-tabs>
+      <q-skeleton
+        height="2.4rem"
+        width="42rem"
+        class="q-mt-md q-mb-lg"
+        v-else
+      />
+      <!-- Bottom -->
+      <q-tab-panels v-model="tab" animated>
+        <!-- Feed -->
+        <q-tab-panel name="feed" class="bg-grey-2 no-padding no-margin">
+          <div v-if="postsFollowingStatus">
+            <div
+              class="cardBase bg-white q-mb-xl"
+              v-for="(post, index) in postsToShow"
+              :key="index"
+            >
+              <!-- Header -->
+              <div>
+                <q-banner rounded class="bg-white items-center">
+                  <template v-slot:avatar>
+                    <q-avatar
+                      size="2rem"
+                      class="shadow-2"
+                      v-if="postsFollowingStatus"
+                    >
+                      <img :src="post.userInfo.userImg" />
+                    </q-avatar>
+                    <q-skeleton type="circle" width="1rem" v-else />
+                  </template>
+                  <span
+                    class="text-weight-bold cursor-pointer"
+                    @click="
+                      this.$router.push({
+                        name: 'User',
+                        params: {
+                          userId: post.userInfo.userId,
+                        },
+                      })
+                    "
+                    v-if="postsFollowingStatus"
+                    >{{ post.userInfo.userName }}</span
+                  >
+                  <q-skeleton width="2rem" v-else />
+                </q-banner>
+              </div>
+              <q-separator color="grey-5" />
+              <!-- Image/Caroussel -->
+              <q-carousel
+                animated
+                v-model="post.scrollIndex"
+                arrows
+                navigation
+                infinite
+                v-if="postsFollowingStatus"
+                style="height: 30rem"
+              >
+                <q-carousel-slide
+                  v-for="(image, index) in post.imagesUploaded"
+                  :key="index"
+                  :name="index"
+                  :img-src="image"
+                />
+              </q-carousel>
+              <q-skeleton height="21rem" v-else />
+              <q-separator color="grey-5" />
+              <!-- Like and Comment -->
+              <div class="q-my-sm">
+                <q-btn
+                  dense
+                  round
+                  flat
+                  @click="unlikePost(post.idPost, post.userInfo.userId)"
+                  v-if="
+                    post.likes &&
+                    actualUserInformation.userInformation.id in post.likes
+                  "
+                  icon="favorite"
+                  color="red"
+                />
+                <q-btn
+                  dense
+                  round
+                  flat
+                  v-else
+                  icon="favorite_border"
+                  @click="likePost(post.idPost, post.userInfo.userId)"
+                />
+                <q-btn dense round flat icon="far fa-comment" />
+              </div>
+              <!-- Likes -->
+              <div
+                class="q-mb-sm q-mx-sm text-weight-bold"
+                v-if="postsFollowingStatus"
+              >
+                <div v-if="post.likes">
+                  {{ Object.values(post.likes).length }} likes
+                </div>
+                <div v-else>0 likes</div>
+              </div>
+              <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
+              <!-- Description -->
+              <div class="q-mb-sm q-mx-sm" v-if="postsFollowingStatus">
+                <span
+                  class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: post.userInfo.userId,
+                      },
+                    })
+                  "
+                  >{{ post.userInfo.userName }}</span
+                >
+                {{ post.description }}
+              </div>
+              <q-skeleton width="300px" class="q-ml-sm" v-else />
+              <q-separator color="grey-4" class="q-mb-sm" />
+              <!-- Comments -->
+              <div
+                v-if="postsFollowingStatus"
+                class="q-mb-sm q-mx-sm"
+                style="max-height: 7rem; overflow: auto"
+              >
+                <div v-for="(message, index) in post.messages" :key="index">
+                  <span
+                    class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                    @click="
+                      this.$router.push({
+                        name: 'User',
+                        params: {
+                          userId: message.idUser,
+                        },
+                      })
+                    "
+                    >{{ message.userName }}</span
+                  >
+                  {{ message.message }}
+                </div>
+              </div>
+              <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
+              <q-separator color="grey-4" class="q-mb-sm" />
+              <!-- Create Comment -->
+              <div class="bg-white full-width q-px-sm">
+                <q-input
+                  color="grey-6"
+                  v-model="textMessage"
+                  label="Add a comment ..."
+                  autofocus
+                  autocomplete="off"
+                  borderless
+                >
+                  <template v-slot:append>
+                    <q-btn
+                      label="POST"
+                      dense
+                      flat
+                      color="primary"
+                      @click="sendText(post.userInfo.userId, post.idPost)"
+                      :disable="textMessage.length <= 0"
+                    />
+                  </template>
+                </q-input>
+              </div>
+              <!-- Date -->
+              <div
+                class="q-mx-sm text-grey text-overline"
+                v-if="postsFollowingStatus"
+              >
+                {{ post.dateOfPost }}
+              </div>
+            </div>
           </div>
-          <div v-else>0 likes</div>
-        </div>
-        <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
-        <!-- Description -->
-        <div class="q-mb-sm q-mx-sm" v-if="prueba">
-          <span class="text-weight-bold">{{ post.userInfo.name }}</span>
-          {{ post.description }}
-        </div>
-        <q-skeleton width="300px" class="q-ml-sm" v-else />
-        <!-- Comments -->
-        <div v-if="prueba">
-          <div v-for="(message, index) in post.messages" :key="index">
-            <span>{{ message.userName }}</span> {{ message.message }}
+          <!-- Skeleton -->
+          <div v-else>
+            <div
+              class="cardBase shadow-2 q-mb-xl q-pb-md"
+              v-for="(skeleton, index) in skeletonTimes"
+              :key="index"
+            >
+              <!-- Header -->
+              <div>
+                <q-banner rounded class="bg-white">
+                  <template v-slot:avatar>
+                    <q-skeleton type="circle" size="50px" />
+                  </template>
+
+                  <q-skeleton width="150px" />
+                </q-banner>
+              </div>
+              <q-separator color="grey-5" />
+              <!-- Image/Caroussel -->
+
+              <q-skeleton height="21rem" />
+              <q-separator color="grey-5" />
+              <!-- Like and Comment -->
+              <div class="q-my-sm">
+                <q-btn dense round flat icon="favorite_border" />
+                <q-btn dense round flat icon="far fa-comment" />
+              </div>
+              <!-- Likes -->
+
+              <q-skeleton width="150px" class="q-ml-sm q-mb-md" />
+              <!-- Description -->
+
+              <q-skeleton width="300px" class="q-ml-sm" />
+              <!-- Comments -->
+
+              <q-skeleton width="190px" class="q-ml-sm q-mt-md" />
+            </div>
           </div>
-        </div>
-        <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
-        <!-- Create Comment -->
-        <div class="bg-white full-width q-px-sm">
-          <q-input
-            color="grey-6"
-            v-model="textMessage"
-            label="Add a comment ..."
-            autofocus
-            autocomplete="off"
-            borderless
+          <!-- No activity -->
+          <div
+            class="full-width text-center text-grey-5"
+            v-if="!postsFollowingStatus || postsToShow.length === 0"
           >
-            <template v-slot:append>
-              <q-btn
-                label="POST"
-                dense
-                flat
-                color="primary"
-                @click="sendText(post.userInfo.userId, post.idPost)"
-                :disable="textMessage.length <= 0"
-              />
-            </template>
-          </q-input>
-        </div>
-        <!-- Date -->
-        <div class="q-mx-sm text-grey text-overline" v-if="prueba">
-          {{ post.dateOfPost }}
-        </div>
-      </div>
-    </div>
-    <!-- Skeleton -->
-    <div v-else>
-      <div
-        class="cardBase shadow-2 q-mb-xl q-pb-md"
-        v-for="(skeleton, index) in skeletonTimes"
-        :key="index"
-      >
-        <!-- Header -->
-        <div>
-          <q-banner rounded class="bg-white">
-            <template v-slot:avatar>
-              <q-skeleton type="circle" size="50px" />
-            </template>
+            <div class="text-center text-h4 q-mb-lg">
+              there is no current activity
+            </div>
+            <q-icon size="2rem" name="sentiment_dissatisfied" />
+          </div>
+        </q-tab-panel>
 
-            <q-skeleton width="150px" />
-          </q-banner>
-        </div>
-        <q-separator color="grey-5" />
-        <!-- Image/Caroussel -->
+        <!-- Explore -->
+        <q-tab-panel name="explore" class="bg-grey-2 no-padding no-margin">
+          <div v-if="postsFollowingStatus">
+            <div
+              class="cardBase bg-white q-mb-xl"
+              v-for="(post, index) in postsExplore"
+              :key="index"
+            >
+              <!-- Header -->
+              <div>
+                <q-banner rounded class="bg-white">
+                  <template v-slot:avatar>
+                    <q-avatar
+                      class="shadow-2"
+                      size="2rem"
+                      v-if="postsFollowingStatus"
+                    >
+                      <img :src="post.userInfo.userImg" />
+                    </q-avatar>
+                    <q-skeleton type="circle" size="20px" v-else />
+                  </template>
+                  <span
+                    class="text-weight-bold cursor-pointer"
+                    @click="
+                      this.$router.push({
+                        name: 'User',
+                        params: {
+                          userId: post.userInfo.userId,
+                        },
+                      })
+                    "
+                    v-if="postsFollowingStatus"
+                    >{{ post.userInfo.userName }}</span
+                  >
+                  <q-skeleton width="150px" v-else />
+                </q-banner>
+              </div>
+              <q-separator color="grey-5" />
+              <!-- Image/Caroussel -->
+              <q-carousel
+                animated
+                v-model="post.scrollIndex"
+                arrows
+                navigation
+                infinite
+                v-if="postsFollowingStatus"
+                style="height: 30rem"
+              >
+                <q-carousel-slide
+                  v-for="(image, index) in post.imagesUploaded"
+                  :key="index"
+                  :name="index"
+                  :img-src="image"
+                />
+              </q-carousel>
+              <q-skeleton height="21rem" v-else />
+              <q-separator color="grey-5" />
+              <!-- Like and Comment -->
+              <div class="q-my-sm">
+                <q-btn
+                  dense
+                  round
+                  flat
+                  @click="unlikePost(post.idPost, post.userInfo.userId)"
+                  v-if="
+                    post.likes &&
+                    actualUserInformation.userInformation.id in post.likes
+                  "
+                  icon="favorite"
+                  color="red"
+                />
+                <q-btn
+                  dense
+                  round
+                  flat
+                  v-else
+                  icon="favorite_border"
+                  @click="likePost(post.idPost, post.userInfo.userId)"
+                />
+                <q-btn dense round flat icon="far fa-comment" />
+              </div>
+              <!-- Likes -->
+              <div
+                class="q-mb-sm q-mx-sm text-weight-bold"
+                v-if="postsFollowingStatus"
+              >
+                <div v-if="post.likes">
+                  {{ Object.values(post.likes).length }} likes
+                </div>
+                <div v-else>0 likes</div>
+              </div>
+              <q-skeleton width="150px" class="q-ml-sm q-mb-md" v-else />
+              <!-- Description -->
+              <div class="q-mb-sm q-mx-sm" v-if="postsFollowingStatus">
+                <span
+                  class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: post.userInfo.userId,
+                      },
+                    })
+                  "
+                  >{{ post.userInfo.userName }}</span
+                >
+                {{ post.description }}
+              </div>
+              <q-skeleton width="300px" class="q-ml-sm" v-else />
+              <q-separator color="grey-4" class="q-mb-sm" />
+              <!-- Comments -->
+              <div
+                v-if="postsFollowingStatus"
+                class="q-mb-sm q-mx-sm"
+                style="max-height: 7rem; overflow: auto"
+              >
+                <div v-for="(message, index) in post.messages" :key="index">
+                  <span
+                    class="text-blue-grey-10 text-weight-bold cursor-pointer"
+                    @click="
+                      this.$router.push({
+                        name: 'User',
+                        params: {
+                          userId: message.idUser,
+                        },
+                      })
+                    "
+                    >{{ message.userName }}</span
+                  >
+                  {{ message.message }}
+                </div>
+              </div>
+              <q-skeleton width="190px" class="q-ml-sm q-mt-md" v-else />
+              <q-separator color="grey-4" class="q-mb-sm" />
+              <!-- Create Comment -->
+              <div class="bg-white full-width q-px-sm">
+                <q-input
+                  color="grey-6"
+                  v-model="textMessage"
+                  label="Add a comment ..."
+                  autofocus
+                  autocomplete="off"
+                  borderless
+                >
+                  <template v-slot:append>
+                    <q-btn
+                      label="POST"
+                      dense
+                      flat
+                      color="primary"
+                      @click="sendText(post.userInfo.userId, post.idPost)"
+                      :disable="textMessage.length <= 0"
+                    />
+                  </template>
+                </q-input>
+              </div>
+              <!-- Date -->
+              <div
+                class="q-mx-sm text-grey text-overline"
+                v-if="postsFollowingStatus"
+              >
+                {{ post.dateOfPost }}
+              </div>
+            </div>
+          </div>
+          <!-- Skeleton -->
+          <div v-else>
+            <div
+              class="cardBase shadow-2 q-mb-xl q-pb-md"
+              v-for="(skeleton, index) in skeletonTimes"
+              :key="index"
+            >
+              <!-- Header -->
+              <div>
+                <q-banner rounded class="bg-white">
+                  <template v-slot:avatar>
+                    <q-skeleton type="circle" size="50px" />
+                  </template>
 
-        <q-skeleton height="21rem" />
-        <q-separator color="grey-5" />
-        <!-- Like and Comment -->
-        <div class="q-my-sm">
-          <q-btn dense round flat icon="favorite_border" />
-          <q-btn dense round flat icon="far fa-comment" />
-        </div>
-        <!-- Likes -->
+                  <q-skeleton width="150px" />
+                </q-banner>
+              </div>
+              <q-separator color="grey-5" />
+              <!-- Image/Caroussel -->
 
-        <q-skeleton width="150px" class="q-ml-sm q-mb-md" />
-        <!-- Description -->
+              <q-skeleton height="21rem" />
+              <q-separator color="grey-5" />
+              <!-- Like and Comment -->
+              <div class="q-my-sm">
+                <q-btn dense round flat icon="favorite_border" />
+                <q-btn dense round flat icon="far fa-comment" />
+              </div>
+              <!-- Likes -->
 
-        <q-skeleton width="300px" class="q-ml-sm" />
-        <!-- Comments -->
+              <q-skeleton width="150px" class="q-ml-sm q-mb-md" />
+              <!-- Description -->
 
-        <q-skeleton width="190px" class="q-ml-sm q-mt-md" />
-      </div>
+              <q-skeleton width="300px" class="q-ml-sm" />
+              <!-- Comments -->
+
+              <q-skeleton width="190px" class="q-ml-sm q-mt-md" />
+            </div>
+          </div>
+        </q-tab-panel>
+      </q-tab-panels>
     </div>
     <!-- New Side Desktop -->
-    <div style="width: 16rem">
+    <div class="desktopBaseNew" style="width: 16rem">
       <div class="q-pt-sm fixed">
         <!-- My Card -->
         <div class="row flex myCardBase items-center justify-between q-mb-lg">
@@ -317,21 +892,44 @@
             <!-- Img -->
             <q-avatar class="imgBase shadow-5">
               <img
-                v-if="allLoaded"
+                @click="
+                  this.$router.push({
+                    name: 'User',
+                    params: {
+                      userId: actualUserInformation.userInformation.id,
+                    },
+                  })
+                "
+                v-if="userInformationStatus"
                 :src="actualUserInformation.userInformation.img"
-                class="imageMyCard"
+                class="imageMyCard cursor-pointer"
               />
               <q-skeleton v-else type="circle" size="100%" />
             </q-avatar>
             <!-- Name -->
             <div class="q-pl-md">
               <!-- Username -->
-              <div class="text-weight-bold" v-if="allLoaded">
+              <div
+                class="text-weight-bold text-blue-grey-10 cursor-pointer"
+                @click="
+                  this.$router.push({
+                    name: 'User',
+                    params: {
+                      userId: actualUserInformation.userInformation.id,
+                    },
+                  })
+                "
+                v-if="userInformationStatus"
+              >
                 {{ actualUserInformation.userInformation.name }}
               </div>
               <q-skeleton v-else width="150px" />
               <!-- Name -->
-              <div class="text-grey" v-if="allLoaded">
+              <div
+                class="text-grey ellipsis"
+                v-if="userInformationStatus"
+                style="max-width: 7rem"
+              >
                 {{ actualUserInformation.userInformation.fullname }}
               </div>
               <q-skeleton v-else class="q-mt-sm" width="120px" />
@@ -344,12 +942,12 @@
             round
             flat
             dense
-            v-if="allLoaded"
+            v-if="userInformationStatus"
           />
         </div>
         <!-- Suggested users -->
         <p class="text-grey text-weight-medium">Suggestions for you</p>
-        <div class="col justify-between q-mb-lg" v-if="allLoaded">
+        <div class="col justify-between q-mb-lg" v-if="userInformationStatus">
           <!-- User -->
           <div
             class="row items-center q-mb-md justify-between"
@@ -358,16 +956,36 @@
           >
             <div class="row items-center">
               <!-- Img -->
-              <q-avatar class="shadow-2">
+              <q-avatar
+                class="shadow-2 cursor-pointer"
+                @click="
+                  this.$router.push({
+                    name: 'User',
+                    params: {
+                      userId: user.userInformation.id,
+                    },
+                  })
+                "
+              >
                 <img :src="user.userInformation.img" />
               </q-avatar>
 
               <!-- Username -->
               <div>
-                <div class="q-pl-md text-weight-medium">
+                <div
+                  class="q-pl-md text-weight-medium cursor-pointer"
+                  @click="
+                    this.$router.push({
+                      name: 'User',
+                      params: {
+                        userId: user.userInformation.id,
+                      },
+                    })
+                  "
+                >
                   {{ user.userInformation.name }}
                 </div>
-                <div class="q-pl-md text-grey">
+                <div class="q-pl-md text-grey ellipsis" style="max-width: 8rem">
                   {{ user.userInformation.fullname }}
                 </div>
               </div>
@@ -410,7 +1028,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
 import { mapGetters } from "vuex";
@@ -423,11 +1040,15 @@ export default {
       slide: 1,
       actualUserInformation: {},
       following: {},
-      allLoaded: false,
-      prueba: false,
+      userInformationStatus: false,
+      postsCurrentUserStatus: false,
+      suggestedUsersStatus: false,
+      postsFollowingStatus: false,
       postsToShow: [],
+      postsExplore: [],
       suggetionsUsers: [],
       textMessage: "",
+      tab: "feed",
     };
   },
   methods: {
@@ -500,6 +1121,7 @@ export default {
         });
     },
     likePost(idPost, idUser) {
+      console.log(idPost);
       // User ref
       const postRef = firebaseDb.ref(
         "toneygram/users/" +
@@ -542,6 +1164,25 @@ export default {
             });
         }
       });
+      this.postsExplore.forEach((Post) => {
+        if (Post.idPost === idPost) {
+          const postLikeActRef = firebaseDb
+            .ref(
+              "toneygram/users/" +
+                Post.userInfo.userId +
+                "/posts/" +
+                Post.idPost +
+                "/likes/"
+            )
+            .once("value", (like) => {
+              if (!Post.likes) {
+                Post.likes = like.val();
+              } else {
+                Post.likes = like.val();
+              }
+            });
+        }
+      });
     },
     unlikePost(idPost, idUser) {
       // User ref
@@ -566,6 +1207,22 @@ export default {
       postGlobalRef.remove();
 
       this.postsToShow.forEach((Post) => {
+        if (Post.idPost === idPost) {
+          const postLikeActRef = firebaseDb
+            .ref(
+              "toneygram/users/" +
+                Post.userInfo.userId +
+                "/posts/" +
+                Post.idPost +
+                "/likes/"
+            )
+            .once("value", (like) => {
+              Post.likes = like.val();
+            });
+        }
+      });
+
+      this.postsExplore.forEach((Post) => {
         if (Post.idPost === idPost) {
           const postLikeActRef = firebaseDb
             .ref(
@@ -635,6 +1292,11 @@ export default {
                     post.messages = allMesagesArray;
                   }
                 });
+                this.postsExplore.forEach((post) => {
+                  if (post.idPost === Post.key) {
+                    post.messages = allMesagesArray;
+                  }
+                });
                 this.textMessage = "";
               });
           }
@@ -687,14 +1349,19 @@ export default {
           }
         });
     },
+    goToTop() {
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+      }, 50);
+    },
   },
   computed: {
     ...mapGetters("settingsUser", ["getUserId"]),
   },
   mounted() {
     setTimeout(() => {
+      /*-------------- Read Info Actual User Page  ---------------- */
       const userId = firebaseAuth.currentUser.uid;
-      // Read Info Actual User Page
       let currentUserInformationRef = firebaseDb.ref(
         "toneygram/users/" + userId
       );
@@ -705,15 +1372,13 @@ export default {
           this.actualUserInformation = userInformation;
         })
         .then(() => {
-          this.allLoaded = true;
-          this.prueba = true;
+          this.userInformationStatus = true;
         })
         .catch(() => {
-          this.allLoaded = false;
+          this.userInformationStatus = false;
         });
 
       /*  ------------- Read Posts From Followings  ------------- */
-
       let postsRef = firebaseDb.ref("toneygram/posts/");
       let currentUserAllInfo = firebaseDb.ref(
         "toneygram/users/" + firebaseAuth.currentUser.uid
@@ -723,8 +1388,9 @@ export default {
       );
       currentUserAllInfo.once("value", (allUserInfo) => {
         let allUserInfoVar = allUserInfo.val();
-        // If user has following
+        //  ----------------------------------------- If user has following ------------------------------------------ //
         if (allUserInfoVar.following) {
+          // Loop though the following users
           followingCurrentUserPosts.once("value", (UsersFromFollowing) => {
             let usersFromFollowingVar = UsersFromFollowing.val();
             postsRef.once("child_added", (users) => {
@@ -740,42 +1406,94 @@ export default {
               }
             });
           });
-          //If user doesn't have any following
+          // Loop through the no following users
+          postsRef
+            .once("value", (allUsers) => {
+              // First we loop on the all users section
+              let allUsersVar = allUsers.val();
+              let allUsersVarArray = Object.values(allUsersVar);
+              let arrayUsers = [];
+
+              // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
+              do {
+                for (let index = 0; index <= 5; index++) {
+                  let user =
+                    allUsersVarArray[
+                      Math.floor(Math.random() * allUsersVarArray.length)
+                    ];
+                  arrayUsers.push(user);
+                  arrayUsers.length = 5;
+                }
+                arrayUsers = arrayUsers.filter(function (item, pos) {
+                  return arrayUsers.indexOf(item) == pos;
+                });
+              } while (arrayUsers.length < 5);
+              // We loop every user that is in the array in order to get 1 post of each one of them
+              let randomNumber = Math.floor(Math.random() * arrayUsers.length);
+              arrayUsers.forEach((User) => {
+                // For every user we must have one post
+                if (Object.values(User).length > 1) {
+                  this.postsExplore.push(Object.values(User)[randomNumber]);
+                } else {
+                  this.postsExplore.push(Object.values(User)[0]);
+                }
+              });
+            })
+            .then(() => {
+              this.postsFollowingStatus = true;
+            })
+            .catch(() => {
+              this.postsFollowingStatus = false;
+            });
+          if (this.postsToShow.length === 0) {
+            this.tab = "explore";
+          }
+          // ----------------------------------------- If user doesn't have any following ------------------------------------- //
         } else {
           // Loop on the posts section
-          postsRef.once("value", (allUsers) => {
-            // First we loop on the all users section
-            let allUsersVar = allUsers.val();
-            let allUsersVarArray = Object.values(allUsersVar);
-            let arrayUsers = [];
+          postsRef
+            .once("value", (allUsers) => {
+              // First we loop on the all users section
+              let allUsersVar = allUsers.val();
+              let allUsersVarArray = Object.values(allUsersVar);
+              let arrayUsers = [];
 
-            // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
-            do {
-              for (let index = 0; index <= 5; index++) {
-                let user =
-                  allUsersVarArray[
-                    Math.floor(Math.random() * allUsersVarArray.length)
-                  ];
-                arrayUsers.push(user);
-                arrayUsers.length = 5;
-              }
-              arrayUsers = arrayUsers.filter(function (item, pos) {
-                return arrayUsers.indexOf(item) == pos;
+              // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
+              do {
+                for (let index = 0; index <= 5; index++) {
+                  let user =
+                    allUsersVarArray[
+                      Math.floor(Math.random() * allUsersVarArray.length)
+                    ];
+                  arrayUsers.push(user);
+                  arrayUsers.length = 5;
+                }
+                arrayUsers = arrayUsers.filter(function (item, pos) {
+                  return arrayUsers.indexOf(item) == pos;
+                });
+              } while (arrayUsers.length < 5);
+              // We loop every user that is in the array in order to get 1 post of each one of them
+              let lastIndexOfArray = Math.floor(
+                Math.random() * arrayUsers.length
+              );
+              arrayUsers.forEach((User) => {
+                // For every user we must have one post
+                if (Object.values(User).length > 1) {
+                  this.postsExplore.push(Object.values(User)[lastIndexOfArray]);
+                } else {
+                  this.postsExplore.push(Object.values(User)[0]);
+                }
               });
-            } while (arrayUsers.length < 5);
-            // We loop every user that is in the array in order to get 1 post of each one of them
-            let lastIndexOfArray = Math.floor(
-              Math.random() * arrayUsers.length
-            );
-            arrayUsers.forEach((User) => {
-              // For every user we must have one post
-              if (Object.values(User).length > 1) {
-                this.postsToShow.push(Object.values(User)[lastIndexOfArray]);
-              } else {
-                this.postsToShow.push(Object.values(User)[0]);
-              }
+            })
+            .then(() => {
+              this.postsFollowingStatus = true;
+            })
+            .catch(() => {
+              this.postsFollowingStatus = false;
             });
-          });
+          if (this.postsToShow.length === 0) {
+            this.tab = "explore";
+          }
         }
       });
 
@@ -791,7 +1509,8 @@ export default {
         });
       });
 
-      /*  ------------- Suggestion Users  ------------- */
+      this.postsCurrentUserStatus = true;
+      /*  ------------- Suggested Users  ------------- */
       const allUsers = firebaseDb.ref("toneygram/users");
       allUsers.once("value", (allUsers) => {
         let allUsersVar = allUsers.val();
@@ -799,35 +1518,50 @@ export default {
         const actualUserInfo = firebaseDb.ref(
           "toneygram/users/" + firebaseAuth.currentUser.uid
         );
-        actualUserInfo.once("value", (userInfoActual) => {
-          let actualUserInfo = userInfoActual.val();
-          // If doesnt has any following
-          if (!actualUserInfo.following) {
-            Object.values(allUsersVar).forEach((User) => {
-              if (User.userInformation.id !== firebaseAuth.currentUser.uid) {
-                this.suggetionsUsers.push(User);
-              }
-            });
-          }
-          // If the user follows any user
-          else {
-            for (const user in allUsersVar) {
-              if (
-                !(user in actualUserInfo.following) &&
-                user !== firebaseAuth.currentUser.uid
-              ) {
-                this.suggetionsUsers.push(allUsersVar[user]);
+        actualUserInfo
+          .once("value", (userInfoActual) => {
+            let actualUserInfo = userInfoActual.val();
+            // If doesnt has any following
+            if (!actualUserInfo.following) {
+              Object.values(allUsersVar).forEach((User) => {
+                if (User.userInformation.id !== firebaseAuth.currentUser.uid) {
+                  this.suggetionsUsers.push(User);
+                  if (this.suggetionsUsers.length > 5) {
+                    this.suggetionsUsers.splice(5, this.suggetionsUsers.length);
+                  }
+                }
+              });
+            }
+            // If the user follows any user
+            else {
+              for (const user in allUsersVar) {
+                if (
+                  !(user in actualUserInfo.following) &&
+                  user !== firebaseAuth.currentUser.uid
+                ) {
+                  this.suggetionsUsers.push(allUsersVar[user]);
+                  if (this.suggetionsUsers.length > 5) {
+                    this.suggetionsUsers.splice(5, this.suggetionsUsers.length);
+                  }
+                }
               }
             }
-          }
-        });
+          })
+          .then(() => {
+            this.suggestedUsersStatus = true;
+            window.scrollTo(0, 0);
+          })
+          .catch(() => {
+            this.suggestedUsersStatus = false;
+            window.scrollTo(0, 0);
+          });
       });
     }, 1000);
   },
 };
 </script>
 <style lang="scss">
-//iPhone
+// iPhone
 @media (max-width: 480px) {
   .cardBase {
     width: 100%;
@@ -838,11 +1572,9 @@ export default {
   .desktopBase {
     display: none;
   }
-  .desktopBaseNew {
-    display: none;
-  }
 }
-//Tablet
+
+// Tablet
 @media (min-width: 480px) {
   .cardBase {
     width: 100%;
@@ -853,18 +1585,16 @@ export default {
   .desktopBase {
     display: none;
   }
-  .desktopBaseNew {
-    display: none;
-  }
 }
-//Desktop
+
+// Desktop
 @media (min-width: 768px) {
   .cardBase {
-    width: 40rem;
+    width: 100%;
+    border: 1px solid lightgrey;
   }
   .homeBase {
     align-items: start;
-    padding: 2rem;
   }
   .mobileBase {
     display: none;
@@ -876,22 +1606,24 @@ export default {
     display: none;
   }
 }
-//Desktop New One
-@media (min-width: 980px) {
+
+// Desktop New Base
+@media (min-width: 1010px) {
   .cardBase {
-    width: 40rem;
+    width: 100%;
+    border: 1px solid lightgrey;
   }
   .homeBase {
     align-items: start;
-    padding: 2rem;
   }
   .mobileBase {
     display: none;
   }
   .desktopBase {
-    display: none;
+    display: flex;
   }
   .desktopBaseNew {
+    padding-top: 0.5rem;
     display: flex;
   }
 }
