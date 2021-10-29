@@ -30,14 +30,18 @@
             @click="sendUserToDM"
           />
           <!-- Likes Button -->
-          <q-btn
+
+          <q-btn-dropdown
+            rounded
             class="buttonFooter"
-            round
+            color="black"
             dense
             flat
-            color="black"
-            icon="favorite_border"
-          />
+            no-icon-animation
+            dropdown-icon="favorite_border"
+          >
+            <div class="q-pa-sm"></div>
+          </q-btn-dropdown>
           <!-- Search button -->
           <q-btn
             dense
@@ -72,18 +76,8 @@
         active-bg-color="cyan-2"
         class="bg-white full-width text-grey-5 shadow-2"
       >
-        <q-tab
-          alert="red"
-          name="home"
-          icon="apartment"
-          @click="sendUserToHome"
-        />
-        <q-tab
-          alert="red"
-          name="search"
-          icon="search"
-          @click="sendUserToSearch"
-        />
+        <q-tab name="home" icon="apartment" @click="sendUserToHome" />
+        <q-tab name="search" icon="search" @click="sendUserToSearch" />
 
         <q-tab
           alert="red"
@@ -91,13 +85,13 @@
           icon="favorite_border"
           @click="sendUserToLikes"
         />
-        <q-tab alert="red" name="user" icon="face" @click="sendToUserPage" />
+        <q-tab name="user" icon="face" @click="sendToUserPage" />
       </q-tabs>
     </q-footer>
   </q-layout>
 </template>
 <script>
-import { firebaseAuth } from "src/boot/firebase";
+import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 import { mapState } from "vuex";
 export default {
   data() {
@@ -141,9 +135,6 @@ export default {
         name: "Likes",
       });
     },
-  },
-  computed: {
-    ...mapState("settingsUser", ["currentUserPhoto"]),
   },
   mounted() {
     setTimeout(() => {

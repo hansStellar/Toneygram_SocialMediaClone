@@ -2,7 +2,7 @@
   <div class="flex column authBase q-py-xl">
     <div class="text-h3 text-center q-mb-md text-weight-light">toneygram</div>
     <!-- Form Base -->
-    <div class="formBase q-mb-sm">
+    <div class="formBase q-mb-sm bg-grey-2">
       <!-- Tabs -->
       <q-tabs
         v-model="tab"
@@ -20,11 +20,11 @@
         animated
         transition-prev="fade"
         transition-next="fade"
-        class="text-white text-center"
+        class="text-white text-center bg-grey-2"
       >
         <!-- Login -->
         <q-tab-panel name="login" class="q-py-none q-pb-md">
-          <q-form style="overflow: hidden">
+          <q-form style="overflow: hidden" @reset="onReset">
             <q-input
               color="grey-3"
               autofocus
@@ -55,107 +55,25 @@
             <q-btn
               label="Log In"
               type="submit"
-              color="green-3"
+              :color="
+                !validateEmail(login.email) || login.password.length <= 5
+                  ? 'light-blue-3'
+                  : 'light-blue-6'
+              "
               class="full-width"
               text-color="white"
               @keyup.enter.prevent="logInUser"
               @click="logInUser"
               ref="logInButton"
-              :disable="loginButtonActive"
+              :disable="
+                !validateEmail(login.email) || login.password.length <= 5
+              "
             />
           </q-form>
         </q-tab-panel>
         <!-- Register -->
         <q-tab-panel name="register" class="q-py-none q-pb-md">
-          <q-form>
-            <!-- username -->
-            <q-input
-              color="grey-3"
-              autofocus
-              label-color="grey-5"
-              dense
-              autocapitalize="none"
-              lazy-rules
-              type="text"
-              v-model="register.username"
-              :rules="[
-                (val) =>
-                  val.length >= 3 ||
-                  'Your username has to be longer than 3 characters',
-              ]"
-              label="Username"
-            />
-            <!-- full name -->
-            <q-input
-              color="grey-3"
-              label-color="grey-5"
-              dense
-              autocapitalize="none"
-              lazy-rules
-              type="text"
-              v-model="register.fullName"
-              :rules="[
-                (val) =>
-                  val.length >= 3 ||
-                  'Your name has to be longer than 3 characters',
-              ]"
-              label="Full name"
-            >
-            </q-input>
-            <!-- email -->
-            <q-input
-              color="grey-3"
-              label-color="grey-5"
-              lazy-rules
-              dense
-              type="email"
-              v-model="register.email"
-              :rules="[
-                (val) => validateEmail(val) || 'Please insert a valid email',
-              ]"
-              label="Email"
-            >
-            </q-input>
-            <!-- password -->
-            <q-input
-              color="grey-3"
-              label-color="grey-5"
-              lazy-rules
-              dense
-              type="password"
-              v-model="register.password"
-              :rules="[
-                (val) =>
-                  val.length >= 6 || 'Please enter more than 6 characters',
-              ]"
-              label="Password"
-            >
-            </q-input>
-            <!-- confirm -->
-            <q-input
-              color="grey-3"
-              label-color="grey-5"
-              lazy-rules
-              dense
-              type="password"
-              v-model="register.confirmPassword"
-              :rules="[
-                (val) =>
-                  val.length >= 6 || 'Please enter more than 6 characters',
-              ]"
-              label="Confirm password"
-            >
-            </q-input>
-            <q-btn
-              label="Register"
-              color="green-3"
-              :disable="registerButtonActive"
-              type="submit"
-              class="col full-width"
-              @keyup.enter.prevent="registerUser"
-              @click="registerUser"
-            />
-          </q-form>
+          <RegisterSteps :showing="visible" />
         </q-tab-panel>
       </q-tab-panels>
       <!-- OR -->
@@ -171,7 +89,7 @@
       <div class="q-pa-md">
         <q-btn
           label="Use your Google Account"
-          color="red-3"
+          color="light-blue-6"
           type="submit"
           class="col full-width"
         />
@@ -192,9 +110,13 @@
 </template>
 
 <script>
+import RegisterSteps from "./../components/Register.vue";
 import { Notify } from "quasar";
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 export default {
+  components: {
+    RegisterSteps,
+  },
   data() {
     return {
       visible: false,
@@ -203,97 +125,33 @@ export default {
         email: "",
         password: "",
       },
-      register: {
-        username: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        fullName: "",
-      },
-      loginButtonActive: false,
-      registerButtonActive: false,
     };
   },
   methods: {
+    onReset() {
+      this.login.email = "";
+      this.login.password = "";
+    },
     validateEmail(email) {
       const re =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
       return re.test(String(email).toLowerCase());
     },
-    registerUser() {
-      if (this.register.password === this.register.confirmPassword) {
-        this.registerButtonActive = true;
-        this.visible = true;
-        firebaseAuth
-          .createUserWithEmailAndPassword(
-            this.register.email,
-            this.register.password
-          )
-          .then((registeredUser) => {
-            this.visible = false;
-            // Setting the user in the Database
-            const actualUserId = firebaseAuth.currentUser.uid;
-            const usersRef = firebaseDb.ref(
-              "toneygram/users/" + actualUserId + "/userInformation"
-            );
-            registeredUser.user
-              .updateProfile({
-                displayName: this.register.username.toLowerCase(),
-                photoURL: "https://i.ibb.co/hyqwWJD/default.png",
-              })
-              .then(() => {
-                usersRef.set({
-                  img: registeredUser.user.photoURL,
-                  name: registeredUser.user.displayName.toLowerCase(),
-                  id: registeredUser.user.uid,
-                  fullname: this.register.fullName,
-                });
-              });
-
-            setTimeout(() => {
-              // Notification
-              Notify.create({
-                avatar: firebaseAuth.currentUser.photoURL,
-                message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
-                color: "positive",
-              });
-              this.$router.push({ name: "Home" });
-            }, 1000);
-          })
-          .catch((error) => {
-            this.registerButtonActive = false;
-            this.visible = false;
-            Notify.create({
-              message: error.message,
-              color: "negative",
-            });
-          });
-      } else if (this.register.password !== this.register.confirmPassword) {
-        Notify.create({
-          message: "Passwords does not match",
-          color: "negative",
-        });
-      }
-    },
     logInUser() {
-      this.loginButtonActive = true;
       this.visible = true;
       firebaseAuth
         .signInWithEmailAndPassword(this.login.email, this.login.password)
         .then((userCredentials) => {
-          this.visible = false;
-
-          setTimeout(() => {
-            this.$router.push({ name: "Home" });
+          this.$router.push({ name: "Home" }).then(() => {
             Notify.create({
               avatar: userCredentials.user.photoURL,
               message: `Welcome, ${userCredentials.user.displayName}`,
               color: "positive",
             });
-          }, 1000);
+            this.visible = false;
+          });
         })
         .catch((error) => {
-          this.loginButtonActive = false;
           this.visible = false;
           Notify.create({
             message: error.message,
@@ -345,6 +203,8 @@ export default {
 @media (min-width: 768px) {
   .authBase {
     align-items: center;
+    max-width: 480px;
+    margin: auto;
   }
   .imgLogoBase {
     width: 10rem;
@@ -355,7 +215,7 @@ export default {
     height: 100%;
   }
   .formBase {
-    max-width: 280px;
+    width: 100%;
   }
 }
 </style>
