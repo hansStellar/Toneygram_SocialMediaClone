@@ -1,116 +1,156 @@
 <template>
-  <!-- iPhone & Tablet -->
-  <div class="items-center userPageBase showMobileUserPage">
+  <div class="items-center userPageBase">
+    <!-- Act Info -->
     <div class="absolute" style="opacity: 0">
       {{ getInfoUserPage }}
     </div>
-    <!-- My Card -->
-    <div
-      class="
-        row
-        flex
-        myCardBaseUser
-        items-center
-        justify-evenly
-        q-px-md q-pt-md
-      "
-    >
+    <!-- Top -->
+    <div class="myCardBaseUser">
       <!-- Img -->
-      <q-avatar
-        v-if="Object.values(userInfomation).length"
-        class="imgBaseUser shadow-5"
-      >
-        <img :src="userInfomation.img" class="imageMyCard" />
-      </q-avatar>
-      <q-skeleton type="circle" size="120px" v-else />
+      <div class="pictureBaseLeftSide">
+        <div v-if="Object.values(userInfomation).length" class="imgBaseUser">
+          <q-img
+            :ratio="16 / 9"
+            :src="userInfomation.img"
+            class="imageMyCardProfile"
+          />
+        </div>
+        <!-- Skeleton -->
+        <q-skeleton v-else type="circle" size="150px" />
+      </div>
       <!-- Info Upper -->
-      <div class="column">
+      <div class="infoUpper">
         <!-- Username -->
-        <div class="userNameUpperBase items-center">
+        <div class="userNameUpperBase">
+          <!-- Info -->
           <div
-            class="text-weight-light q-mb-sm text-h5 usernameDesktop ellipsis"
-            v-if="userInfomation.name"
+            v-if="Object.values(userInfomation).length"
+            class="nameAndSettingsPart"
           >
-            {{ userInfomation.name }}
+            <!-- Name -->
+            <div class="text-weight-light text-h5 usernameDesktop">
+              {{ userInfomation.name }}
+            </div>
+            <!-- Edit profile -->
+            <q-btn
+              v-if="currentUserInfoData.id === userInfomation.id"
+              class="showButtonDesktopSettings"
+              dense
+              color="black"
+              flat
+              icon-right="settings"
+              style="
+                min-width: 9rem;
+                max-height: 2rem;
+                border: solid 1px lightgray;
+              "
+              size=".8rem"
+              no-caps
+            >
+              Edit Profile&nbsp;
+            </q-btn>
+            <!-- Follow -->
             <q-btn
               v-if="
-                currentUserId in followers &&
-                userInfomation.id !== currentUserId
+                !(currentUserInfoData.id in followers) &&
+                userInfomation.id !== currentUserInfoData.id
+              "
+              no-caps
+              color="light-blue"
+              class="q-px-md no-shadow"
+              style="height: 0.5rem; width: 6rem"
+              text-color="white"
+              dense
+              @click="followUser"
+            >
+              Follow
+            </q-btn>
+            <!-- Remove Follower -->
+            <q-btn
+              v-if="
+                currentUserInfoData.id in followers &&
+                userInfomation.id !== currentUserInfoData.id
               "
               flat
-              round
               icon="person_remove_alt_1"
-              color="negative"
-              class=""
+              color="black"
               dense
+              style="width: 4rem; border: solid 1px lightgray"
+              class="q-mr-md"
               @click="unfollowUser"
             />
+            <!-- Message -->
+            <q-btn
+              no-caps
+              v-if="
+                currentUserInfoData.id in followers &&
+                userInfomation.id !== currentUserInfoData.id
+              "
+              outline
+              color="black"
+              class="q-px-md"
+              style="width: 7rem; border: solid 1px lightgray"
+              text-color="black"
+              flat
+              dense
+            >
+              Message
+            </q-btn>
           </div>
-          <q-skeleton width="150px" v-else class="q-mb-sm" />
-          <q-btn
-            class="full-width showButtonMobile"
-            dense
-            outline
-            color="grey-6"
-            no-caps
-            v-if="currentUserId === userInfomation.id"
-          >
-            Edit Profile
-          </q-btn>
-          <q-btn
-            no-caps
-            color="light-blue"
-            class="q-px-md"
-            style="height: 1rem; width: 100%"
-            text-color="white"
-            dense
-            @click="followUser"
-            v-if="
-              !(currentUserId in followers) &&
-              userInfomation.id !== currentUserId
-            "
-          >
-            Follow
-          </q-btn>
-
-          <q-btn
-            no-caps
-            v-if="
-              currentUserId in followers && userInfomation.id !== currentUserId
-            "
-            outline
-            color="black"
-            class="q-px-md"
-            style="height: 1rem; width: 100%"
-            text-color="black"
-            dense
-          >
-            Message
-          </q-btn>
+          <!-- Skeleton -->
+          <q-skeleton width="180px" height="2rem" v-else />
+        </div>
+        <!-- Followers, following and posts -->
+        <div class="row q-py-md text-center upperFFP">
+          <div v-if="Object.values(userInfomation).length" class="row">
+            <!-- Post -->
+            <div class="row">
+              <div class="text-weight-medium q-mr-sm">
+                {{ Object.values(posts).length }}
+              </div>
+              <div class="text-black text-weight-light">posts</div>
+            </div>
+            <!-- Following -->
+            <div class="row q-mx-lg">
+              <div class="text-weight-medium q-mr-sm">
+                {{ Object.values(following).length }}
+              </div>
+              <div class="text-black text-weight-light">following</div>
+            </div>
+            <!-- Followers -->
+            <div class="row">
+              <div class="text-weight-medium q-mr-sm">
+                {{ Object.values(followers).length }}
+              </div>
+              <div class="text-black text-weight-light">followers</div>
+            </div>
+          </div>
+          <!-- Skeleton -->
+          <q-skeleton width="250px" height="2rem" v-else />
+        </div>
+        <!-- Resume -->
+        <div class="resumeBaseUpper">
+          <div v-if="Object.values(userInfomation).length">
+            <!-- Name -->
+            <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
+            <!-- Description -->
+            <div v-if="userInfomation.description">
+              {{ userInfomation.description }}
+            </div>
+            <!-- Pagina web -->
+            <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
+          </div>
+          <!-- Skeleton -->
+          <q-skeleton width="150px" v-else />
         </div>
       </div>
     </div>
-    <!-- Resume -->
-    <div class="q-pa-md resumeBase">
-      <!-- Name -->
-      <div class="text-weight-medium upperName" v-if="userInfomation.fullname">
-        {{ userInfomation.fullname }}
-      </div>
-      <q-skeleton width="150px" v-else />
-      <!-- Description -->
-      <div class="upperDescription" v-if="userInfomation.description">
-        {{ userInfomation.description }}
-      </div>
-
-      <!-- Pagina web -->
-      <div class="upperWeb" v-if="userInfomation.url">
-        {{ userInfomation.url }}
-      </div>
-    </div>
+    <!-- Bar Desktop -->
+    <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
     <!-- Post, following and followers -->
-    <div class="followersPostBase">
+    <div class="ffpBase">
       <q-separator color="grey-4" size="1px" />
-      <div class="followersPost q-py-sm">
+      <div class="ffp q-py-sm">
         <!-- Post -->
         <div v-if="userInfomation.id">
           <div class="text-weight-medium">
@@ -138,188 +178,26 @@
       </div>
       <q-separator color="grey-4" size="1px" />
     </div>
-    <!-- Bar Desktop -->
-    <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
     <!-- Images -->
     <div class="postsBase" v-if="userInfomation.id">
       <div
-        class="cursor-pointer imgPost shadow-2"
-        v-for="(post, index) in posts"
-        :key="index"
-        :style="{ 'background-image': 'url(' + post.imagesUploaded[0] + ')' }"
-        @click="goToPost(index, post.userInfo.userId)"
-      />
-    </div>
-    <div class="postsBase" style="height: 30rem" v-else>
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-    </div>
-  </div>
-  <!-- Desktop -->
-  <div class="items-center userPageBase showDesktopUserPage">
-    <div class="absolute" style="opacity: 0">
-      {{ getInfoUserPage }}
-      {{ getFollowersAndFollowing }}
-    </div>
-    <!-- My Card -->
-    <div class="myCardBaseUser q-px-md q-pt-md">
-      <!-- Img -->
-      <div>
-        <q-avatar
-          v-if="Object.values(userInfomation).length"
-          class="imgBaseUser shadow-5"
-        >
-          <img :src="userInfomation.img" class="imageMyCard" />
-        </q-avatar>
-        <q-skeleton v-else type="circle" size="150px" />
-      </div>
-      <!-- Info Upper -->
-      <div class="column">
-        <!-- Username -->
-        <div class="userNameUpperBase items-center" style="min-width: 22rem">
-          <!-- Info -->
-          <div
-            v-if="Object.values(userInfomation).length"
-            class="row items-center"
-          >
-            <div class="text-weight-thin text-h5 usernameDesktop ellipsis">
-              {{ userInfomation.name }}
-            </div>
-            <q-btn
-              v-if="currentUserId === userInfomation.id"
-              class="full-width showButtonDesktop"
-              dense
-              color="black"
-              flat
-              icon="settings"
-              style="max-height: 2rem; max-width: 1.5rem"
-            />
-            <q-btn
-              v-if="
-                !(currentUserId in followers) &&
-                userInfomation.id !== currentUserId
-              "
-              no-caps
-              color="light-blue"
-              class="q-px-md"
-              style="height: 1rem"
-              text-color="white"
-              dense
-              @click="followUser"
-            >
-              Follow
-            </q-btn>
-            <q-btn
-              v-if="
-                currentUserId in followers &&
-                userInfomation.id !== currentUserId
-              "
-              flat
-              round
-              icon="person_remove_alt_1"
-              color="negative"
-              dense
-              class="q-mr-md"
-              @click="unfollowUser"
-            />
-            <q-btn
-              no-caps
-              v-if="
-                currentUserId in followers &&
-                userInfomation.id !== currentUserId
-              "
-              outline
-              color="black"
-              class="q-px-md"
-              style="height: 1rem; width: 4rem"
-              text-color="black"
-              dense
-            >
-              Message
-            </q-btn>
-          </div>
-          <!-- Skeleton -->
-          <q-skeleton width="180px" height="2rem" v-else />
-        </div>
-        <!-- Followers, following and posts -->
-        <div class="row q-py-md text-center followers">
-          <div v-if="Object.values(userInfomation).length" class="row">
-            <!-- Post -->
-            <div class="row q-mr-md">
-              <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(posts).length }}
-              </div>
-              <div class="text-black text-weight-light">posts</div>
-            </div>
-            <!-- Following -->
-            <div class="row q-mr-md">
-              <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(following).length }}
-              </div>
-              <div class="text-black text-weight-light">following</div>
-            </div>
-            <!-- Followers -->
-            <div class="row">
-              <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(followers).length }}
-              </div>
-              <div class="text-black text-weight-light">followers</div>
-            </div>
-          </div>
-          <!-- Skeleton -->
-          <q-skeleton width="250px" height="2rem" v-else />
-        </div>
-        <!-- Resume -->
-        <div class="resumeBaseUpper">
-          <div v-if="Object.values(userInfomation).length">
-            <!-- Name -->
-            <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
-            <!-- Description -->
-            <div style="max-width: 20rem" v-if="userInfomation.description">
-              {{ userInfomation.description }}
-            </div>
-            <!-- Pagina web -->
-            <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
-          </div>
-          <!-- Skeleton -->
-          <q-skeleton width="150px" v-else />
-        </div>
-      </div>
-    </div>
-    <!-- Bar Desktop -->
-    <q-separator size="1px" color="grey-4" class="q-mt-lg barOnlyDesktop" />
-    <!-- Images -->
-    <div class="postsBase" v-if="userInfomation.id">
-      <div
-        class="cursor-pointer imgPost shadow-2"
+        class="cursor-pointer imgPost"
         v-for="(post, index) in posts"
         :key="index"
         @click="goToPost(index, post.userInfo.userId)"
       >
-        <img style="height: 100%; width: 100%" :src="post.imagesUploaded[0]" />
+        <q-img :ratio="1" class="no-shadow" :src="post.imagesUploaded[0]" />
       </div>
     </div>
-    <div class="postsBase" style="height: 50rem" v-else>
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
-      <q-skeleton width="100%" height="100%" />
+    <div class="postsBase" v-else>
+      <q-img :ratio="1" v-for="times in 10" :key="times">
+        <q-skeleton width="100%" height="100%" />
+      </q-img>
     </div>
   </div>
 </template>
 <script>
-import { uid } from "quasar";
-import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
+import { firebaseDb } from "src/boot/firebase";
 import { mapState } from "vuex";
 export default {
   data() {
@@ -328,6 +206,7 @@ export default {
       posts: [],
       followers: {},
       following: {},
+      timesShow: 9,
     };
   },
   methods: {
@@ -339,7 +218,7 @@ export default {
     },
     followUser() {
       let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = firebaseAuth.currentUser.uid;
+      let currentUserId = this.currentUserInfoData.id;
       // Following Steps
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + currentUserIdPage
@@ -368,14 +247,14 @@ export default {
       // Read from firebase database User Actual Page (Followers)
       const followerActRef = firebaseDb
         .ref("toneygram/users/" + currentUserIdPage + "/followers/")
-        .once("child_added", (newFollower) => {
+        .on("child_added", (newFollower) => {
           let follower = newFollower.val();
           this.followers[newFollower.key] = follower;
         });
     },
     unfollowUser() {
       let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = this.currentUserId;
+      let currentUserId = this.currentUserInfoData.id;
       // Following Steps
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + currentUserIdPage + "/userInformation/"
@@ -408,73 +287,57 @@ export default {
           delete this.followers[newFollower.key];
         });
     },
-    likePost() {
-      let userId = this.$route.params.userId;
-      let postId = this.$route.params.postId;
-      const postRef = firebaseDb.ref(
-        "toneygram/users/" +
-          userId +
-          "/posts/" +
-          postId +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postRef.set(firebaseAuth.currentUser.uid);
-
-      // Read from firebase database
-      const postLikeActRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes/")
-        .once("child_added", (like) => {
-          this.likeUsers.push(like.val());
-        });
-    },
   },
   created() {
     let currentUserId = this.$route.params.userId;
+
     // Read Post User Page
     let currentUserInformationRef = firebaseDb.ref(
       "toneygram/users/" + currentUserId
     );
-    currentUserInformationRef.once("value", (userInPage) => {
-      let userInformation = userInPage.val();
-      // User information
-      this.userInfomation = {
-        id: userInformation.userInformation.id,
-        img: userInformation.userInformation.img,
-        name: userInformation.userInformation.name,
-        fullname: userInformation.userInformation.fullname,
-      };
-      // User pictures
-      if (!userInformation.posts) {
-        this.posts = [];
-      } else {
-        this.posts = userInformation.posts;
-      }
-    });
-    // Read Followers
-    let userPageFollowersRef = firebaseDb.ref(
-      "toneygram/users/" + currentUserId + "/followers/"
-    );
-    userPageFollowersRef.once("value", (followers) => {
-      let followersUserPage = followers.val();
-      if (!followersUserPage) {
-        this.followers = {};
-      } else {
-        this.followers = followersUserPage;
-      }
-    });
-    // Read Following
-    let userPageFollowingRef = firebaseDb.ref(
-      "toneygram/users/" + currentUserId + "/following/"
-    );
-    userPageFollowingRef.once("value", (following) => {
-      let followingUserPage = following.val();
-      if (!followingUserPage) {
-        this.following = {};
-      } else {
-        this.following = followingUserPage;
-      }
-    });
+    currentUserInformationRef
+      .once("value", (userInPage) => {
+        let userInformation = userInPage.val();
+        // User information
+        this.userInfomation = {
+          id: userInformation.userInformation.id,
+          img: userInformation.userInformation.img,
+          name: userInformation.userInformation.name,
+          fullname: userInformation.userInformation.fullname,
+        };
+        // User pictures
+        if (!userInformation.posts) {
+          this.posts = [];
+        } else {
+          this.posts = userInformation.posts;
+        }
+      })
+      .then(() => {
+        // Read Followers
+        let userPageFollowersRef = firebaseDb.ref(
+          "toneygram/users/" + currentUserId + "/followers/"
+        );
+        userPageFollowersRef.once("value", (followers) => {
+          let followersUserPage = followers.val();
+          if (!followersUserPage) {
+            this.followers = {};
+          } else {
+            this.followers = followersUserPage;
+          }
+        });
+        // Read Following
+        let userPageFollowingRef = firebaseDb.ref(
+          "toneygram/users/" + currentUserId + "/following/"
+        );
+        userPageFollowingRef.once("value", (following) => {
+          let followingUserPage = following.val();
+          if (!followingUserPage) {
+            this.following = {};
+          } else {
+            this.following = followingUserPage;
+          }
+        });
+      });
   },
   computed: {
     getInfoUserPage() {
@@ -513,7 +376,7 @@ export default {
       });
       return infoUserPage;
     },
-    ...mapState("settingsUser", ["currentUserId"]),
+    ...mapState("settingsUser", ["currentUserId", "currentUserInfoData"]),
   },
 };
 </script>
@@ -524,202 +387,146 @@ export default {
 }
 //iPhone
 @media (max-width: 480px) {
-  .resumeBase {
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
-    gap: 0px 0px;
-    justify-items: start;
-    grid-template-areas:
-      "primero . ."
-      "segundo . ."
-      "tercero . .";
-    text-align: center;
-  }
-  .upperName {
-    grid-area: primero;
-  }
-  .upperDescription {
-    grid-area: segundo;
-  }
-  .upperWeb {
-    grid-area: tercero;
-  }
-  .showMobileUserPage {
-    display: block;
-  }
-  .showDesktopUserPage {
-    display: none;
-  }
-  .barOnlyDesktop {
-    display: none;
-  }
-  .imgBaseUser {
-    height: 70px;
-    width: 70px;
-  }
-  .imageMyCard {
-    width: 100%;
-    height: 100%;
-  }
-  .resumeBaseUpper {
-    display: none;
-  }
-  .showButtonMobile {
-    display: block;
-  }
-  .showButtonDesktop {
-    display: none;
-  }
-  .followers {
-    display: none;
+  /* --- Grid Base --- */
+  .userPageBase {
+    padding: 1rem 0 0;
+    font-size: 1rem;
   }
   .myCardBaseUser {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 0.7fr 1fr;
     grid-template-rows: 1fr;
-    gap: 0px 0px;
-    grid-template-areas: ". . ";
-    align-items: center;
+    gap: 0;
     justify-items: center;
+    align-items: center;
+    padding-bottom: 1.5rem;
   }
+  .infoUpper {
+    margin-top: 0.6rem;
+    width: 100%;
+    align-self: start;
+  }
+
+  /* Bars */
+  .barOnlyDesktop {
+    display: none;
+  }
+
+  /* -- Pictures -- */
+  .imgBaseUser {
+    height: 90px;
+    width: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border-radius: 100%;
+  }
+  .imageMyCardProfile {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    border: lightgray 1px solid;
+  }
+
+  /* Username */
+  .userNameUpperBase {
+    display: flex;
+  }
+  .usernameDesktop {
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+  }
+
+  /*------ Resume --------------*/
+  .resumeBaseUpper {
+    display: none;
+  }
+  .nameAndSettingsPart {
+    display: flex;
+    flex-direction: column;
+  }
+  .showButtonDesktopSettings {
+    display: flex;
+    place-self: center;
+  }
+
+  /* --- Followers, following and Post upper/bottom section --- */
+  .upperFFP {
+    display: none;
+  }
+  .ffpBase {
+    display: block;
+  }
+  .ffp {
+    display: flex;
+    text-align: center;
+    justify-content: space-around;
+  }
+
+  /* -- ----------Post Base------------- -- */
   .postsBase {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: 0.5rem;
+    gap: 0.3rem;
     width: 100%;
-
-    margin: auto;
+    margin: 0;
   }
   .imgPost {
     width: 100%;
+    height: 100%;
     cursor: pointer;
-    height: 6rem;
     background-repeat: round;
-  }
-  .followersPost {
-    display: grid;
-    grid-auto-columns: 1fr;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 0px 0px;
-    grid-template-areas: ". . .";
-    justify-items: center;
-    text-align: center;
   }
 }
 //Tablet
 @media (min-width: 480px) {
-  .resumeBase {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: 0px 0px;
-    justify-items: center;
-    grid-template-areas:
-      "primero . "
-      "segundo . "
-      "tercero . ";
-    text-align: center;
-  }
-  .upperName {
-    grid-area: primero;
-  }
-  .upperDescription {
-    grid-area: segundo;
-  }
-  .upperWeb {
-    grid-area: tercero;
-  }
-  .showMobileUserPage {
-    display: block;
-  }
-  .showDesktopUserPage {
-    display: none;
-  }
-  .barOnlyDesktop {
-    display: none;
-  }
-  .imgBaseUser {
-    height: 120px;
-    width: 120px;
-  }
-  .imageMyCard {
-    width: 100%;
-    height: 100%;
-  }
-  .resumeBaseUpper {
-    display: none;
-  }
-  .showButtonMobile {
-    display: block;
-  }
-  .showButtonDesktop {
-    display: none;
-  }
-  .followers {
-    display: none;
-  }
+  /* --- Grid Base --- */
   .myCardBaseUser {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 2fr;
     grid-template-rows: 1fr;
-    gap: 0px 0px;
-    grid-template-areas: ". . ";
-    align-items: center;
-    justify-items: center;
-  }
-  .postsBase {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: 0.5rem;
-    width: 100%;
-    margin: auto;
-  }
-  .imgPost {
-    width: 100%;
-    cursor: pointer;
-    height: 12rem;
-    background-repeat: round;
-  }
-  .followersPost {
-    display: grid;
-    grid-auto-columns: 1fr;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 0px 0px;
-    grid-template-areas: ". . .";
-    justify-items: center;
-    text-align: center;
-  }
-}
-//Desktop
-@media (min-width: 768px) {
-  .myCardBaseUser {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 0;
-    grid-template-areas: ". . .";
+    gap: 0 2rem;
     justify-items: center;
     align-items: center;
   }
-  .showMobileUserPage {
-    display: none;
-  }
-  .showDesktopUserPage {
-    display: block;
+  .infoUpper {
+    margin-top: 0.6rem;
+    width: 100%;
+    align-self: start;
   }
   .barOnlyDesktop {
     display: block;
     width: 93.5%;
     margin: 4rem auto 0;
   }
+  .userPageBase {
+    padding: 3rem 0 0;
+    font-size: 1rem;
+  }
+
+  /* -- Profile Picture -- */
   .imgBaseUser {
     height: 150px;
     width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border-radius: 100%;
+  }
+  .imageMyCardProfile {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    border: lightgray 1px solid;
+  }
+  .nameAndSettingsPart {
+    display: flex;
+    flex-direction: row;
+  }
+
+  // Follower Following Post
+  .ffpBase {
+    display: none;
   }
   .userNameUpperBase {
     display: flex;
@@ -727,32 +534,90 @@ export default {
   .usernameDesktop {
     margin-right: 1rem;
   }
-  .resumeBase {
-    display: none;
-  }
-  .resumeBaseUpper {
-    display: block;
-  }
-  .showButtonMobile {
-    display: none;
-  }
-  .showButtonDesktop {
-    display: block;
-  }
-  .followers {
+  .showButtonDesktopSettings {
     display: flex;
+    place-self: center;
   }
-  .followersPostBase {
-    display: none;
-  }
-  .userPageBase {
-    padding: 1rem 0;
-    font-size: 1rem;
-  }
+
+  // Post Base
   .postsBase {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
+    gap: 0.3rem;
+    width: 100%;
+    margin: 0;
+  }
+  .imgPost {
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background-repeat: round;
+  }
+}
+
+//Desktop
+@media (min-width: 768px) {
+  /* --- Grid Base --- */
+  .myCardBaseUser {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    grid-template-rows: 1fr;
+    gap: 0 2rem;
+    justify-items: center;
+    align-items: center;
+  }
+  .infoUpper {
+    margin-top: 0.6rem;
+    width: 100%;
+    align-self: start;
+  }
+  .barOnlyDesktop {
+    display: block;
+    width: 93.5%;
+    margin: 4rem auto 0;
+  }
+  .userPageBase {
+    padding: 3rem 0 0;
+    font-size: 1rem;
+  }
+  .showButtonDesktopSettings {
+    display: flex;
+    place-self: center;
+  }
+  /* -- Profile Picture -- */
+  .imgBaseUser {
+    height: 150px;
+    width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border-radius: 100%;
+  }
+  .imageMyCardProfile {
+    width: 100%;
+    height: 100%;
+    border-radius: 100%;
+    border: lightgray 1px solid;
+  }
+  .userNameUpperBase {
+    display: flex;
+  }
+  // Name and Settings
+  .nameAndSettingsPart {
+    display: flex;
+    flex-direction: row;
+  }
+  .usernameDesktop {
+    margin-right: 1rem;
+  }
+  //Following follower post section
+  .ffpBase {
+    display: none;
+  }
+  // Post
+  .postsBase {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 1.5rem;
     width: 93%;
     margin: 2rem auto;
@@ -761,7 +626,6 @@ export default {
     width: 100%;
     height: 100%;
     cursor: pointer;
-    height: 18rem;
     background-repeat: round;
   }
 }

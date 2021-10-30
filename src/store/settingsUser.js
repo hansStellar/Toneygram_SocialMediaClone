@@ -3,6 +3,7 @@ import { firebaseAuth } from "src/boot/firebase";
 const state = {
     currentUserId: '',
     currentUserPhoto: '',
+    currentUserInfoData: {}
 }
 
 const mutations = {
@@ -11,6 +12,9 @@ const mutations = {
     },
     setPhoto(state, userPhoto){
         state.currentUserPhoto = userPhoto
+    },
+    getDataUserInfo(state, data){
+        state.currentUserInfoData = data
     }
 }
 
@@ -20,6 +24,9 @@ const actions = {
         commit('setUserId', userId)
         let userPhoto = firebaseAuth.currentUser.photoURL
         commit('setPhoto', userPhoto)
+    },
+    sendUserInformation({commit}, data){
+        commit('getDataUserInfo', data)
     }
 }
 

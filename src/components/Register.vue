@@ -154,6 +154,7 @@
 <script>
 import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
 import { Notify, openURL } from "quasar";
+import { mapActions } from "vuex";
 export default {
   props: ["showing"],
   data() {
@@ -173,6 +174,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions("settingsUser", ["sendUserInformation"]),
     registerUser(registerData) {
       // Check usernames
       this.visible = true;
@@ -326,7 +328,6 @@ export default {
         }
         &:after {
           content: "\e853";
-          font-family: "Solid Style";
           color: #757575;
           position: absolute;
           top: 10px;

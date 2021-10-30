@@ -113,6 +113,7 @@
 import RegisterSteps from "./../components/Register.vue";
 import { Notify } from "quasar";
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
+import { mapActions } from "vuex";
 export default {
   components: {
     RegisterSteps,
@@ -128,10 +129,7 @@ export default {
     };
   },
   methods: {
-    onReset() {
-      this.login.email = "";
-      this.login.password = "";
-    },
+    ...mapActions("settingsUser", ["sendUserInformation"]),
     validateEmail(email) {
       const re =
         /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -149,6 +147,13 @@ export default {
               color: "positive",
             });
             this.visible = false;
+            const userInformation = firebaseDb.ref(
+              "toneygram/users/" + userCredentials.user.uid + "/userInformation"
+            );
+            userInformation.once("value", (allData) => {
+              let allInfoUser = allData.val();
+              this.sendUserInformation(allInfoUser);
+            });
           });
         })
         .catch((error) => {

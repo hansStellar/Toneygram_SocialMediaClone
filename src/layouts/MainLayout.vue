@@ -145,7 +145,6 @@ export default {
 </script>
 <style lang="scss">
 .baseLayout {
-  font-family: "Roboto";
 }
 //iPhone
 @media (max-width: 480px) {
@@ -154,7 +153,6 @@ export default {
   }
   .baseFooter {
     display: flex;
-    font-family: "Roboto";
   }
 }
 
