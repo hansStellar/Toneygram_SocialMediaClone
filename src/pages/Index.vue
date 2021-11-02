@@ -49,10 +49,13 @@
                 @click="goToUser(post.userInfo.userId)"
                 class="cursor-pointer text-weight-bold"
                 v-if="allSet"
+                style="max-width: max-content"
                 >{{ post.userInfo.userName }}</q-item-label
               >
               <q-skeleton width="150px" v-else />
-              <q-item-label caption> Subhead </q-item-label>
+              <q-item-label caption style="max-width: max-content">
+                Subhead
+              </q-item-label>
             </q-item-section>
           </q-item>
         </q-card-section>
@@ -197,7 +200,9 @@
 
             <q-item-section>
               <q-skeleton width="150px" class="q-mb-sm" />
-              <q-item-label caption> <q-skeleton width="70px" /> </q-item-label>
+              <q-item-label caption>
+                <q-skeleton width="70px" />
+              </q-item-label>
             </q-item-section>
           </q-item>
         </q-card-section>

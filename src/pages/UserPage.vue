@@ -7,7 +7,7 @@
     <!-- Top -->
     <div class="myCardBaseUser">
       <!-- Img -->
-      <div class="pictureBaseLeftSide">
+      <div style="align-self: start">
         <div v-if="Object.values(userInfomation).length" class="imgBaseUser">
           <q-img
             :ratio="16 / 9"
@@ -49,6 +49,7 @@
               class="showButtonDesktopSettings"
               dense
               color="black"
+              @click="this.settingsDialog = !this.settingsDialog"
               flat
               icon-right="settings"
               style="
@@ -146,11 +147,18 @@
             <!-- Name -->
             <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
             <!-- Description -->
-            <div v-if="userInfomation.description">
+            <div v-if="userInfomation.description" style="max-width: 17rem">
               {{ userInfomation.description }}
             </div>
             <!-- Pagina web -->
-            <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
+            <div
+              class="text-blue-10 text-weight-bold cursor-pointer"
+              style="max-width: fit-content"
+              v-if="userInfomation.website"
+              @click="goWebsite(userInfomation.website)"
+            >
+              {{ userInfomation.website }}
+            </div>
           </div>
           <!-- Skeleton -->
           <q-skeleton width="150px" v-else />
@@ -166,7 +174,13 @@
             {{ userInfomation.description }}
           </div>
           <!-- Pagina web -->
-          <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
+          <div
+            class="text-blue-10 text-weight-bold cursor-pointer"
+            v-if="userInfomation.website"
+            @click="goWebsite(userInfomation.website)"
+          >
+            {{ userInfomation.website }}
+          </div>
         </div>
         <!-- Skeleton -->
         <q-skeleton width="150px" v-else />
@@ -221,11 +235,25 @@
         <q-skeleton width="100%" height="100%" />
       </q-img>
     </div>
+    <!-- Dialogs -->
+    <SettingsDialog v-model="settingsDialog" v-on:modalChange="actionModal" />
+    <UsernameDialog v-model="username" />
+    <FullnameDialog v-model="fullname" />
+    <WebsiteDialog v-model="website" />
+    <BioDialog v-model="bio" />
+    <Picture v-model="picture" />
   </div>
 </template>
 <script>
-import { firebaseDb } from "src/boot/firebase";
+import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 import { mapState } from "vuex";
+import SettingsDialog from "components/ModalsSettings/SettingsDialog.vue";
+import UsernameDialog from "components/ModalsSettings/Username.vue";
+import FullnameDialog from "components/ModalsSettings/Fullname.vue";
+import WebsiteDialog from "components/ModalsSettings/Website.vue";
+import BioDialog from "components/ModalsSettings/Bio.vue";
+import Picture from "components/ModalsSettings/Picture.vue";
+import { Dialog } from "quasar";
 export default {
   data() {
     return {
@@ -234,9 +262,31 @@ export default {
       followers: {},
       following: {},
       timesShow: 9,
+      settingsDialog: false,
+      username: false,
+      fullname: false,
+      website: false,
+      bio: false,
+      picture: false,
     };
   },
+  components: {
+    SettingsDialog,
+    UsernameDialog,
+    FullnameDialog,
+    WebsiteDialog,
+    BioDialog,
+    Picture,
+  },
   methods: {
+    actionModal(option) {
+      if (option === "username") this.username = !this.username;
+      else if (option === "fullname") this.fullname = !this.fullname;
+      else if (option === "website") this.website = !this.website;
+      else if (option === "bio") this.bio = !this.bio;
+      else if (option === "picture") this.picture = !this.picture;
+      this.settingsDialog = false;
+    },
     goToPost(indexPost, userId) {
       this.$router.push({
         name: "Post",
@@ -314,6 +364,10 @@ export default {
           delete this.followers[newFollower.key];
         });
     },
+    goWebsite(page) {
+      console.log(page);
+      window.location.replace(`https://${page}`);
+    },
   },
   created() {
     let currentUserId = this.$route.params.userId;
@@ -330,6 +384,8 @@ export default {
           img: userInformation.userInformation.img,
           name: userInformation.userInformation.name,
           fullname: userInformation.userInformation.fullname,
+          description: userInformation.userInformation.bio,
+          website: userInformation.userInformation.website,
         };
         // User Posts
         if (!userInformation.posts) {
@@ -432,7 +488,7 @@ export default {
     grid-template-areas:
       ". ."
       "resumeBaseMobile resumeBaseMobile";
-    gap: 0 2rem;
+    gap: 1rem 0.5rem;
     /* justify-items: center; */
     align-items: center;
     padding-bottom: 1.5rem;
