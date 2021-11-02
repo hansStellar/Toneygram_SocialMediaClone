@@ -21,17 +21,17 @@
             @click="this.$router.push({ name: 'Add' })"
           />
           <!-- DM Messages -->
-          <q-btn
+          <!-- <q-btn
             round
             dense
             flat
             color="black"
             icon="mail_outline"
             @click="sendUserToDM"
-          />
+          /> -->
           <!-- Likes Button -->
 
-          <q-btn-dropdown
+          <!-- <q-btn-dropdown
             rounded
             class="buttonFooter"
             color="black"
@@ -41,9 +41,9 @@
             dropdown-icon="favorite_border"
           >
             <div class="q-pa-sm"></div>
-          </q-btn-dropdown>
+          </q-btn-dropdown> -->
           <!-- Search button -->
-          <q-btn
+          <!-- <q-btn
             dense
             class="buttonFooter"
             icon="search"
@@ -51,15 +51,18 @@
             round
             color="black"
             @click="sendUserToSearch"
-          />
+          /> -->
           <!-- Profile button -->
-          <q-avatar
-            size="1.5rem"
-            class="q-ml-md cursor-pointer"
+
+          <q-img
+            height="26px"
+            width="26px"
+            :ratio="1"
+            :src="userPicture"
             @click="sendToUserPage"
-          >
-            <img :src="userPicture" />
-          </q-avatar>
+            class="q-ml-md cursor-pointer profileUpperButton"
+            style="border-radius: 100%; border: solid 1px lightgray"
+          />
         </div>
       </q-toolbar>
     </q-header>
@@ -68,7 +71,7 @@
       <router-view />
     </q-page-container>
 
-    <q-footer reveal elevated class="bg-grey-8 text-white baseFooter">
+    <q-footer elevated class="bg-grey-8 text-white baseFooter">
       <q-tabs
         v-model="tab"
         indicator-color="transparent"
@@ -77,15 +80,24 @@
         class="bg-white full-width text-grey-5 shadow-2"
       >
         <q-tab name="home" icon="apartment" @click="sendUserToHome" />
-        <q-tab name="search" icon="search" @click="sendUserToSearch" />
+        <!-- <q-tab name="search" icon="search" @click="sendUserToSearch" /> -->
 
-        <q-tab
+        <!-- <q-tab
           alert="red"
           name="likes"
           icon="favorite_border"
           @click="sendUserToLikes"
-        />
-        <q-tab name="user" icon="face" @click="sendToUserPage" />
+        /> -->
+        <q-tab name="user" @click="sendToUserPage">
+          <q-img
+            height="26px"
+            width="26px"
+            :src="userPicture"
+            @click="sendToUserPage"
+            class="cursor-pointer"
+            style="border-radius: 100%; border: solid 1px lightgray"
+          />
+        </q-tab>
       </q-tabs>
     </q-footer>
   </q-layout>
@@ -154,6 +166,9 @@ export default {
   .baseFooter {
     display: flex;
   }
+  .profileUpperButton {
+    position: absolute;
+  }
 }
 
 //Tablet
@@ -161,12 +176,16 @@ export default {
   .baseFooter {
     display: none;
   }
+  .profileUpperButton {
+  }
 }
 
 //Desktop
 @media (min-width: 768px) {
   .baseFooter {
     display: none;
+  }
+  .profileUpperButton {
   }
 }
 </style>

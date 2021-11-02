@@ -21,7 +21,11 @@
       />
       <q-btn
         class="full-width q-mt-md"
-        color="positive"
+        :color="
+          descriptionPost.length <= 0 || images.length <= 0
+            ? 'light-blue-1'
+            : 'light-blue'
+        "
         dense
         label="Upload"
         :disabled="descriptionPost.length <= 0 || images.length <= 0"
@@ -37,16 +41,16 @@
       :key="index"
       class="filesBase relative-position"
     >
+      <q-img :ratio="1" :src="img" class="fileImg"> </q-img>
       <q-btn
-        icon="clear"
-        color="white"
-        text-color="black"
+        icon="cancel"
         class="absolute-top-right q-ma-lg"
-        round
-        dense
+        color="white"
+        style="z-index: 9"
         @click="eraseImage(index)"
+        dense
+        flat
       />
-      <img :src="img" class="fileImg shadow-2" />
     </div>
   </div>
 </template>

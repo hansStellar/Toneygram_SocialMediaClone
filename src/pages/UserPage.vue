@@ -16,7 +16,19 @@
           />
         </div>
         <!-- Skeleton -->
-        <q-skeleton v-else type="circle" size="150px" />
+        <q-skeleton
+          v-if="!Object.values(userInfomation).length"
+          type="circle"
+          size="150px"
+          class="skeletonDesktop"
+        />
+        <!-- Skeleton Mobile -->
+        <q-skeleton
+          v-if="!Object.values(userInfomation).length"
+          type="circle"
+          size="90px"
+          class="skeletonMobile"
+        />
       </div>
       <!-- Info Upper -->
       <div class="infoUpper">
@@ -144,6 +156,21 @@
           <q-skeleton width="150px" v-else />
         </div>
       </div>
+      <!-- Resume Mobile Version -->
+      <div class="resumeBaseMobile">
+        <div v-if="Object.values(userInfomation).length">
+          <!-- Name -->
+          <div class="text-weight-medium">{{ userInfomation.fullname }}</div>
+          <!-- Description -->
+          <div v-if="userInfomation.description">
+            {{ userInfomation.description }}
+          </div>
+          <!-- Pagina web -->
+          <div v-if="userInfomation.url">{{ userInfomation.url }}</div>
+        </div>
+        <!-- Skeleton -->
+        <q-skeleton width="150px" v-else />
+      </div>
     </div>
     <!-- Bar Desktop -->
     <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
@@ -158,7 +185,7 @@
           </div>
           <div class="text-grey">posts</div>
         </div>
-        <q-skeleton width="150px" v-else class="q-my-sm" />
+        <q-skeleton width="150px" v-else class="q-ma-sm" />
         <!-- Following -->
         <div v-if="userInfomation.id">
           <div class="text-weight-medium">
@@ -166,7 +193,7 @@
           </div>
           <div class="text-grey">following</div>
         </div>
-        <q-skeleton width="150px" v-else class="q-my-sm" />
+        <q-skeleton width="150px" v-else class="q-ma-sm" />
         <!-- Followers -->
         <div v-if="userInfomation.id">
           <div class="text-weight-medium">
@@ -174,7 +201,7 @@
           </div>
           <div class="text-grey">followers</div>
         </div>
-        <q-skeleton width="150px" v-else class="q-my-sm" />
+        <q-skeleton width="150px" v-else class="q-ma-sm" />
       </div>
       <q-separator color="grey-4" size="1px" />
     </div>
@@ -184,7 +211,7 @@
         class="cursor-pointer imgPost"
         v-for="(post, index) in posts"
         :key="index"
-        @click="goToPost(index, post.userInfo.userId)"
+        @click="goToPost(post.idPost, post.userInfo.userId)"
       >
         <q-img :ratio="1" class="no-shadow" :src="post.imagesUploaded[0]" />
       </div>
@@ -290,7 +317,6 @@ export default {
   },
   created() {
     let currentUserId = this.$route.params.userId;
-
     // Read Post User Page
     let currentUserInformationRef = firebaseDb.ref(
       "toneygram/users/" + currentUserId
@@ -305,11 +331,18 @@ export default {
           name: userInformation.userInformation.name,
           fullname: userInformation.userInformation.fullname,
         };
-        // User pictures
+        // User Posts
         if (!userInformation.posts) {
           this.posts = [];
         } else {
-          this.posts = userInformation.posts;
+          let arrayNoSirve = [];
+          Object.values(userInformation.posts).forEach((Post) => {
+            arrayNoSirve.push(Post);
+            arrayNoSirve.sort((a, b) => {
+              return b.fullD - a.fullD;
+            });
+            this.posts = arrayNoSirve;
+          });
         }
       })
       .then(() => {
@@ -395,11 +428,19 @@ export default {
   .myCardBaseUser {
     display: grid;
     grid-template-columns: 0.7fr 1fr;
-    grid-template-rows: 1fr;
-    gap: 0;
-    justify-items: center;
+    grid-template-rows: 1fr 0.5fr;
+    grid-template-areas:
+      ". ."
+      "resumeBaseMobile resumeBaseMobile";
+    gap: 0 2rem;
+    /* justify-items: center; */
     align-items: center;
     padding-bottom: 1.5rem;
+    padding-left: 1rem;
+  }
+  .resumeBaseMobile {
+    grid-area: resumeBaseMobile;
+    justify-self: flex-start;
   }
   .infoUpper {
     margin-top: 0.6rem;
@@ -463,6 +504,16 @@ export default {
     justify-content: space-around;
   }
 
+  // Skeleton
+
+  .skeletonMobile {
+    display: block;
+  }
+
+  .skeletonDesktop {
+    display: none;
+  }
+
   /* -- ----------Post Base------------- -- */
   .postsBase {
     display: grid;
@@ -485,6 +536,7 @@ export default {
     display: grid;
     grid-template-columns: 1fr 2fr;
     grid-template-rows: 1fr;
+
     gap: 0 2rem;
     justify-items: center;
     align-items: center;
@@ -503,7 +555,9 @@ export default {
     padding: 3rem 0 0;
     font-size: 1rem;
   }
-
+  .resumeBaseMobile {
+    display: none;
+  }
   /* -- Profile Picture -- */
   .imgBaseUser {
     height: 150px;
@@ -553,6 +607,14 @@ export default {
     cursor: pointer;
     background-repeat: round;
   }
+
+  // Skeleton
+  .skeletonMobile {
+    display: none;
+  }
+  .skeletonDesktop {
+    display: block;
+  }
 }
 
 //Desktop
@@ -583,6 +645,9 @@ export default {
   .showButtonDesktopSettings {
     display: flex;
     place-self: center;
+  }
+  .resumeBaseMobile {
+    display: none;
   }
   /* -- Profile Picture -- */
   .imgBaseUser {
@@ -627,6 +692,14 @@ export default {
     height: 100%;
     cursor: pointer;
     background-repeat: round;
+  }
+
+  // Skeleton
+  .skeletonMobile {
+    display: none;
+  }
+  .skeletonDesktop {
+    display: block;
   }
 }
 </style>

@@ -1,127 +1,183 @@
 <template>
-  <!-- Desktop -->
-  <div>
-    <!-- Model -->
-    <div
-      class="desktopBasePost row flex justify-center"
-      style="
-        max-width: 970px;
-        margin: auto;
-        height: 90vh;
-        align-content: center;
-      "
+  <q-page class="q-pa-md flex flex-center mobileScript">
+    <!-- Base Desktop -->
+    <q-card
+      class="row no-shadow no-border-radius col desktopVersion"
+      style="border: solid 1px lightgray; max-width: 850px"
     >
-      <!-- Image/Caroussel -->
-      <div class="col-7" style="border: 1px solid lightgray">
-        <!-- Img -->
+      <!-- Img -->
+      <div class="no-padding col-8">
         <q-carousel
-          animated
           v-model="slide"
-          :arrows="images.length > 1"
-          :navigation="images.length > 1"
-          infinite
+          transition-prev="jump-right"
+          transition-next="jump-left"
           swipeable
-          class="baseCarousel"
-          v-if="images.length"
+          animated
+          control-color="white"
+          prev-icon="arrow_left"
+          next-icon="arrow_right"
+          navigation-icon="radio_button_unchecked"
+          navigation
+          arrows
+          class="no-padding full-height full-width"
+          v-if="Object.values(userInfoPost).length"
         >
           <q-carousel-slide
             v-for="(image, index) in images"
             :key="index"
             :name="index"
-            class="no-padding"
-            style="overflow: none"
+            style="padding: 0; margin: 0; width: 100%; height: 100%"
+            class=""
           >
-            <q-img :src="image" :ratio="1" />
+            <q-img
+              :ratio="4 / 3"
+              class="no-shadow"
+              :src="image"
+              style="padding: 0; margin: 0; width: 100%; height: 100%"
+            />
           </q-carousel-slide>
         </q-carousel>
-        <!-- Skeleton -->
-        <q-skeleton width="100%" height="100%" v-else />
+        <q-img :ratio="4 / 3" class="no-border-radius" v-else>
+          <q-skeleton class="no-border-radius" height="100%" width="100%" />
+        </q-img>
       </div>
-      <!-- Right Side -->
-      <div class="col-4 bg-white" style="border: 1px solid lightgray">
-        <!-- Header -->
-        <div @click="goToUser(userInfoPost.userId)">
-          <q-banner rounded class="bg-white items-center q-py-md">
-            <template v-slot:avatar>
-              <q-avatar
-                class="shadow-2 imgUserTop cursor-pointer"
-                v-if="userInfoPost.userImg"
-              >
-                <img :src="userInfoPost.userImg" />
-              </q-avatar>
-              <q-skeleton type="circle" size="2rem" v-else />
-            </template>
 
-            <span
-              v-if="userInfoPost.userName"
-              class="text-weight-medium cursor-pointer"
-              >{{ userInfoPost.userName }}</span
+      <!-- Info Section -->
+      <q-card-section class="col-4 no-padding">
+        <!-- Banner name and avatar -->
+        <q-item>
+          <q-item-section avatar>
+            <q-img
+              class="cursor-pointer"
+              style="border-radius: 100%"
+              @click="goToUser(userInfoPost.userId)"
+              :ratio="1"
+              :src="userInfoPost.userImg"
+              width="32px"
+              height="32px"
+              v-if="Object.values(userInfoPost).length"
+            />
+            <q-skeleton type="circle" size="32px" v-else />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label
+              @click="goToUser(userInfoPost.userId)"
+              class="cursor-pointer text-weight-bold"
+              v-if="Object.values(userInfoPost).length"
+              >{{ userInfoPost.userName }}</q-item-label
             >
             <q-skeleton width="150px" v-else />
-          </q-banner>
-        </div>
-        <q-separator color="grey-4" />
-        <!-- Description -->
-        <div class="q-px-sm q-pt-sm bg-white" v-if="descriptionPost">
-          <span
-            class="text-weight-bold cursor-pointer"
-            @click="goToUser(userInfoPost.userId)"
-            >{{ userInfoPost.userName }}</span
-          >
-          {{ descriptionPost }}
-        </div>
-        <q-skeleton class="q-ma-md" width="200px" v-else />
-        <!-- Comments -->
-        <div class="bg-white" style="height: 18.58rem; overflow: auto">
-          <div
-            v-for="(comment, index) in comments"
-            :key="index"
-            class="row items-center q-px-sm"
-          >
-            <!-- Username -->
-            <div class="">
+            <q-item-label caption> Subhead </q-item-label>
+          </q-item-section>
+        </q-item>
+        <q-separator color="grey-3" size="1px" />
+
+        <!-- Comments and Description -->
+        <q-responsive :ratio="1">
+          <div style="overflow: auto">
+            <!-- Description Post -->
+            <div
+              v-if="Object.values(userInfoPost).length"
+              class="q-my-sm q-px-md row items-center"
+            >
+              <q-img
+                @click="goToUser(userInfoPost.userId)"
+                :src="userInfoPost.userImg"
+                :ratio="1"
+                width="32px"
+                height="32px"
+                class="cursor-pointer"
+                style="border-radius: 100%"
+              />
               <span
-                class="text-weight-bold cursor-pointer"
-                @click="goToUser(comment.idUser)"
-                >{{ comment.userName }}</span
-              >&nbsp;
-              <span>{{ comment.message }}</span>
+                @click="goToUser(userInfoPost.userId)"
+                class="cursor-pointer q-ml-md q-mr-sm text-weight-bold"
+                >{{ userInfoPost.userName }}</span
+              ><span>{{ descriptionPost }}</span>
             </div>
+            <q-skeleton class="q-ma-md" width="190px" v-else />
+            <!-- Comments desktop -->
+            <div
+              v-if="Object.values(userInfoPost).length"
+              class="q-px-md bg-white"
+            >
+              <div
+                v-for="(comment, index) in comments"
+                :key="index"
+                class="row items-center q-py-sm"
+              >
+                <!-- img -->
+                <q-img
+                  :src="comment.imgUser"
+                  :ratio="1"
+                  width="32px"
+                  height="32px"
+                  class="cursor-pointer"
+                  style="border-radius: 100%"
+                  @click="goToUser(comment.idUser)"
+                />
+
+                <span
+                  @click="goToUser(comment.idUser)"
+                  class="
+                    cursor-pointer
+                    q-ml-md q-mr-sm
+                    text-weight-medium text-weight-bold
+                  "
+                  >{{ comment.userName }}</span
+                >
+                <span class="ellipsis">{{ comment.message }}</span>
+              </div>
+            </div>
+            <q-skeleton class="q-ma-md" width="210px" v-else />
+          </div>
+        </q-responsive>
+        <q-separator color="grey-3" size="1px" />
+        <!-- Like, likes, date -->
+        <div class="col lldInfo" v-if="Object.values(userInfoPost).length">
+          <!-- Like and Comment -->
+          <div class="bg-white lcInfo">
+            <q-btn
+              dense
+              round
+              flat
+              v-if="likeUsers.includes(actualUserId)"
+              @click="unlikePost()"
+              icon="favorite"
+              color="red"
+            />
+            <q-btn
+              dense
+              round
+              flat
+              icon="favorite_border"
+              v-else
+              @click="likePost()"
+            />
+            <q-btn dense round flat icon="far fa-comment" />
+          </div>
+          <!-- Likes -->
+          <div
+            v-if="Object.values(userInfoPost).length"
+            class="q-mx-sm text-weight-bold"
+          >
+            <div v-if="likeUsers.length">{{ likeUsers.length }} likes</div>
+            <div v-else>0 likes</div>
+          </div>
+          <q-skeleton width="200px" class="q-ma-md" v-else />
+          <!-- Date -->
+          <div
+            v-if="Object.values(userInfoPost).length"
+            class="q-mx-sm text-grey text-overline"
+          >
+            {{ dateOfPost }}
           </div>
         </div>
-        <q-separator color="grey-4" />
-        <!-- Like and Comment-->
-        <div class="bg-white q-py-sm">
-          <q-btn
-            dense
-            round
-            flat
-            @click="likePost()"
-            v-if="!likeUsers.includes(actualUserId)"
-            icon="favorite_border"
-          />
-          <q-btn
-            dense
-            round
-            flat
-            @click="unlikePost()"
-            v-else
-            icon="favorite"
-            color="red"
-          />
-          <q-btn dense round flat icon="far fa-comment" />
-        </div>
-        <!-- Likes -->
-        <div class="q-pb-sm q-px-sm bg-white text-weight-bold">
-          {{ likeUsers.length }} likes
-        </div>
-        <!-- Date -->
-        <div class="q-px-sm text-grey bg-white items-bottom text-overline">
-          {{ dateOfPost }}
-        </div>
-        <q-separator color="grey-4" class="" />
+        <q-skeleton width="150px" class="q-mx-md q-mb-md" v-else />
+        <q-separator color="grey-3" size="1px" />
         <!-- Create Comment -->
-        <div class="bg-white full-width q-px-sm">
+        <div class="bg-white full-width q-px-sm ccInfo">
           <q-input
             color="grey-6"
             v-model="textMessage"
@@ -136,15 +192,172 @@
                 dense
                 flat
                 color="primary"
-                @click="sendText"
+                @click="sendText(textMessage)"
                 :disable="textMessage.length <= 0"
               />
             </template>
           </q-input>
         </div>
+      </q-card-section>
+    </q-card>
+    <!-- Base Mobile -->
+    <q-card
+      class="no-shadow no-border-radius col column mobileVersion"
+      style="border: solid 1px lightgray; max-width: 550px"
+    >
+      <!-- Header -->
+      <q-card-section class="no-padding">
+        <!-- Banner name and avatar -->
+        <q-item>
+          <q-item-section avatar>
+            <q-img
+              class="cursor-pointer"
+              style="border-radius: 100%"
+              @click="goToUser(userInfoPost.userId)"
+              :ratio="1"
+              :src="userInfoPost.userImg"
+              width="32px"
+              height="32px"
+              v-if="Object.values(userInfoPost).length"
+            />
+            <q-skeleton type="circle" size="32px" v-else />
+          </q-item-section>
+
+          <q-item-section>
+            <q-item-label
+              @click="goToUser(userInfoPost.userId)"
+              class="cursor-pointer text-weight-bold"
+              v-if="Object.values(userInfoPost).length"
+              >{{ userInfoPost.userName }}</q-item-label
+            >
+            <q-skeleton width="150px" v-else />
+            <q-item-label caption> Subhead </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-card-section>
+      <q-separator color="grey-3" size="1px" />
+      <!-- Img -->
+      <q-carousel
+        v-if="Object.values(userInfoPost).length"
+        v-model="slide"
+        transition-prev="jump-right"
+        transition-next="jump-left"
+        swipeable
+        animated
+        control-color="white"
+        prev-icon="arrow_left"
+        next-icon="arrow_right"
+        navigation-icon="radio_button_unchecked"
+        navigation
+        arrows
+        class="no-padding full-width full-height"
+      >
+        <q-carousel-slide
+          v-for="(image, index) in images"
+          :key="index"
+          :name="index"
+          style="padding: 0; margin: 0; width: 100%; height: 100%"
+          class=""
+        >
+          <q-img
+            :ratio="2 / 2"
+            class="no-shadow"
+            :src="image"
+            style="padding: 0; margin: 0; width: 100%; height: 100%"
+            v-if="images.length"
+          />
+        </q-carousel-slide>
+      </q-carousel>
+      <q-img :ratio="4 / 3" class="no-border-radius" v-else>
+        <q-skeleton class="no-border-radius" height="100%" width="100%" />
+      </q-img>
+      <q-separator color="grey-3" size="1px" />
+      <!-- Like and coment -->
+      <q-card-actions class="q-pb-none full-width" align="left">
+        <q-btn
+          dense
+          round
+          flat
+          v-if="likeUsers.includes(actualUserId)"
+          @click="unlikePost()"
+          icon="favorite"
+          color="red"
+        />
+        <q-btn
+          dense
+          round
+          flat
+          icon="favorite_border"
+          v-else
+          @click="likePost()"
+        />
+        <q-btn dense round flat icon="far fa-comment" />
+      </q-card-actions>
+      <q-card-actions
+        v-if="Object.values(userInfoPost).length"
+        class="q-py-none q-px-md text-weight-bold full-width"
+        align="left"
+      >
+        <div v-if="likeUsers.length">{{ likeUsers.length }} likes</div>
+        <div v-else>0 likes</div>
+      </q-card-actions>
+      <!-- Description -->
+      <q-list class="q-py-none q-pl-sm full-width">
+        <q-card-actions class="q-py-none">
+          <span
+            class="cursor-pointer text-weight-bold"
+            @click="goToUser(userInfoPost.userId)"
+          >
+            {{ userInfoPost.userName }} &nbsp;
+          </span>
+          <span> {{ descriptionPost }} </span>
+        </q-card-actions>
+      </q-list>
+      <q-separator color="grey-3" size="1px" />
+      <!-- Comments -->
+      <q-list
+        style="max-height: 120px; overflow: overlay"
+        class="q-py-none q-pl-sm full-width"
+      >
+        <q-card-actions
+          class="q-py-none"
+          v-for="(comment, index) in comments"
+          :key="index"
+        >
+          <span
+            class="cursor-pointer text-weight-bold"
+            @click="goToUser(comment.idUser)"
+          >
+            {{ comment.userName }} &nbsp;
+          </span>
+          <span class="ellipsis"> {{ comment.message }} </span>
+        </q-card-actions>
+      </q-list>
+      <q-separator color="grey-3" size="1px" />
+      <!-- Create Comment -->
+      <div class="bg-white full-width q-px-sm ccInfo">
+        <q-input
+          color="grey-6"
+          v-model="textMessage"
+          label="Add a comment ..."
+          autofocus
+          autocomplete="off"
+          borderless
+        >
+          <template v-slot:append>
+            <q-btn
+              label="POST"
+              dense
+              flat
+              color="primary"
+              @click="sendText(textMessage)"
+              :disable="textMessage.length <= 0"
+            />
+          </template>
+        </q-input>
       </div>
-    </div>
-  </div>
+    </q-card>
+  </q-page>
 </template>
 <script>
 import { uid } from "quasar";
@@ -406,87 +619,34 @@ export default {
 <style lang="scss">
 //iPhone
 @media (max-width: 480px) {
-  .phoneBasePost {
-    display: block;
+  .mobileVersion {
+    display: flex;
+    width: 100%;
   }
-  .desktopBasePost {
-    display: none;
+  .mobileScript {
+    padding: 0;
   }
-  .userCommentImg {
-    display: none;
-  }
-  .imgUserTop {
-    width: 2rem;
-    height: 2rem;
-  }
-  .baseCarousel {
-    height: 20rem;
-  }
-  .inputForm {
-    width: 85%;
-  }
-  .btnForm {
-    width: 15%;
-  }
-  .desktopShowPost {
+  .desktopVersion {
     display: none;
   }
 }
 //Tablet
 @media (min-width: 480px) {
-  .phoneBasePost {
+  .mobileVersion {
     display: flex;
-    flex-direction: column;
   }
-  .desktopBasePost {
-    display: none;
-  }
-  .userCommentImg {
-    display: none;
-  }
-  .imgUserTop {
-    width: 2rem;
-    height: 2rem;
-  }
-  .baseCarousel {
-    height: 25rem;
-  }
-  .inputForm {
-    width: 91%;
-  }
-  .btnForm {
-    width: 9%;
-  }
-  .desktopShowPost {
+  .desktopVersion {
     display: none;
   }
 }
+
 //Desktop
 @media (min-width: 768px) {
-  .phoneBasePost {
+  .mobileVersion {
     display: none;
   }
-  .desktopBasePost {
+  .desktopVersion {
     display: flex;
-  }
-  .userCommentImg {
-    display: none;
-  }
-  .imgUserTop {
-    width: 2rem;
-    height: 2rem;
-  }
-  .baseCarousel {
-    height: 35rem;
-  }
-  .inputForm {
-    width: 95%;
-  }
-  .btnForm {
-    width: 4%;
-  }
-  .desktopShowPost {
-    display: block;
   }
 }
 </style>

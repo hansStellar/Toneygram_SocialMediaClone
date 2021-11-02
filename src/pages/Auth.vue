@@ -24,7 +24,7 @@
       >
         <!-- Login -->
         <q-tab-panel name="login" class="q-py-none q-pb-md">
-          <q-form style="overflow: hidden" @reset="onReset">
+          <q-form style="overflow: hidden">
             <q-input
               color="grey-3"
               autofocus
