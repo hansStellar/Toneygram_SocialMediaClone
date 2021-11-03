@@ -20,6 +20,37 @@
             icon="add_circle_outline"
             @click="this.$router.push({ name: 'Add' })"
           />
+
+          <!-- Explore -->
+          <q-btn
+            dense
+            round
+            flat
+            color="black"
+            class="profileUpperButton"
+            icon="explore"
+            @click="footer('explore', 'Explore')"
+          />
+          <!-- Log Out -->
+          <q-btn
+            color="red"
+            round
+            dense
+            flat
+            icon="logout"
+            class="notShowDesktop"
+            @click="logOff"
+          />
+          <!-- User -->
+          <q-img
+            height="26px"
+            width="26px"
+            :ratio="1"
+            :src="userPicture"
+            @click="sendToUserPage"
+            class="q-ml-md cursor-pointer profileUpperButton"
+            style="border-radius: 100%; border: solid 1px lightgray"
+          />
           <!-- DM Messages -->
           <!-- <q-btn
             round
@@ -29,8 +60,8 @@
             icon="mail_outline"
             @click="sendUserToDM"
           /> -->
-          <!-- Likes Button -->
 
+          <!-- Likes Button -->
           <!-- <q-btn-dropdown
             rounded
             class="buttonFooter"
@@ -42,6 +73,7 @@
           >
             <div class="q-pa-sm"></div>
           </q-btn-dropdown> -->
+
           <!-- Search button -->
           <!-- <q-btn
             dense
@@ -53,16 +85,6 @@
             @click="sendUserToSearch"
           /> -->
           <!-- Profile button -->
-
-          <q-img
-            height="26px"
-            width="26px"
-            :ratio="1"
-            :src="userPicture"
-            @click="sendToUserPage"
-            class="q-ml-md cursor-pointer profileUpperButton"
-            style="border-radius: 100%; border: solid 1px lightgray"
-          />
         </div>
       </q-toolbar>
     </q-header>
@@ -75,11 +97,10 @@
       <q-tabs
         v-model="tab"
         indicator-color="transparent"
-        active-color="cyan-8"
-        active-bg-color="cyan-2"
-        class="bg-white full-width text-grey-5 shadow-2"
+        active-bg-color="light-blue-2"
+        class="bg-white full-width text-black shadow-2"
       >
-        <q-tab name="home" icon="apartment" @click="sendUserToHome" />
+        <q-tab name="home" icon="home" @click="footer('home', 'Home')" />
         <!-- <q-tab name="search" icon="search" @click="sendUserToSearch" /> -->
 
         <!-- <q-tab
@@ -88,12 +109,18 @@
           icon="favorite_border"
           @click="sendUserToLikes"
         /> -->
-        <q-tab name="user" @click="sendToUserPage">
+        <q-tab
+          name="explore"
+          icon="explore"
+          @click="footer('explore', 'Explore')"
+        />
+
+        <q-tab name="user" @click="sendToUserPage('user')">
           <q-img
             height="26px"
             width="26px"
             :src="userPicture"
-            @click="sendToUserPage"
+            @click="sendToUserPage('user')"
             class="cursor-pointer"
             style="border-radius: 100%; border: solid 1px lightgray"
           />
@@ -104,17 +131,27 @@
 </template>
 <script>
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapState } from "vuex";
+import { mapActions, mapState } from "vuex";
 export default {
   data() {
     return {
-      tab: "mails",
+      tab: "home",
       userPicture: "",
     };
   },
   methods: {
-    logOut() {
-      firebaseAuth.signOut();
+    footer(footerName, routeName) {
+      this.$router.push({ name: routeName });
+    },
+    logOff() {
+      firebaseAuth.signOut().then(() => {
+        this.$router.push({ name: "Auth" }).then(() => {
+          Notify.create({
+            message: "You have logged off",
+            color: "light-blue-5",
+          });
+        });
+      });
     },
     sendToUserPage() {
       this.$router.push({
@@ -168,6 +205,9 @@ export default {
   }
   .profileUpperButton {
     position: absolute;
+    top: 9284309238rem;
+  }
+  .notShowDesktop {
   }
 }
 
@@ -178,6 +218,9 @@ export default {
   }
   .profileUpperButton {
   }
+
+  .notShowDesktop {
+  }
 }
 
 //Desktop
@@ -186,6 +229,10 @@ export default {
     display: none;
   }
   .profileUpperButton {
+  }
+  .notShowDesktop {
+    position: absolute;
+    right: 10000rem;
   }
 }
 </style>

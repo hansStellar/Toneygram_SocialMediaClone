@@ -483,12 +483,12 @@ export default {
   }
   .myCardBaseUser {
     display: grid;
-    grid-template-columns: 0.7fr 1fr;
+    grid-template-columns: 0.4fr 1fr;
     grid-template-rows: 1fr 0.5fr;
     grid-template-areas:
       ". ."
       "resumeBaseMobile resumeBaseMobile";
-    gap: 1rem 0.5rem;
+    gap: 1rem 0.9rem;
     /* justify-items: center; */
     align-items: center;
     padding-bottom: 1.5rem;

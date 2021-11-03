@@ -182,7 +182,6 @@
             color="grey-6"
             v-model="textMessage"
             label="Add a comment ..."
-            autofocus
             autocomplete="off"
             borderless
           >
@@ -340,7 +339,6 @@
           color="grey-6"
           v-model="textMessage"
           label="Add a comment ..."
-          autofocus
           autocomplete="off"
           borderless
         >

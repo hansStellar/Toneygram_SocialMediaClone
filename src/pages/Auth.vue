@@ -27,7 +27,6 @@
           <q-form style="overflow: hidden">
             <q-input
               color="grey-3"
-              autofocus
               label-color="grey-5"
               type="email"
               lazy-rules

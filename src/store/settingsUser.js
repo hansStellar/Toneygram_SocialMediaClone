@@ -1,9 +1,10 @@
-import { firebaseAuth } from "src/boot/firebase";
+import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 
 const state = {
     currentUserId: '',
     currentUserPhoto: '',
-    currentUserInfoData: {}
+    currentUserInfoData: {},
+    footerValue: 'home'
 }
 
 const mutations = {
@@ -15,6 +16,9 @@ const mutations = {
     },
     getDataUserInfo(state, data){
         state.currentUserInfoData = data
+    },
+    footer(state, value){
+        state.footerValue = value
     }
 }
 
@@ -27,6 +31,20 @@ const actions = {
     },
     sendUserInformation({commit}, data){
         commit('getDataUserInfo', data)
+    },
+    changeFooter({commit}, value){
+        const footerRef = firebaseDb.ref('toneygram/users/' + firebaseAuth.currentUser.uid)
+        footerRef.once('value', allData => {
+            let allDataVar = allData.val()
+            if (!allDataVar.footer) {
+                footerRef.child('/footer').set(value)
+            } else {
+                footerRef.child('/footer').set(value)
+            }
+        })
+        commit('footer', value)
+
+
     }
 }
 

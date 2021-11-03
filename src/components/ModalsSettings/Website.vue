@@ -3,7 +3,6 @@
     <q-banner class="bg-grey-3">
       <q-input
         v-model="website"
-        autofocus
         type="url"
         dense
         outlined

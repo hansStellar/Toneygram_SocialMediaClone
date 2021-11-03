@@ -16,12 +16,12 @@
     </section>
     <!-- Left Side -->
     <section
-      class="col-12 col-sm-8"
+      class="col-sm-8 LeftSideBase"
       v-if="allSet && this.postsToShow.length > 0"
     >
       <!-- Base -->
       <q-card
-        class="no-shadow no-border-radius col column q-mb-lg"
+        class="no-shadow no-border-radius col column CardLeft"
         style="border: solid 1px lightgray"
         v-for="(post, index) in postsToShow"
         :key="index"
@@ -161,7 +161,6 @@
             color="grey-6"
             v-model="textMessage"
             label="Add a comment ..."
-            autofocus
             autocomplete="off"
             borderless
           >
@@ -181,11 +180,11 @@
     </section>
     <!-- Skeleton -->
     <section
-      class="col-12 col-sm-8"
+      class="col-sm-8 LeftSideBase"
       v-if="!allSet && this.postsToShow.length === 0"
     >
       <q-card
-        class="no-shadow no-border-radius col column q-mb-lg"
+        class="no-shadow no-border-radius col column CardLeft"
         style="border: solid 1px lightgray"
         v-for="(post, index) in skeletonTimes"
         :key="index"
@@ -965,6 +964,13 @@ export default {
     justify-content: center;
     padding: 0;
   }
+  .CardLeft {
+    margin-bottom: 0rem;
+    margin-top: 0rem;
+  }
+  .LeftSideBase {
+    width: 100%;
+  }
 }
 
 // Tablet
@@ -976,6 +982,13 @@ export default {
     padding: 0rem 0 0;
     justify-content: center;
   }
+  .CardLeft {
+    margin-bottom: 2rem;
+    margin-top: 2rem;
+  }
+  .LeftSideBase {
+    width: 66.6667%;
+  }
 }
 
 // Desktop
@@ -986,6 +999,13 @@ export default {
   }
   .baseFeed {
     padding: 2rem 0 0;
+  }
+  .CardLeft {
+    margin-bottom: 2rem;
+    margin-top: 0rem;
+  }
+  .LeftSideBase {
+    width: 66.6667%;
   }
 }
 </style>
