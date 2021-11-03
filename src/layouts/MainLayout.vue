@@ -9,6 +9,56 @@
         <div class="text-h5 text-black cursor-pointer" @click="sendUserToHome">
           toneygram
         </div>
+
+        <!-- Search -->
+        <div class="relative-position searchBaseLayout">
+          <q-input
+            @focus="focusInput"
+            @blur="focusOutput"
+            outlined
+            v-model="textSearch"
+            dense
+            color="black"
+            label-color="black"
+            bg-color="grey-2"
+            label="Search"
+            class=""
+          />
+          <q-list
+            class="baseSearch shadow-2"
+            v-show="showSearch"
+            style="overflow: auto"
+          >
+            <q-item
+              class="q-mb-sm itemUser"
+              clickable
+              v-ripple
+              v-for="(user, index) in usersFound"
+              :key="index"
+              @click="sendToUserPageSearch(user.userInformation.id)"
+            >
+              <q-item-section avatar>
+                <q-img
+                  :ratio="1"
+                  :src="user.userInformation.img"
+                  height="36px"
+                  width="36px"
+                  style="border-radius: 100%; border: solid 1px black"
+                />
+              </q-item-section>
+
+              <q-item-section>
+                <q-item-label class="text-black text-weight-bold">{{
+                  user.userInformation.name
+                }}</q-item-label>
+                <q-item-label caption lines="1">
+                  {{ user.userInformation.fullname }}
+                </q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
           <!-- Add Post -->
@@ -73,18 +123,6 @@
           >
             <div class="q-pa-sm"></div>
           </q-btn-dropdown> -->
-
-          <!-- Search button -->
-          <!-- <q-btn
-            dense
-            class="buttonFooter"
-            icon="search"
-            flat
-            round
-            color="black"
-            @click="sendUserToSearch"
-          /> -->
-          <!-- Profile button -->
         </div>
       </q-toolbar>
     </q-header>
@@ -96,11 +134,13 @@
     <q-footer elevated class="bg-grey-8 text-white baseFooter">
       <q-tabs
         v-model="tab"
+        align="justify"
         indicator-color="transparent"
         active-bg-color="light-blue-2"
         class="bg-white full-width text-black shadow-2"
       >
         <q-tab name="home" icon="home" @click="footer('home', 'Home')" />
+
         <!-- <q-tab name="search" icon="search" @click="sendUserToSearch" /> -->
 
         <!-- <q-tab
@@ -109,10 +149,17 @@
           icon="favorite_border"
           @click="sendUserToLikes"
         /> -->
+
         <q-tab
           name="explore"
           icon="explore"
           @click="footer('explore', 'Explore')"
+        />
+
+        <q-tab
+          name="search"
+          icon="search"
+          @click="footer('search', 'Search')"
         />
 
         <q-tab name="user" @click="sendToUserPage('user')">
@@ -137,6 +184,9 @@ export default {
     return {
       tab: "home",
       userPicture: "",
+      showSearch: false,
+      textSearch: "",
+      usersFound: [],
     };
   },
   methods: {
@@ -157,6 +207,12 @@ export default {
       this.$router.push({
         name: "User",
         params: { userId: firebaseAuth.currentUser.uid },
+      });
+    },
+    sendToUserPageSearch(idUser) {
+      this.$router.push({
+        name: "User",
+        params: { userId: idUser },
       });
     },
     sendUserToHome() {
@@ -184,6 +240,33 @@ export default {
         name: "Likes",
       });
     },
+    focusInput() {
+      this.showSearch = true;
+    },
+    focusOutput() {
+      setTimeout(() => {
+        this.showSearch = false;
+      }, 100);
+    },
+  },
+  watch: {
+    textSearch(val) {
+      this.usersFound = [];
+      const allUsers = firebaseDb
+        .ref("toneygram/users")
+        .once("value", (allUsers) => {
+          let users = allUsers.val();
+          Object.values(users).forEach((User) => {
+            let name = User.userInformation.name;
+            if (name.includes(val)) {
+              this.usersFound.push(User);
+              this.usersFound = this.usersFound.filter((user) => {
+                return user.userInformation.name === user.userInformation.name;
+              });
+            }
+          });
+        });
+    },
   },
   mounted() {
     setTimeout(() => {
@@ -209,17 +292,27 @@ export default {
   }
   .notShowDesktop {
   }
+  .searchBaseLayout {
+    display: none;
+  }
 }
 
 //Tablet
 @media (min-width: 480px) {
-  .baseFooter {
+  .buttonFooter {
     display: none;
   }
-  .profileUpperButton {
+  .baseFooter {
+    display: flex;
   }
-
+  .profileUpperButton {
+    position: absolute;
+    top: 9284309238rem;
+  }
   .notShowDesktop {
+  }
+  .searchBaseLayout {
+    display: none;
   }
 }
 
@@ -233,6 +326,23 @@ export default {
   .notShowDesktop {
     position: absolute;
     right: 10000rem;
+  }
+  .baseSearch {
+    width: 20rem;
+    max-width: 20rem;
+    background: white;
+    height: 20rem;
+    max-height: 20rem;
+    position: absolute;
+    bottom: -21rem;
+    right: -4rem;
+    border-radius: 1rem;
+  }
+  .itemUser:hover {
+    background: rgb(238, 238, 238);
+  }
+  .searchBaseLayout {
+    display: flex;
   }
 }
 </style>
