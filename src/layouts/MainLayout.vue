@@ -287,8 +287,7 @@ export default {
     display: flex;
   }
   .profileUpperButton {
-    position: absolute;
-    top: 9284309238rem;
+    display: none;
   }
   .notShowDesktop {
   }
@@ -306,8 +305,7 @@ export default {
     display: flex;
   }
   .profileUpperButton {
-    position: absolute;
-    top: 9284309238rem;
+    display: none;
   }
   .notShowDesktop {
   }
@@ -318,10 +316,16 @@ export default {
 
 //Desktop
 @media (min-width: 768px) {
+  .buttonsLayerBase {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+  }
   .baseFooter {
     display: none;
   }
   .profileUpperButton {
+    display: flex;
   }
   .notShowDesktop {
     position: absolute;
