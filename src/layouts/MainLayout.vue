@@ -23,7 +23,9 @@
             bg-color="grey-2"
             label="Search"
             class=""
+            @keyup.enter.prevent="searchAction(textSearch)"
           />
+
           <q-list
             class="baseSearch shadow-2"
             v-show="showSearch"
@@ -248,9 +250,7 @@ export default {
         this.showSearch = false;
       }, 100);
     },
-  },
-  watch: {
-    textSearch(val) {
+    searchAction(val) {
       this.usersFound = [];
       const allUsers = firebaseDb
         .ref("toneygram/users")
@@ -276,8 +276,6 @@ export default {
 };
 </script>
 <style lang="scss">
-.baseLayout {
-}
 //iPhone
 @media (max-width: 480px) {
   .buttonFooter {

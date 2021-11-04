@@ -6,11 +6,12 @@
         outlined
         v-model="textSearch"
         dense
-        color="black"
+        color="grey-4"
         label-color="black"
         bg-color="grey-2"
         label="Search"
         class=""
+        @keyup.enter.prevent="searchAction(textSearch)"
       />
       <q-list class="baseSearch" style="overflow: auto">
         <q-item
@@ -60,9 +61,7 @@ export default {
         params: { userId: idUser },
       });
     },
-  },
-  watch: {
-    textSearch(val) {
+    searchAction(val) {
       this.usersFound = [];
       const allUsers = firebaseDb
         .ref("toneygram/users")

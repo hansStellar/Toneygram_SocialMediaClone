@@ -44,24 +44,28 @@ export default {
 
         // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
         do {
-          for (let index = 0; index <= 10; index++) {
+          for (let index = 0; index <= allUsersVarArray.length; index++) {
             let user =
               allUsersVarArray[
                 Math.floor(Math.random() * allUsersVarArray.length)
               ];
             arrayUsers.push(user);
-            arrayUsers.length = 10;
+            arrayUsers.length = allUsersVarArray.length;
           }
           arrayUsers = arrayUsers.filter(function (item, pos) {
             return arrayUsers.indexOf(item) == pos;
           });
-        } while (arrayUsers.length < 10);
+        } while (arrayUsers.length < allUsersVarArray.length);
         // We loop every user that is in the array in order to get 1 post of each one of them
         let randomNumber = Math.floor(Math.random() * arrayUsers.length);
         arrayUsers.forEach((User) => {
           // For every user we must have one post
           if (Object.values(User).length > 1) {
-            this.postsExplore.push(Object.values(User)[randomNumber]);
+            this.postsExplore.push(
+              Object.values(User)[
+                Math.floor(Math.random() * Object.values(User).length)
+              ]
+            );
           } else {
             this.postsExplore.push(Object.values(User)[0]);
           }
