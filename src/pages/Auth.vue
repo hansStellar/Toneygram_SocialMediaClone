@@ -24,7 +24,7 @@
       >
         <!-- Login -->
         <q-tab-panel name="login" class="q-py-none q-pb-md">
-          <q-form style="overflow: hidden">
+          <q-form style="overflow: hidden" @submit.prevent="logInUser">
             <q-input
               color="grey-3"
               label-color="grey-5"
@@ -62,7 +62,7 @@
               class="full-width"
               text-color="white"
               @keyup.enter.prevent="logInUser"
-              @click="logInUser"
+              @click.prevent="logInUser"
               ref="logInButton"
               :disable="
                 !validateEmail(login.email) || login.password.length <= 5

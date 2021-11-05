@@ -1,4 +1,5 @@
-
+import Main from './../pages/Main.vue'
+import Chats from './../pages/Chats.vue'
 const routes = [
   {
     path: '/',
@@ -12,9 +13,25 @@ const routes = [
       { path: '/dms', component: () => import('pages/DM.vue'), name: 'DM' },
       { path: '/settings', component: () => import('pages/Settings.vue'), name: 'Settings' },
       { path: '/search', component: () => import('pages/Search.vue'), name: 'Search' },
-      { path: '/likes', component: () => import('pages/Likes.vue'), name: 'Likes' },
+      { path: '/activity', component: () => import('src/pages/Activity.vue'), name: 'Activity' },
     ]
     
+  },
+  {
+    path: '/main',
+    component: () => import('layouts/noLayout.vue'),
+    children: [
+      {
+        path: '/main',
+        component: Main,
+        name: 'Main'
+      },
+      {
+        path: '/main/:userId',
+        component: Chats,
+        name: 'Chat',
+      },
+    ]
   },
   { path: '/auth', component: () => import('pages/Auth.vue'), name: 'Auth' },
 

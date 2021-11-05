@@ -96,7 +96,7 @@
             dense
             round
             flat
-            v-if="post.likes && currentUserInfoData.id in post.likes"
+            v-if="post.likes && currentUserIndex.id in post.likes"
             @click="unlikePost(post.idPost, post.userInfo.userId)"
             icon="favorite"
             color="red"
@@ -236,12 +236,12 @@
                 class="cursor-pointer"
                 style="border-radius: 100%; border: solid 1px lightgray"
                 :ratio="1"
-                :src="currentUserInfoData.img"
+                :src="currentUserIndex.img"
                 @click="
                   this.$router.push({
                     name: 'User',
                     params: {
-                      userId: currentUserInfoData.id,
+                      userId: currentUserIndex.id,
                     },
                   })
                 "
@@ -254,15 +254,15 @@
                   this.$router.push({
                     name: 'User',
                     params: {
-                      userId: currentUserInfoData.id,
+                      userId: currentUserIndex.id,
                     },
                   })
                 "
                 class="cursor-pointer text-weight-medium"
-                >{{ currentUserInfoData.name }}</q-item-label
+                >{{ currentUserIndex.name }}</q-item-label
               >
               <q-item-label class="text-weight-regular" caption lines="1">{{
-                currentUserInfoData.fullname
+                currentUserIndex.fullname
               }}</q-item-label>
             </q-item-section>
             <!-- Right Side -->
@@ -711,7 +711,7 @@ export default {
     },
   },
   computed: {
-    ...mapState("settingsUser", ["currentUserInfoData"]),
+    ...mapState("settingsUser", ["currentUserIndex"]),
   },
   mounted() {
     setTimeout(() => {
@@ -719,7 +719,7 @@ export default {
       let postCurrentUserStatus = false;
       let postsFromFollowingStatus = false;
       let suggestesUsersStatus = false;
-      let userId = this.currentUserInfoData.id;
+      let userId = this.currentUserIndex.id;
       let baseRef = firebaseDb.ref("toneygram");
       baseRef
         .once("value", (allData) => {

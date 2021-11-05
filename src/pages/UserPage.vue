@@ -6,10 +6,13 @@
       <div class="myCardBaseUser">
         <!-- Img -->
         <div style="align-self: start">
-          <div v-if="Object.values(userInfomation).length" class="imgBaseUser">
+          <div
+            v-if="Object.values(getInfoUserPage.userInfomation).length"
+            class="imgBaseUser"
+          >
             <q-img
               :ratio="16 / 9"
-              :src="userInfomation.img"
+              :src="getInfoUserPage.userInfomation.img"
               class="imageMyCardProfile"
               height="75px"
               width="75px"
@@ -17,7 +20,7 @@
           </div>
           <!-- Skeleton Mobile -->
           <q-skeleton
-            v-if="!Object.values(userInfomation).length"
+            v-if="!Object.values(getInfoUserPage.userInfomation).length"
             type="circle"
             size="90px"
             class="skeletonMobile"
@@ -26,25 +29,28 @@
 
         <!-- Followers, following and posts -->
         <div class="row q-py-md text-center upperFFP">
-          <div v-if="Object.values(userInfomation).length" class="row">
+          <div
+            v-if="Object.values(getInfoUserPage.userInfomation).length"
+            class="row"
+          >
             <!-- Post -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(posts).length }}
+                {{ Object.values(getInfoUserPage.posts).length }}
               </div>
               <div class="text-black text-weight-light">Posts</div>
             </div>
             <!-- Following -->
             <div class="column q-mx-lg">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(following).length }}
+                {{ Object.values(getInfoUserPage.following).length }}
               </div>
               <div class="text-black text-weight-light">Following</div>
             </div>
             <!-- Followers -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(followers).length }}
+                {{ Object.values(getInfoUserPage.followers).length }}
               </div>
               <div class="text-black text-weight-light">Followers</div>
             </div>
@@ -55,26 +61,26 @@
 
         <!-- Resume Mobile Version -->
         <div class="resumeBaseMobile">
-          <div v-if="Object.values(userInfomation).length">
+          <div v-if="Object.values(getInfoUserPage.userInfomation).length">
             <!-- Name -->
             <div class="text-weight-medium ellipsis" style="max-width: 10rem">
-              {{ userInfomation.fullname }}
+              {{ getInfoUserPage.userInfomation.fullname }}
             </div>
             <!-- Description -->
             <div
-              v-if="userInfomation.description"
+              v-if="getInfoUserPage.userInfomation.description"
               class="ellipsis"
               style="max-width: 10rem"
             >
-              {{ userInfomation.description }}
+              {{ getInfoUserPage.userInfomation.description }}
             </div>
             <!-- Pagina web -->
             <div
               class="text-blue-10 text-weight-bold cursor-pointer"
-              v-if="userInfomation.website"
-              @click="goWebsite(userInfomation.website)"
+              v-if="getInfoUserPage.userInfomation.website"
+              @click="goWebsite(getInfoUserPage.userInfomation.website)"
             >
-              {{ userInfomation.website }}
+              {{ getInfoUserPage.userInfomation.website }}
             </div>
           </div>
           <!-- Skeleton -->
@@ -83,7 +89,7 @@
 
         <!-- Edit profile -->
         <q-btn
-          v-if="currentUserInfoData.id === userInfomation.id"
+          v-if="currentUserIndex.id === getInfoUserPage.userInfomation.id"
           class="showButtonDesktopSettings"
           dense
           color="black"
@@ -99,8 +105,8 @@
         <!-- Follow -->
         <q-btn
           v-if="
-            !(currentUserInfoData.id in followers) &&
-            userInfomation.id !== currentUserInfoData.id
+            !(currentUserIndex.id in getInfoUserPage.followers) &&
+            getInfoUserPage.userInfomation.id !== currentUserIndex.id
           "
           no-caps
           color="light-blue"
@@ -115,8 +121,8 @@
         <!-- Remove Follower -->
         <q-btn
           v-if="
-            currentUserInfoData.id in followers &&
-            userInfomation.id !== currentUserInfoData.id
+            currentUserIndex.id in getInfoUserPage.followers &&
+            getInfoUserPage.userInfomation.id !== currentUserIndex.id
           "
           flat
           color="black"
@@ -131,7 +137,8 @@
         <!-- Message -->
         <q-btn
           no-caps
-          v-if="userInfomation.id !== currentUserInfoData.id"
+          @click="goToChat(getInfoUserPage.userInfomation.id)"
+          v-if="getInfoUserPage.userInfomation.id !== currentUserIndex.id"
           outline
           color="black"
           class="q-px-md q-ml-sm"
@@ -148,7 +155,7 @@
       <q-separator size="1px" color="grey-4" />
 
       <!-- Images -->
-      <div class="postsBase" v-if="userInfomation.id">
+      <div class="postsBase" v-if="getInfoUserPage.userInfomation.id">
         <div
           class="cursor-pointer imgPost"
           v-for="(post, index) in posts"
@@ -172,16 +179,19 @@
       <div class="myCardBaseUser">
         <!-- Img -->
         <div style="align-self: start">
-          <div v-if="Object.values(userInfomation).length" class="imgBaseUser">
+          <div
+            v-if="Object.values(getInfoUserPage.userInfomation).length"
+            class="imgBaseUser"
+          >
             <q-img
               :ratio="16 / 9"
-              :src="userInfomation.img"
+              :src="getInfoUserPage.userInfomation.img"
               class="imageMyCardProfile"
             />
           </div>
           <!-- Skeleton -->
           <q-skeleton
-            v-if="!Object.values(userInfomation).length"
+            v-if="!Object.values(getInfoUserPage.userInfomation).length"
             type="circle"
             size="150px"
             class="skeletonDesktop"
@@ -193,16 +203,16 @@
           <div class="userNameUpperBase">
             <!-- Info -->
             <div
-              v-if="Object.values(userInfomation).length"
+              v-if="Object.values(getInfoUserPage.userInfomation).length"
               class="nameAndSettingsPart"
             >
               <!-- Name -->
               <div class="text-weight-light text-h5 usernameDesktop">
-                {{ userInfomation.name }}
+                {{ getInfoUserPage.userInfomation.name }}
               </div>
               <!-- Edit profile -->
               <q-btn
-                v-if="currentUserInfoData.id === userInfomation.id"
+                v-if="currentUserIndex.id === getInfoUserPage.userInfomation.id"
                 class="showButtonDesktopSettings"
                 dense
                 color="black"
@@ -222,8 +232,8 @@
               <!-- Follow -->
               <q-btn
                 v-if="
-                  !(currentUserInfoData.id in followers) &&
-                  userInfomation.id !== currentUserInfoData.id
+                  !(currentUserIndex.id in getInfoUserPage.followers) &&
+                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
                 "
                 no-caps
                 color="light-blue"
@@ -238,8 +248,8 @@
               <!-- Remove Follower -->
               <q-btn
                 v-if="
-                  currentUserInfoData.id in followers &&
-                  userInfomation.id !== currentUserInfoData.id
+                  currentUserIndex.id in followers &&
+                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
                 "
                 flat
                 icon="person_remove_alt_1"
@@ -256,9 +266,10 @@
               <!-- Message -->
               <q-btn
                 no-caps
+                @click="goToChat(getInfoUserPage.userInfomation.id)"
                 v-if="
-                  currentUserInfoData.id in followers &&
-                  userInfomation.id !== currentUserInfoData.id
+                  currentUserIndex.id in followers &&
+                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
                 "
                 outline
                 color="black"
@@ -280,25 +291,28 @@
           </div>
           <!-- Followers, following and posts -->
           <div class="row q-py-md text-center upperFFP">
-            <div v-if="Object.values(userInfomation).length" class="row">
+            <div
+              v-if="Object.values(getInfoUserPage.userInfomation).length"
+              class="row"
+            >
               <!-- Post -->
               <div class="row">
                 <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(posts).length }}
+                  {{ Object.values(getInfoUserPage.posts).length }}
                 </div>
                 <div class="text-black text-weight-light">posts</div>
               </div>
               <!-- Following -->
               <div class="row q-mx-lg">
                 <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(following).length }}
+                  {{ Object.values(getInfoUserPage.following).length }}
                 </div>
                 <div class="text-black text-weight-light">following</div>
               </div>
               <!-- Followers -->
               <div class="row">
                 <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(followers).length }}
+                  {{ Object.values(getInfoUserPage.followers).length }}
                 </div>
                 <div class="text-black text-weight-light">followers</div>
               </div>
@@ -308,27 +322,27 @@
           </div>
           <!-- Resume -->
           <div class="resumeBaseUpper">
-            <div v-if="Object.values(userInfomation).length">
+            <div v-if="Object.values(getInfoUserPage.userInfomation).length">
               <!-- Name -->
               <div class="text-weight-medium">
-                {{ userInfomation.fullname }}
+                {{ getInfoUserPage.userInfomation.fullname }}
               </div>
               <!-- Description -->
               <div
-                v-if="userInfomation.description"
+                v-if="getInfoUserPage.userInfomation.description"
                 class="ellipsis"
                 style="max-width: 17rem"
               >
-                {{ userInfomation.description }}
+                {{ getInfoUserPage.userInfomation.description }}
               </div>
               <!-- Pagina web -->
               <div
                 class="text-blue-10 text-weight-bold cursor-pointer"
                 style="max-width: fit-content"
-                v-if="userInfomation.website"
-                @click="goWebsite(userInfomation.website)"
+                v-if="getInfoUserPage.userInfomation.website"
+                @click="goWebsite(getInfoUserPage.userInfomation.website)"
               >
-                {{ userInfomation.website }}
+                {{ getInfoUserPage.userInfomation.website }}
               </div>
             </div>
             <!-- Skeleton -->
@@ -339,7 +353,7 @@
       <!-- Bar Desktop -->
       <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
       <!-- Images -->
-      <div class="postsBase" v-if="userInfomation.id">
+      <div class="postsBase" v-if="getInfoUserPage.userInfomation.id">
         <div
           class="cursor-pointer imgPost"
           v-for="(post, index) in posts"
@@ -416,7 +430,7 @@ export default {
     },
     followUser() {
       let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = this.currentUserInfoData.id;
+      let currentUserId = this.currentUserIndex.id;
       // Following Steps
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + currentUserIdPage
@@ -452,7 +466,7 @@ export default {
     },
     unfollowUser() {
       let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = this.currentUserInfoData.id;
+      let currentUserId = this.currentUserIndex.id;
       // Following Steps
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + currentUserIdPage + "/userInformation/"
@@ -488,136 +502,59 @@ export default {
     goWebsite(page) {
       window.location.replace(`https://${page}`);
     },
+    goToChat(idChat) {
+      this.$router.push({ name: "Chat", params: idChat });
+    },
   },
-  created() {
-    let currentUserId = this.$route.params.userId;
-    // Read Post User Page
-    let currentUserInformationRef = firebaseDb.ref(
-      "toneygram/users/" + currentUserId
-    );
-    currentUserInformationRef
-      .once("value", (userInPage) => {
+  computed: {
+    getInfoUserPage() {
+      let infoUserPage;
+      let currentUserId = this.$route.params.userId;
+      const currentUserInformationRef = firebaseDb.ref(
+        "toneygram/users/" + currentUserId
+      );
+      // Change user on page
+      currentUserInformationRef.on("value", (userInPage) => {
         let userInformation = userInPage.val();
         // User information
+
         this.userInfomation = {
           id: userInformation.userInformation.id,
           img: userInformation.userInformation.img,
           name: userInformation.userInformation.name,
           fullname: userInformation.userInformation.fullname,
-          description: userInformation.userInformation.bio,
           website: userInformation.userInformation.website,
+          description: userInformation.userInformation.bio,
         };
-        // User Posts
+
+        // User pictures
         if (!userInformation.posts) {
           this.posts = [];
         } else {
-          let arrayNoSirve = [];
-          Object.values(userInformation.posts).forEach((Post) => {
-            arrayNoSirve.push(Post);
-            arrayNoSirve.sort((a, b) => {
-              return b.fullD - a.fullD;
-            });
-            this.posts = arrayNoSirve;
-          });
+          this.posts = userInformation.posts;
         }
-      })
-      .then(() => {
-        // Read Followers
-        let userPageFollowersRef = firebaseDb.ref(
-          "toneygram/users/" + currentUserId + "/followers/"
-        );
-        userPageFollowersRef.once("value", (followers) => {
-          let followersUserPage = followers.val();
-          if (!followersUserPage) {
-            this.followers = {};
-          } else {
-            this.followers = followersUserPage;
-          }
-        });
-        // Read Following
-        let userPageFollowingRef = firebaseDb.ref(
-          "toneygram/users/" + currentUserId + "/following/"
-        );
-        userPageFollowingRef.once("value", (following) => {
-          let followingUserPage = following.val();
-          if (!followingUserPage) {
-            this.following = {};
-          } else {
-            this.following = followingUserPage;
-          }
-        });
+        // User Followers
+        if (userInformation.followers) {
+          this.followers = userInformation.followers;
+        } else {
+          this.followers = {};
+        }
+        // User Following
+        if (userInformation.following) {
+          this.following = userInformation.following;
+        } else {
+          this.following = {};
+        }
       });
-  },
-  computed: {
-    // getInfoUserPage() {
-    //   let infoUserPage = {};
-    //   let currentUserId = this.$route.params.userId;
-    //   let currentUserInformationRef = firebaseDb.ref(
-    //     "toneygram/users/" + currentUserId
-    //   );
-    //   // Change user on page
-    //   currentUserInformationRef.once("value", (userInPage) => {
-    //     let userInformation = userInPage.val();
-    //     // User information
-    //     this.userInfomation = {
-    //       id: userInformation.userInformation.id,
-    //       img: userInformation.userInformation.img,
-    //       name: userInformation.userInformation.name,
-    //       fullname: userInformation.userInformation.fullname,
-    //     };
-    //     // User pictures
-    //     if (!userInformation.posts) {
-    //       this.posts = [];
-    //     } else {
-    //       this.posts = userInformation.posts;
-    //     }
-    //     // User Followers
-    //     if (userInformation.followers) {
-    //       this.followers = userInformation.followers;
-    //     } else {
-    //       this.followers = {};
-    //     }
-    //     // User Following
-    //     if (userInformation.following) {
-    //       this.following = userInformation.following;
-    //     } else {
-    //       this.following = {};
-    //     }
-    //   });
-
-    //   // Whenever user change info
-    //   currentUserInformationRef.on("child_changed", (userInPage) => {
-    //     console.log(userInPage.val());
-    //     let userInformation = userInPage.val();
-    //     // User information
-    //     this.userInfomation = {
-    //       id: userInformation.userInformation.id,
-    //       img: userInformation.userInformation.img,
-    //       name: userInformation.userInformation.name,
-    //       fullname: userInformation.userInformation.fullname,
-    //     };
-    //     // User pictures
-    //     if (!userInformation.posts) {
-    //       this.posts = [];
-    //     } else {
-    //       this.posts = userInformation.posts;
-    //     }
-    //     // User Followers
-    //     if (userInformation.followers) {
-    //       this.followers = userInformation.followers;
-    //     } else {
-    //       this.followers = {};
-    //     }
-    //     // User Following
-    //     if (userInformation.following) {
-    //       this.following = userInformation.following;
-    //     } else {
-    //       this.following = {};
-    //     }
-    //   });
-    //   return infoUserPage;
-    // },
-    ...mapState("settingsUser", ["currentUserId", "currentUserInfoData"]),
+      infoUserPage = {
+        following: this.following,
+        followers: this.followers,
+        posts: this.posts,
+        userInfomation: this.userInfomation,
+      };
+      return infoUserPage;
+    },
+    ...mapState("settingsUser", ["currentUserId", "currentUserIndex"]),
   },
 };
 </script>

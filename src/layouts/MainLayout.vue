@@ -83,6 +83,15 @@
             icon="explore"
             @click="footer('explore', 'Explore')"
           />
+          <!-- DM Messages -->
+          <q-btn
+            round
+            dense
+            flat
+            color="black"
+            icon="mail_outline"
+            @click="sendUserToDM"
+          />
           <!-- Log Out -->
           <q-btn
             color="red"
@@ -98,20 +107,11 @@
             height="26px"
             width="26px"
             :ratio="1"
-            :src="userPicture"
+            :src="currentUserIndex.img"
             @click="sendToUserPage"
             class="q-ml-md cursor-pointer profileUpperButton"
             style="border-radius: 100%; border: solid 1px lightgray"
           />
-          <!-- DM Messages -->
-          <!-- <q-btn
-            round
-            dense
-            flat
-            color="black"
-            icon="mail_outline"
-            @click="sendUserToDM"
-          /> -->
 
           <!-- Likes Button -->
           <!-- <q-btn-dropdown
@@ -168,7 +168,7 @@
           <q-img
             height="26px"
             width="26px"
-            :src="userPicture"
+            :src="currentUserIndex.img"
             @click="sendToUserPage('user')"
             class="cursor-pointer"
             style="border-radius: 100%; border: solid 1px lightgray"
@@ -234,7 +234,7 @@ export default {
     },
     sendUserToDM() {
       this.$router.push({
-        name: "DM",
+        name: "Main",
       });
     },
     sendUserToLikes() {
@@ -268,10 +268,8 @@ export default {
         });
     },
   },
-  mounted() {
-    setTimeout(() => {
-      this.userPicture = firebaseAuth.currentUser.photoURL;
-    }, 1000);
+  computed: {
+    ...mapState("settingsUser", ["currentUserIndex"]),
   },
 };
 </script>

@@ -23,6 +23,7 @@
 </template>
 <script>
 import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
+import { Notify } from "quasar";
 export default {
   data() {
     return {
