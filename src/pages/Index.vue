@@ -7,7 +7,7 @@
     <!-- No Activity -->
     <section
       class="col-12 col-sm-8 items-center relative-position"
-      v-if="allSet && this.postsToShow.length === 0"
+      v-if="getStatusForPostsOnIndex && showPostsGetter.length === 0"
     >
       <div class="absolute-top-center text-center">
         <h4 class="col">No activity :(</h4>
@@ -15,15 +15,12 @@
       </div>
     </section>
     <!-- Left Side -->
-    <section
-      class="col-sm-8 LeftSideBase"
-      v-if="allSet && this.postsToShow.length > 0"
-    >
+    <section class="col-sm-8 LeftSideBase" v-if="showPostsGetter.length > 0">
       <!-- Base -->
       <q-card
         class="no-shadow no-border-radius col column CardLeft"
-        style="border: solid 1px lightgray"
-        v-for="(post, index) in postsToShow"
+        style=""
+        v-for="(post, index) in showPostsGetter"
         :key="index"
       >
         <!-- Header -->
@@ -39,7 +36,7 @@
                 :src="post.userInfo.userImg"
                 width="32px"
                 height="32px"
-                v-if="allSet"
+                v-if="getStatusForPostsOnIndex"
               />
               <q-skeleton type="circle" size="32px" v-else />
             </q-item-section>
@@ -48,7 +45,7 @@
               <q-item-label
                 @click="goToUser(post.userInfo.userId)"
                 class="cursor-pointer text-weight-bold"
-                v-if="allSet"
+                v-if="getStatusForPostsOnIndex"
                 style="max-width: max-content"
                 >{{ post.userInfo.userName }}</q-item-label
               >
@@ -62,31 +59,50 @@
         <q-separator color="grey-3" size="1px" />
         <!-- Img -->
         <q-carousel
-          animated
           v-model="post.scrollIndex"
-          :arrows="Object.values(post.imagesUploaded).length > 1"
+          v-if="getStatusForPostsOnIndex"
+          transition-prev="slide-right"
+          transition-next="slide-left"
           swipeable
-          :navigation="Object.values(post.imagesUploaded).length > 1"
-          infinite
-          v-if="allSet"
+          animated
+          control-color="grey"
+          navigation
+          padding
           class="no-padding full-width full-height"
         >
           <q-carousel-slide
             v-for="(image, index) in post.imagesUploaded"
             :key="index"
-            style="padding: 0; margin: 0; width: 100%; height: 100%"
+            style="
+              padding: 0;
+              margin: 0;
+              width: 100%;
+              height: 420px;
+              max-height: 420px;
+            "
             class=""
             :name="index"
           >
             <q-img
-              :ratio="2 / 2"
-              class="no-shadow"
+              fit="contain"
+              class="shadow-1"
               :src="image"
-              style="padding: 0; margin: 0; width: 100%; height: 100%"
+              style="
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                height: 420px;
+                max-height: 420px;
+              "
             />
           </q-carousel-slide>
         </q-carousel>
-        <q-img :ratio="2 / 2" class="no-border-radius" v-else>
+        <!-- Skeleton -->
+        <q-img
+          style="height: 420px; max-height: 420px"
+          class="no-border-radius"
+          v-else
+        >
           <q-skeleton class="no-border-radius" height="100%" width="100%" />
         </q-img>
         <q-separator color="grey-3" size="1px" />
@@ -96,8 +112,13 @@
             dense
             round
             flat
-            v-if="post.likes && currentUserIndex.id in post.likes"
-            @click="unlikePost(post.idPost, post.userInfo.userId)"
+            v-if="post.likes && getCurrentUserIndex.id in post.likes"
+            @click="
+              this.unlikePost({
+                idPost: post.idPost,
+                userId: post.userInfo.userId,
+              })
+            "
             icon="favorite"
             color="red"
           />
@@ -107,13 +128,18 @@
             flat
             icon="favorite_border"
             v-else
-            @click="likePost(post.idPost, post.userInfo.userId)"
+            @click="
+              this.likePost({
+                idPost: post.idPost,
+                userId: post.userInfo.userId,
+              })
+            "
           />
           <q-btn dense round flat icon="far fa-comment" />
         </q-card-actions>
         <!-- Likes -->
         <q-card-actions
-          v-if="allSet"
+          v-if="getStatusForPostsOnIndex"
           class="q-py-none text-weight-bold full-width"
           align="left"
         >
@@ -170,7 +196,13 @@
                 dense
                 flat
                 color="primary"
-                @click="sendText(post.userInfo.userId, post.idPost)"
+                @click="
+                  this.sendText({
+                    userId: post.userInfo.userId,
+                    idPost: post.idPost,
+                    message: this.textMessage,
+                  })
+                "
                 :disable="textMessage.length <= 0"
               />
             </template>
@@ -181,7 +213,7 @@
     <!-- Skeleton -->
     <section
       class="col-sm-8 LeftSideBase"
-      v-if="!allSet && this.postsToShow.length === 0"
+      v-if="!getStatusForPostsOnIndex && showPostsGetter.length === 0"
     >
       <q-card
         class="no-shadow no-border-radius col column CardLeft"
@@ -223,7 +255,7 @@
     </section>
     <!-- Right Side -->
     <section
-      v-if="allSet"
+      v-if="getStatusForPostsOnIndex"
       class="col-0 col-sm-4 q-pl-md newSideRight relative-position row"
     >
       <article class="fixed full-width" style="max-width: 20rem">
@@ -236,12 +268,12 @@
                 class="cursor-pointer"
                 style="border-radius: 100%; border: solid 1px lightgray"
                 :ratio="1"
-                :src="currentUserIndex.img"
+                :src="getCurrentUserIndex.img"
                 @click="
                   this.$router.push({
                     name: 'User',
                     params: {
-                      userId: currentUserIndex.id,
+                      userId: getCurrentUserIndex.id,
                     },
                   })
                 "
@@ -254,15 +286,15 @@
                   this.$router.push({
                     name: 'User',
                     params: {
-                      userId: currentUserIndex.id,
+                      userId: getCurrentUserIndex.id,
                     },
                   })
                 "
                 class="cursor-pointer text-weight-medium"
-                >{{ currentUserIndex.name }}</q-item-label
+                >{{ getCurrentUserIndex.name }}</q-item-label
               >
               <q-item-label class="text-weight-regular" caption lines="1">{{
-                currentUserIndex.fullname
+                getCurrentUserIndex.fullname
               }}</q-item-label>
             </q-item-section>
             <!-- Right Side -->
@@ -281,12 +313,12 @@
           </q-item>
         </q-list>
         <!-- New Side Desktop -->
-        <q-list v-if="allSet">
+        <q-list v-if="getStatusForPostsOnIndex">
           <q-item-label header class="q-pb-sm"
             >Suggestions for you</q-item-label
           >
           <q-item
-            v-for="(user, index) in suggetionsUsers"
+            v-for="(user, index) in getSuggetedsUsers"
             :key="index"
             class="q-py-none"
           >
@@ -332,8 +364,8 @@
                 no-caps
                 flat
                 class="text-caption text-weight-bold"
-                v-if="user.userInformation.id in following"
-                @click="unFollowUser(user.userInformation.id)"
+                v-if="user.userInformation.id in getFollowingFromCurrentUser"
+                @click="this.unFollowUser(user.userInformation.id)"
                 color="black"
               >
                 Unfollow
@@ -344,7 +376,7 @@
                 v-else
                 flat
                 class="text-caption text-weight-bold"
-                @click="followUser(user.userInformation.id)"
+                @click="this.followUser(user.userInformation.id)"
                 color="light-blue-7"
               >
                 Follow
@@ -355,7 +387,7 @@
 
         <!-- Footer -->
         <div class="text-grey-5 text-weight-light text-overline q-pl-md">
-          © 2021 Toneygram
+          © 2022 Toneygram
         </div>
       </article>
     </section>
@@ -413,544 +445,42 @@
   </q-page>
 </template>
 <script>
-import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapState } from "vuex";
-import { Notify, uid } from "quasar";
+import { mapGetters, mapActions } from "vuex";
 export default {
   name: "PageIndex",
   data() {
     return {
       skeletonTimes: [1, 2, 3],
-      slide: 0,
-      following: {},
-      allSet: false,
-      postsToShow: [],
-      suggetionsUsers: [],
       textMessage: "",
-      contador: 0,
     };
   },
   methods: {
-    followUser(idUserAdd) {
-      let userIdAuth = firebaseAuth.currentUser.uid;
-      // Following Steps
-      const currentUserRouteFollowing = firebaseDb.ref(
-        "toneygram/users/" + idUserAdd
-      );
-      currentUserRouteFollowing.once("value", (userInfo) => {
-        let user = userInfo.val();
-        // Search for our route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + userIdAuth + "/following/" + idUserAdd
-        );
-        currentUserRoute.set(user.userInformation);
-      });
-
-      // Followers Steps
-      const currentUserRouteFollowers = firebaseDb.ref(
-        "toneygram/users/" + userIdAuth
-      );
-      currentUserRouteFollowers.once("value", (userInfo) => {
-        let user = userInfo.val();
-        // Search for his route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + idUserAdd + "/followers/" + userIdAuth
-        );
-        currentUserRoute.set(user.userInformation);
-      });
-
-      // Read from firebase database User Actual Page (Followers)
-      const followerActRef = firebaseDb
-        .ref("toneygram/users/" + userIdAuth + "/following/")
-        .once("child_added", (newFollower) => {
-          let follower = newFollower.val();
-          this.following[newFollower.key] = follower;
-        });
-    },
-    unFollowUser(idUserRemove) {
-      let userIdAuth = firebaseAuth.currentUser.uid;
-      // Following Steps
-      const currentUserRouteFollowing = firebaseDb.ref(
-        "toneygram/users/" + idUserRemove + "/userInformation/"
-      );
-      currentUserRouteFollowing.once("value", (userInfo) => {
-        // Search for our route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + userIdAuth + "/following/" + idUserRemove
-        );
-        currentUserRoute.remove();
-      });
-      // Followers Steps
-      const currentUserRouteFollowers = firebaseDb.ref(
-        "toneygram/users/" + userIdAuth + "/userInformation/"
-      );
-      currentUserRouteFollowers.once("value", (userInfo) => {
-        // Search for his route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + idUserRemove + "/followers/" + userIdAuth
-        );
-        currentUserRoute.remove();
-      });
-
-      // Read from firebase database User Actual Page (Followers)
-      const UnfollowerActRef = firebaseDb
-        .ref("toneygram/users/" + userIdAuth + "/following/" + idUserRemove)
-        .once("value", (newFollower) => {
-          delete this.following[newFollower.key];
-        });
-    },
-    likePost(idPost, idUser) {
-      // User ref
-      const postRef = firebaseDb.ref(
-        "toneygram/users/" +
-          idUser +
-          "/posts/" +
-          idPost +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postRef.set(firebaseAuth.currentUser.uid);
-      // Posts ref Global
-      const postsGlobalRef = firebaseDb.ref(
-        "toneygram/posts/" +
-          idUser +
-          "/" +
-          idPost +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postsGlobalRef.set(firebaseAuth.currentUser.uid);
-
-      // Read from firebase database
-      // Make a loop of this posts to show
-      this.postsToShow.forEach((Post) => {
-        if (Post.idPost === idPost) {
-          const postLikeActRef = firebaseDb
-            .ref(
-              "toneygram/users/" +
-                Post.userInfo.userId +
-                "/posts/" +
-                Post.idPost +
-                "/likes/"
-            )
-            .once("value", (like) => {
-              if (!Post.likes) {
-                Post.likes = like.val();
-              } else {
-                Post.likes = like.val();
-              }
-            });
-        }
-      });
-    },
-    unlikePost(idPost, idUser) {
-      // User ref
-      const postRef = firebaseDb.ref(
-        "toneygram/users/" +
-          idUser +
-          "/posts/" +
-          idPost +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postRef.remove();
-      // Posts ref Global
-      const postGlobalRef = firebaseDb.ref(
-        "toneygram/posts/" +
-          idUser +
-          "/" +
-          idPost +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postGlobalRef.remove();
-      this.postsToShow.forEach((Post) => {
-        if (Post.idPost === idPost) {
-          const postLikeActRef = firebaseDb
-            .ref(
-              "toneygram/users/" +
-                Post.userInfo.userId +
-                "/posts/" +
-                Post.idPost +
-                "/likes/"
-            )
-            .once("value", (like) => {
-              Post.likes = like.val();
-            });
-        }
-      });
-    },
-    sendText(userId, postId) {
-      let randomId = uid();
-      // set on User private
-      const MessagesBaseRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId)
-        .once("value", (Post) => {
-          if (!Post.hasChild("messages")) {
-            let allMesagesArray = [];
-            let newMessage = {
-              userName: firebaseAuth.currentUser.displayName,
-              imgUser: firebaseAuth.currentUser.photoURL,
-              idUser: firebaseAuth.currentUser.uid,
-              message: this.textMessage,
-              date: new Date().getTime(),
-            };
-            allMesagesArray.push(newMessage);
-
-            const nuevoRef = firebaseDb.ref(
-              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-            );
-            nuevoRef.set(allMesagesArray);
-            this.postsToShow.forEach((post) => {
-              if (post.idPost === Post.key) {
-                post.messages = allMesagesArray;
-              }
-            });
-            this.textMessage = "";
-          } else {
-            let allMesagesArray = [];
-            const messagesRef = firebaseDb.ref(
-              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-            );
-            messagesRef
-              .once("child_added", (allMesages) => {
-                allMesagesArray.push(allMesages.val());
-              })
-              .then(() => {
-                let newMessage = {
-                  userName: firebaseAuth.currentUser.displayName,
-                  imgUser: firebaseAuth.currentUser.photoURL,
-                  idUser: firebaseAuth.currentUser.uid,
-                  message: this.textMessage,
-                  date: new Date().getTime(),
-                };
-                allMesagesArray.push(newMessage);
-                allMesagesArray.sort((a, b) => {
-                  return a.date - b.date;
-                });
-                messagesRef.set(allMesagesArray);
-                this.postsToShow.forEach((post) => {
-                  if (post.idPost === Post.key) {
-                    post.messages = allMesagesArray;
-                  }
-                });
-              });
-          }
-        });
-      // set on global
-      const MessageGlobalRef = firebaseDb
-        .ref("toneygram/posts/" + userId + "/" + postId)
-        .once("value", (Post) => {
-          if (!Post.hasChild("messages")) {
-            let allMesagesArray = [];
-            let newMessage = {
-              userName: firebaseAuth.currentUser.displayName,
-              imgUser: firebaseAuth.currentUser.photoURL,
-              idUser: firebaseAuth.currentUser.uid,
-              message: this.textMessage,
-              date: new Date().getTime(),
-            };
-            allMesagesArray.push(newMessage);
-
-            const nuevoRef = firebaseDb.ref(
-              "toneygram/posts/" + userId + "/" + postId + "/messages"
-            );
-            nuevoRef.set(allMesagesArray);
-          } else {
-            let allMesagesArray = [];
-            const messagesRef = firebaseDb.ref(
-              "toneygram/posts/" + userId + "/" + postId + "/messages"
-            );
-            messagesRef
-              .once("child_added", (allMesages) => {
-                allMesagesArray.push(allMesages.val());
-              })
-              .then(() => {
-                let newMessage = {
-                  userName: firebaseAuth.currentUser.displayName,
-                  imgUser: firebaseAuth.currentUser.photoURL,
-                  idUser: firebaseAuth.currentUser.uid,
-                  message: this.textMessage,
-                  date: new Date().getTime(),
-                };
-                allMesagesArray.push(newMessage);
-                allMesagesArray.sort((a, b) => {
-                  return a.date - b.date;
-                });
-                messagesRef.set(allMesagesArray);
-                this.textMessage = "";
-              });
-          }
-        });
-    },
-    goToTop() {
-      setTimeout(() => {
-        window.scrollTo(0, 0);
-      }, 50);
-    },
-    goToUser(id) {
-      this.$router.push({
-        name: "User",
-        params: {
-          userId: id,
-        },
-      });
-    },
-    logOff() {
-      firebaseAuth.signOut().then(() => {
-        this.$router.push({ name: "Auth" }).then(() => {
-          Notify.create({
-            message: "You have logged off",
-            color: "light-blue-5",
-          });
-        });
-      });
-    },
-    onScroll(position) {
-      console.log(position);
-    },
+    ...mapActions("actionsOnWeb", [
+      "setNewLikesToPostAction",
+      "logOff",
+      "setNewMessagesToPostAction",
+      "changeTheImageOfAnyPostAction",
+      "likePost",
+      "unlikePost",
+      "sendText",
+      "goToUser",
+    ]),
+    ...mapActions("settingsUser", [
+      "addFollowingToCurrentUserAction",
+      "followUser",
+      "unFollowUser",
+    ]),
   },
   computed: {
-    ...mapState("settingsUser", ["currentUserIndex"]),
-  },
-  mounted() {
-    setTimeout(() => {
-      window.scrollTo(0, 0);
-      let postCurrentUserStatus = false;
-      let postsFromFollowingStatus = false;
-      let suggestesUsersStatus = false;
-      let userId = this.currentUserIndex.id;
-      let baseRef = firebaseDb.ref("toneygram");
-      baseRef
-        .once("value", (allData) => {
-          let allDataVar = allData.val();
-        })
-        .then((value) => {
-          // ------ Get all the posts of current user ------ //
-          let postsCurrentUser = value.val().users[userId];
-          // If user has posts
-          if (postsCurrentUser.posts) {
-            Object.values(postsCurrentUser.posts).forEach((Post) => {
-              this.postsToShow.push(Post);
-              //Order
-              this.postsToShow.sort((a, b) => {
-                return b.fullD - a.fullD;
-              });
-              postCurrentUserStatus = true;
-            });
-          } /* If User does not have posts */ else {
-            postCurrentUserStatus = true;
-          }
-
-          // ----- Get all the followings from current User -------- //
-          let followingSectionCurrentUser = value.val().users[userId];
-          // Get all the posts from following users
-          let postsFromFollowing = value.val().posts;
-          // if current user has following
-          if (followingSectionCurrentUser.following) {
-            for (const following in followingSectionCurrentUser.following) {
-              if (following in postsFromFollowing) {
-                Object.values(postsFromFollowing[following]).forEach((Post) => {
-                  this.postsToShow.push(Post);
-                });
-                this.postsToShow.sort((a, b) => {
-                  return b.fullD - a.fullD;
-                });
-              }
-            }
-            postsFromFollowingStatus = true;
-          } /* if doesnt has any following */ else {
-            postsFromFollowingStatus = true;
-          }
-
-          // ------ Suggested Users --------- //
-          let allUsers = value.val().users;
-          // if user doesnt has any following
-          if (!followingSectionCurrentUser.following) {
-            Object.values(allUsers).forEach((User) => {
-              if (User.userInformation.id !== userId) {
-                this.suggetionsUsers.push(User);
-                if (this.suggetionsUsers.length > 5) {
-                  this.suggetionsUsers.splice(5, this.suggetionsUsers.length);
-                }
-              }
-            });
-            suggestesUsersStatus = true;
-          }
-          // ------- If the user follows any user --------- //
-          else {
-            for (const user in allUsers) {
-              if (!(user in postsCurrentUser.following) && user !== userId) {
-                this.suggetionsUsers.push(allUsers[user]);
-                if (this.suggetionsUsers.length > 5) {
-                  this.suggetionsUsers.splice(5, this.suggetionsUsers.length);
-                }
-              }
-            }
-            suggestesUsersStatus = true;
-          }
-        })
-        .then(() => {
-          if (
-            postCurrentUserStatus &&
-            postsFromFollowingStatus &&
-            suggestesUsersStatus
-          ) {
-            this.allSet = true;
-          } else {
-            this.allSet = false;
-          }
-        })
-        .then(() => {
-          window.scrollTo(0, 0);
-        });
-    }, 2000);
-    // let baseRef = firebaseDb.ref('toneygram')
-    // baseRef.
-
-    // // Posts Ref
-    // let postsRef = firebaseDb.ref("toneygram/posts/");
-
-    // // Current User All Info Ref
-    // let currentUserAllInfo = firebaseDb.ref("toneygram/users/" + userId);
-
-    // // Current User Following Path
-    // let followingCurrentUserPosts = firebaseDb.ref(
-    //   "toneygram/users/" + userId + "/following"
-    // );
-
-    // // --------- Where all begins
-    // currentUserAllInfo
-    //   .once("value", (allUserInfo) => {
-    //     let allUserInfoVar = allUserInfo.val();
-    //     /*  ------------- Read Posts From Followings  ------------- */
-    //     //  If user has following
-    //     if (allUserInfoVar.following) {
-    //       // Loop though the following users
-    //       followingCurrentUserPosts.once("value", (UsersFromFollowing) => {
-    //         let usersFromFollowingVar = UsersFromFollowing.val();
-    //         postsRef
-    //           .once("child_added", (users) => {
-    //             if (users.key in usersFromFollowingVar) {
-    //               Object.values(users.val()).forEach((post) => {
-    //                 this.postsToShow.push(post);
-    //                 this.postsToShow.sort((a, b) => {
-    //                   return (
-    //                     new Date(b.fullD).getTime() -
-    //                     new Date(a.fullD).getTime()
-    //                   );
-    //                 });
-    //               });
-    //             }
-    //           })
-    //           .then(() => {
-    //             this.postsFollowingStatus = true;
-    //           })
-    //           .catch(() => {
-    //             this.postsFollowingStatus = false;
-    //           });
-    //       });
-    //       // ----------------------------------------- If user doesn't have any following ------------------------------------- //
-    //     } else {
-    //       this.postsToShow = [];
-    //       this.postsFollowingStatus = true;
-    //     }
-    //     /*  ------------- Read Posts From Current User  ------------- */
-    //     currentUserAllInfo.once("value", (allData) => {
-    //       let allDataVar = allData.val();
-    //       if (allDataVar.posts) {
-    //         let postsCurrentUser = firebaseDb.ref(
-    //           "toneygram/users/" + userId + "/posts"
-    //         );
-    //         postsCurrentUser
-    //           .once("child_added", (postsFromCurrentUser) => {
-    //             let posts = postsFromCurrentUser.val();
-    //             this.postsToShow.push(posts);
-    //             this.postsToShow.sort((a, b) => {
-    //               return a.fullD - b.fullD;
-    //             });
-    //           })
-    //           .then(() => {
-    //             this.postsCurrentUserStatus = true;
-    //           })
-    //           .catch(() => {
-    //             this.postsCurrentUserStatus = false;
-    //           });
-    //       } else {
-    //         this.postsCurrentUserStatus = true;
-    //       }
-    //     });
-    //     /*  ------------- Suggested Users  ------------- */
-    //     const allUsers = firebaseDb.ref("toneygram/users");
-    //     allUsers.once("value", (allUsers) => {
-    //       let allUsersVar = allUsers.val();
-    //       // Actual User followings
-    //       const actualUserInfo = firebaseDb.ref("toneygram/users/" + userId);
-    //       actualUserInfo
-    //         .once("value", (userInfoActual) => {
-    //           let actualUserInfo = userInfoActual.val();
-    //           // If doesnt has any following
-    //           if (actualUserInfo.following === undefined) {
-    //             Object.values(allUsersVar).forEach((User) => {
-    //               if (User.userInformation.id !== userId) {
-    //                 this.suggetionsUsers.push(User);
-    //                 if (this.suggetionsUsers.length > 5) {
-    //                   this.suggetionsUsers.splice(
-    //                     5,
-    //                     this.suggetionsUsers.length
-    //                   );
-    //                 }
-    //               }
-    //             });
-    //           }
-    //           // If the user follows any user
-    //           else {
-    //             for (const user in allUsersVar) {
-    //               if (
-    //                 !(user in actualUserInfo.following) &&
-    //                 user !== userId
-    //               ) {
-    //                 this.suggetionsUsers.push(allUsersVar[user]);
-    //                 if (this.suggetionsUsers.length > 5) {
-    //                   this.suggetionsUsers.splice(
-    //                     5,
-    //                     this.suggetionsUsers.length
-    //                   );
-    //                 }
-    //               }
-    //             }
-    //           }
-    //         })
-    //         .then(() => {
-    //           this.suggestedUsersStatus = true;
-    //         })
-    //         .catch(() => {
-    //           this.suggestedUsersStatus = false;
-    //         });
-    //     });
-    //   })
-    //   .then(() => {
-    //     if (
-    //       this.postsCurrentUserStatus ||
-    //       this.suggestedUsersStatus ||
-    //       this.postsFollowingStatus
-    //     ) {
-    //       this.allSet = true;
-    //     } else {
-    //       this.allSet = false;
-    //     }
-    //   })
-    //   .catch(() => {
-    //     if (
-    //       this.postsCurrentUserStatus &&
-    //       this.suggestedUsersStatus &&
-    //       this.postsFollowingStatus
-    //     ) {
-    //       this.allSet = true;
-    //     } else {
-    //       this.allSet = false;
-    //     }
-    //   });
+    ...mapGetters("settingsUser", [
+      "getCurrentUserIndex",
+      "getFollowingFromCurrentUser",
+    ]),
+    ...mapGetters("actionsOnWeb", [
+      "showPostsGetter",
+      "getStatusForPostsOnIndex",
+      "getSuggetedsUsers",
+    ]),
   },
 };
 </script>
@@ -967,6 +497,7 @@ export default {
   .CardLeft {
     margin-bottom: 0rem;
     margin-top: 0rem;
+    border-bottom: solid 1px grey;
   }
   .LeftSideBase {
     width: 100%;
@@ -985,6 +516,7 @@ export default {
   .CardLeft {
     margin-bottom: 2rem;
     margin-top: 2rem;
+    border: solid 1px lightgrey;
   }
   .LeftSideBase {
     width: 66.6667%;
@@ -1003,6 +535,7 @@ export default {
   .CardLeft {
     margin-bottom: 2rem;
     margin-top: 0rem;
+    border-bottom: solid 1px lightgrey;
   }
   .LeftSideBase {
     width: 66.6667%;

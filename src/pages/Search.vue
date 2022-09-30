@@ -3,16 +3,36 @@
     <!-- Search -->
     <div class="searchBase">
       <q-input
-        outlined
         v-model="textSearch"
-        dense
-        color="grey-4"
-        label-color="black"
-        bg-color="grey-2"
         label="Search"
-        class=""
-        @keyup.enter.prevent="searchAction(textSearch)"
-      />
+        dense
+        outlined
+        @keyup="searchUser"
+        color="black"
+        label-color="black"
+        class="no-border"
+        style="border: solid 1px"
+      >
+        <template v-slot:append v-if="!this.loading">
+          <q-icon
+            v-if="textSearch !== ''"
+            name="close"
+            @click="clearSearch"
+            class="cursor-pointer"
+          />
+          <q-icon name="search" />
+        </template>
+
+        <template v-slot:append v-else>
+          <q-icon
+            v-if="textSearch !== ''"
+            name="close"
+            @click="textSearch = ''"
+            class="cursor-pointer"
+          />
+          <q-spinner-ios color="grey" size="1em" />
+        </template>
+      </q-input>
       <q-list class="baseSearch" style="overflow: auto">
         <q-item
           class="q-mb-sm itemUser q-px-sm"
@@ -52,31 +72,46 @@ export default {
     return {
       textSearch: "",
       usersFound: [],
+      usersFoundOther: [],
+      timeout: 0,
+      loading: false,
     };
   },
   methods: {
+    searchUser: function () {
+      // clear timeout variable
+      this.loading = true;
+      clearTimeout(this.timeout);
+      this.usersFound = [];
+      var self = this;
+      this.timeout = setTimeout(function () {
+        // enter this block of code after 1 second
+        // handle stuff, call search API etc.
+        const allUsers = firebaseDb
+          .ref("toneygram/users")
+          .once("value", async (allUsers) => {
+            const users = await allUsers.val();
+            Object.values(users).forEach((User) => {
+              const name = User.userInformation.name;
+              if (name.includes(self.textSearch.toLowerCase())) {
+                return self.usersFound.push(User);
+              }
+            });
+            self.loading = false;
+          });
+      }, 1000);
+    },
+    clearSearch: function () {
+      clearTimeout(this.timeout);
+      self.loading = false;
+      this.usersFound = [];
+      this.textSearch = "";
+    },
     sendToUserPageSearch(idUser) {
       this.$router.push({
         name: "User",
         params: { userId: idUser },
       });
-    },
-    searchAction(val) {
-      this.usersFound = [];
-      const allUsers = firebaseDb
-        .ref("toneygram/users")
-        .once("value", (allUsers) => {
-          let users = allUsers.val();
-          Object.values(users).forEach((User) => {
-            let name = User.userInformation.name;
-            if (name.includes(val)) {
-              this.usersFound.push(User);
-              this.usersFound = this.usersFound.filter((user) => {
-                return user.userInformation.name === user.userInformation.name;
-              });
-            }
-          });
-        });
     },
   },
 };

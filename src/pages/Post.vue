@@ -3,69 +3,86 @@
     <!-- Base Desktop -->
     <q-card
       class="row no-shadow no-border-radius col desktopVersion"
-      style="border: solid 1px lightgray; max-width: 850px"
+      style="border: solid 1px lightgray; max-width: 850px; max-height: 480px"
     >
       <!-- Img -->
-      <div class="no-padding col-8">
+      <div class="no-padding col-8" style="align-self: center">
         <q-carousel
           v-model="slide"
           transition-prev="jump-right"
           transition-next="jump-left"
           swipeable
           animated
-          control-color="white"
+          control-color="black"
           prev-icon="arrow_left"
           next-icon="arrow_right"
           navigation-icon="radio_button_unchecked"
           navigation
           arrows
           class="no-padding full-height full-width"
-          v-if="Object.values(userInfoPost).length"
+          v-if="getPostOnShowReady"
         >
           <q-carousel-slide
-            v-for="(image, index) in images"
+            v-for="(image, index) in getPostOnShow.imagesUploaded"
             :key="index"
             :name="index"
-            style="padding: 0; margin: 0; width: 100%; height: 100%"
+            style="padding: 0; margin: 0; width: 100%; height: 480px"
             class=""
           >
             <q-img
-              :ratio="4 / 3"
               class="no-shadow"
+              fit="contain"
               :src="image"
-              style="padding: 0; margin: 0; width: 100%; height: 100%"
+              style="
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                max-height: 480px;
+                height: 480px;
+              "
             />
           </q-carousel-slide>
         </q-carousel>
-        <q-img :ratio="4 / 3" class="no-border-radius" v-else>
+        <q-img
+          :ratio="4 / 3"
+          class="no-border-radius"
+          v-else
+          style="height: 480px"
+        >
           <q-skeleton class="no-border-radius" height="100%" width="100%" />
         </q-img>
       </div>
 
       <!-- Info Section -->
-      <q-card-section class="col-4 no-padding">
+      <q-card-section
+        class="col-4 no-padding"
+        style="
+          border-left: solid 1px lightgray;
+          border-bottom: solid 1px lightgray;
+        "
+      >
         <!-- Banner name and avatar -->
         <q-item>
           <q-item-section avatar>
             <q-img
               class="cursor-pointer"
               style="border-radius: 100%"
-              @click="goToUser(userInfoPost.userId)"
+              @click="goToUser(getPostOnShow.userInfo.userId)"
               :ratio="1"
-              :src="userInfoPost.userImg"
+              :src="getPostOnShow.userInfo.userImg"
               width="32px"
               height="32px"
-              v-if="Object.values(userInfoPost).length"
+              v-if="getPostOnShowReady"
             />
             <q-skeleton type="circle" size="32px" v-else />
           </q-item-section>
 
           <q-item-section>
             <q-item-label
-              @click="goToUser(userInfoPost.userId)"
+              @click="goToUser(getPostOnShow.userInfo.userId)"
               class="cursor-pointer text-weight-bold"
-              v-if="Object.values(userInfoPost).length"
-              >{{ userInfoPost.userName }}</q-item-label
+              v-if="getPostOnShowReady"
+              >{{ getPostOnShow.userInfo.userName }}</q-item-label
             >
             <q-skeleton width="150px" v-else />
             <q-item-label caption> Subhead </q-item-label>
@@ -78,32 +95,29 @@
           <div style="overflow: auto">
             <!-- Description Post -->
             <div
-              v-if="Object.values(userInfoPost).length"
+              v-if="getPostOnShowReady"
               class="q-my-sm q-px-md row items-center"
             >
               <q-img
-                @click="goToUser(userInfoPost.userId)"
-                :src="userInfoPost.userImg"
+                @click="goToUser(getPostOnShow.userInfo.userId)"
+                :src="getPostOnShow.userInfo.userImg"
                 :ratio="1"
                 width="32px"
                 height="32px"
                 class="cursor-pointer"
-                style="border-radius: 100%"
+                style="border-radius: 100%; border: 1px solid grey"
               />
               <span
-                @click="goToUser(userInfoPost.userId)"
+                @click="goToUser(getPostOnShow.userInfo.userId)"
                 class="cursor-pointer q-ml-md q-mr-sm text-weight-bold"
-                >{{ userInfoPost.userName }}</span
-              ><span>{{ descriptionPost }}</span>
+                >{{ getPostOnShow.userInfo.userName }}</span
+              ><span>{{ getPostOnShow.description }}</span>
             </div>
             <q-skeleton class="q-ma-md" width="190px" v-else />
             <!-- Comments desktop -->
-            <div
-              v-if="Object.values(userInfoPost).length"
-              class="q-px-md bg-white"
-            >
+            <div v-if="getPostOnShowReady" class="q-px-md bg-white" style="">
               <div
-                v-for="(comment, index) in comments"
+                v-for="(comment, index) in getPostOnShow.messages"
                 :key="index"
                 class="row items-center q-py-sm"
               >
@@ -114,17 +128,13 @@
                   width="32px"
                   height="32px"
                   class="cursor-pointer"
-                  style="border-radius: 100%"
+                  style="border-radius: 100%; border: 1px solid grey"
                   @click="goToUser(comment.idUser)"
                 />
 
                 <span
                   @click="goToUser(comment.idUser)"
-                  class="
-                    cursor-pointer
-                    q-ml-md q-mr-sm
-                    text-weight-medium text-weight-bold
-                  "
+                  class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
                   >{{ comment.userName }}</span
                 >
                 <span class="ellipsis">{{ comment.message }}</span>
@@ -135,15 +145,20 @@
         </q-responsive>
         <q-separator color="grey-3" size="1px" />
         <!-- Like, likes, date -->
-        <div class="col lldInfo" v-if="Object.values(userInfoPost).length">
+        <div class="col lldInfo" v-if="getPostOnShowReady">
           <!-- Like and Comment -->
           <div class="bg-white lcInfo">
             <q-btn
               dense
               round
               flat
-              v-if="likeUsers.includes(actualUserId)"
-              @click="unlikePost()"
+              v-if="getCurrentUserIndex.id in getPostOnShow.likes"
+              @click="
+                this.unlikePost({
+                  idPost: getPostOnShow.idPost,
+                  userId: getPostOnShow.userInfo.userId,
+                })
+              "
               icon="favorite"
               color="red"
             />
@@ -153,25 +168,29 @@
               flat
               icon="favorite_border"
               v-else
-              @click="likePost()"
+              @click="
+                this.likePost({
+                  idPost: getPostOnShow.idPost,
+                  userId: getPostOnShow.userInfo.userId,
+                })
+              "
             />
             <q-btn dense round flat icon="far fa-comment" />
           </div>
           <!-- Likes -->
-          <div
-            v-if="Object.values(userInfoPost).length"
-            class="q-mx-sm text-weight-bold"
-          >
-            <div v-if="likeUsers.length">{{ likeUsers.length }} likes</div>
+          <div v-if="getPostOnShowReady" class="q-mx-sm text-weight-bold">
+            <div v-if="getPostOnShow.likes">
+              {{ Object.values(getPostOnShow.likes).length }} likes
+            </div>
             <div v-else>0 likes</div>
           </div>
           <q-skeleton width="200px" class="q-ma-md" v-else />
           <!-- Date -->
           <div
-            v-if="Object.values(userInfoPost).length"
+            v-if="getPostOnShowReady"
             class="q-mx-sm text-grey text-overline"
           >
-            {{ dateOfPost }}
+            {{ getPostOnShow.fullD }}
           </div>
         </div>
         <q-skeleton width="150px" class="q-mx-md q-mb-md" v-else />
@@ -191,7 +210,14 @@
                 dense
                 flat
                 color="primary"
-                @click="sendText(textMessage)"
+                @click="
+                  this.sendText({
+                    message: textMessage,
+                    idPost: getPostOnShow.idPost,
+                    userId: getPostOnShow.userInfo.userId,
+                  }),
+                    (this.textMessage = '')
+                "
                 :disable="textMessage.length <= 0"
               />
             </template>
@@ -212,22 +238,22 @@
             <q-img
               class="cursor-pointer"
               style="border-radius: 100%"
-              @click="goToUser(userInfoPost.userId)"
+              @click="goToUser(getPostOnShow.userInfo.userId)"
               :ratio="1"
-              :src="userInfoPost.userImg"
+              :src="getPostOnShow.userInfo.userImg"
               width="32px"
               height="32px"
-              v-if="Object.values(userInfoPost).length"
+              v-if="getPostOnShowReady"
             />
             <q-skeleton type="circle" size="32px" v-else />
           </q-item-section>
 
           <q-item-section>
             <q-item-label
-              @click="goToUser(userInfoPost.userId)"
+              @click="goToUser(getPostOnShow.userInfo.userId)"
               class="cursor-pointer text-weight-bold"
-              v-if="Object.values(userInfoPost).length"
-              >{{ userInfoPost.userName }}</q-item-label
+              v-if="getPostOnShowReady"
+              >{{ getPostOnShow.userInfo.userName }}</q-item-label
             >
             <q-skeleton width="150px" v-else />
             <q-item-label caption> Subhead </q-item-label>
@@ -237,13 +263,13 @@
       <q-separator color="grey-3" size="1px" />
       <!-- Img -->
       <q-carousel
-        v-if="Object.values(userInfoPost).length"
+        v-if="getPostOnShowReady"
         v-model="slide"
         transition-prev="jump-right"
         transition-next="jump-left"
         swipeable
         animated
-        control-color="white"
+        control-color="black"
         prev-icon="arrow_left"
         next-icon="arrow_right"
         navigation-icon="radio_button_unchecked"
@@ -252,33 +278,46 @@
         class="no-padding full-width full-height"
       >
         <q-carousel-slide
-          v-for="(image, index) in images"
+          v-for="(image, index) in getPostOnShow.imagesUploaded"
           :key="index"
           :name="index"
-          style="padding: 0; margin: 0; width: 100%; height: 100%"
+          style="padding: 0; margin: 0; width: 100%; height: 448px"
           class=""
         >
           <q-img
-            :ratio="2 / 2"
+            fit="contain"
             class="no-shadow"
             :src="image"
-            style="padding: 0; margin: 0; width: 100%; height: 100%"
-            v-if="images.length"
+            style="padding: 0; margin: 0; width: 100%; height: 448px"
           />
         </q-carousel-slide>
       </q-carousel>
-      <q-img :ratio="4 / 3" class="no-border-radius" v-else>
+      <q-img
+        :ratio="4 / 3"
+        class="no-border-radius"
+        v-else
+        style="padding: 0; margin: 0; width: 100%; height: 448px"
+      >
         <q-skeleton class="no-border-radius" height="100%" width="100%" />
       </q-img>
       <q-separator color="grey-3" size="1px" />
-      <!-- Like and coment -->
-      <q-card-actions class="q-pb-none full-width" align="left">
+      <!-- Like -->
+      <q-card-actions
+        class="q-pb-none full-width"
+        v-if="getPostOnShowReady"
+        align="left"
+      >
         <q-btn
           dense
           round
           flat
-          v-if="likeUsers.includes(actualUserId)"
-          @click="unlikePost()"
+          v-if="getCurrentUserIndex.id in getPostOnShow.likes"
+          @click="
+            this.unlikePost({
+              idPost: getPostOnShow.idPost,
+              userId: getPostOnShow.userInfo.userId,
+            })
+          "
           icon="favorite"
           color="red"
         />
@@ -288,39 +327,48 @@
           flat
           icon="favorite_border"
           v-else
-          @click="likePost()"
+          @click="
+            this.likePost({
+              idPost: getPostOnShow.idPost,
+              userId: getPostOnShow.userInfo.userId,
+            })
+          "
         />
         <q-btn dense round flat icon="far fa-comment" />
       </q-card-actions>
+      <!-- Likes -->
       <q-card-actions
-        v-if="Object.values(userInfoPost).length"
+        v-if="getPostOnShowReady"
         class="q-py-none q-px-md text-weight-bold full-width"
         align="left"
       >
-        <div v-if="likeUsers.length">{{ likeUsers.length }} likes</div>
+        <div v-if="getPostOnShow.likes">
+          {{ Object.values(getPostOnShow.likes).length }} likes
+        </div>
         <div v-else>0 likes</div>
       </q-card-actions>
       <!-- Description -->
-      <q-list class="q-py-none q-pl-sm full-width">
+      <q-list class="q-py-none q-pl-sm full-width" v-if="getPostOnShowReady">
         <q-card-actions class="q-py-none">
           <span
             class="cursor-pointer text-weight-bold"
-            @click="goToUser(userInfoPost.userId)"
+            @click="goToUser(getPostOnShow.userInfo.userId)"
           >
-            {{ userInfoPost.userName }} &nbsp;
+            {{ getPostOnShow.userInfo.userName }} &nbsp;
           </span>
-          <span> {{ descriptionPost }} </span>
+          <span> {{ getPostOnShow.description }} </span>
         </q-card-actions>
       </q-list>
       <q-separator color="grey-3" size="1px" />
       <!-- Comments -->
       <q-list
+        v-if="getPostOnShowReady"
         style="max-height: 120px; overflow: overlay"
         class="q-py-none q-pl-sm full-width"
       >
         <q-card-actions
           class="q-py-none"
-          v-for="(comment, index) in comments"
+          v-for="(comment, index) in getPostOnShow.messages"
           :key="index"
         >
           <span
@@ -334,7 +382,7 @@
       </q-list>
       <q-separator color="grey-3" size="1px" />
       <!-- Create Comment -->
-      <div class="bg-white full-width q-px-sm ccInfo">
+      <div class="bg-white full-width q-px-sm ccInfo" v-if="getPostOnShowReady">
         <q-input
           color="grey-6"
           v-model="textMessage"
@@ -348,7 +396,14 @@
               dense
               flat
               color="primary"
-              @click="sendText(textMessage)"
+              @click="
+                this.sendText({
+                  message: textMessage,
+                  idPost: getPostOnShow.idPost,
+                  userId: getPostOnShow.userInfo.userId,
+                }),
+                  (this.textMessage = '')
+              "
               :disable="textMessage.length <= 0"
             />
           </template>
@@ -358,259 +413,44 @@
   </q-page>
 </template>
 <script>
-import { uid } from "quasar";
-import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapState } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 export default {
   data() {
     return {
-      images: [],
-      likeUsers: [],
-      comments: [],
-      userInfoPost: {},
-      descriptionPost: "",
-      dateOfPost: "",
-      actualUserId: "",
-      showPost: true,
       slide: 0,
       textMessage: "",
     };
   },
   methods: {
-    likePost() {
-      let userId = this.$route.params.userId;
-      let postId = this.$route.params.postId;
-      // User ref
-      const postRef = firebaseDb.ref(
-        "toneygram/users/" +
-          userId +
-          "/posts/" +
-          postId +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postRef.set(firebaseAuth.currentUser.uid);
-      // Posts ref Global
-      const postsGlobalRef = firebaseDb.ref(
-        "toneygram/posts/" +
-          userId +
-          "/" +
-          postId +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postsGlobalRef.set(firebaseAuth.currentUser.uid);
-
-      // Read from firebase database
-      const postLikeActRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes/")
-        .once("child_added", (like) => {
-          this.likeUsers.push(like.val());
-        });
-    },
-    unlikePost() {
-      let userId = this.$route.params.userId;
-      let postId = this.$route.params.postId;
-      // User ref
-      const postRef = firebaseDb.ref(
-        "toneygram/users/" +
-          userId +
-          "/posts/" +
-          postId +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postRef.remove();
-      // Posts ref Global
-      const postGlobalRef = firebaseDb.ref(
-        "toneygram/posts/" +
-          userId +
-          "/" +
-          postId +
-          "/likes/" +
-          firebaseAuth.currentUser.uid
-      );
-      postGlobalRef.remove();
-      // Read from firebase database
-      const postLikeRemoveRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId + "/likes")
-        .once("value", (likeBase) => {
-          if (likeBase.val() === null) {
-            return (this.likeUsers = []);
-          } else {
-            this.likeUsers = Object.values(likeBase.val()).filter((like) => {
-              return this.likeUsers !== like;
-            });
-          }
-        });
-    },
-    sendText() {
-      let userId = this.$route.params.userId;
-      let postId = this.$route.params.postId;
-      // set on User private
-      const MessagesBaseRef = firebaseDb
-        .ref("toneygram/users/" + userId + "/posts/" + postId)
-        .once("value", (Post) => {
-          if (!Post.hasChild("messages")) {
-            let allMesagesArray = [];
-            let newMessage = {
-              userName: firebaseAuth.currentUser.displayName,
-              imgUser: firebaseAuth.currentUser.photoURL,
-              idUser: firebaseAuth.currentUser.uid,
-              message: this.textMessage,
-              date: new Date().getTime(),
-            };
-            allMesagesArray.push(newMessage);
-
-            const nuevoRef = firebaseDb.ref(
-              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-            );
-            nuevoRef.set(allMesagesArray);
-            // Read Firebase Database
-            const messagesActRef = firebaseDb.ref(
-              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-            );
-            messagesActRef.once("child_added", (comments) => {
-              this.comments.push(comments.val());
-            });
-            this.textMessage = "";
-          } else {
-            let allMesagesArray = [];
-            const messagesRef = firebaseDb.ref(
-              "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-            );
-            messagesRef
-              .once("child_added", (allMesages) => {
-                allMesagesArray.push(allMesages.val());
-              })
-              .then(() => {
-                let newMessage = {
-                  userName: firebaseAuth.currentUser.displayName,
-                  imgUser: firebaseAuth.currentUser.photoURL,
-                  idUser: firebaseAuth.currentUser.uid,
-                  message: this.textMessage,
-                  date: new Date().getTime(),
-                };
-                allMesagesArray.push(newMessage);
-                allMesagesArray.sort((a, b) => {
-                  return a.date - b.date;
-                });
-                messagesRef.set(allMesagesArray);
-                const messagesActRef = firebaseDb.ref(
-                  "toneygram/users/" + userId + "/posts/" + postId + "/messages"
-                );
-                messagesActRef.once("value", (comments) => {
-                  this.comments = comments.val();
-                });
-                this.textMessage = "";
-              });
-          }
-        });
-
-      // set on global
-
-      const MessageGlobalRef = firebaseDb
-        .ref("toneygram/posts/" + userId + "/" + postId)
-        .once("value", (Post) => {
-          if (!Post.hasChild("messages")) {
-            let allMesagesArray = [];
-            let newMessage = {
-              userName: firebaseAuth.currentUser.displayName,
-              imgUser: firebaseAuth.currentUser.photoURL,
-              idUser: firebaseAuth.currentUser.uid,
-              message: this.textMessage,
-              date: new Date().getTime(),
-            };
-            allMesagesArray.push(newMessage);
-
-            const nuevoRef = firebaseDb.ref(
-              "toneygram/posts/" + userId + "/" + postId + "/messages"
-            );
-            nuevoRef.set(allMesagesArray);
-          } else {
-            let allMesagesArray = [];
-            const messagesRef = firebaseDb.ref(
-              "toneygram/posts/" + userId + "/" + postId + "/messages"
-            );
-            messagesRef
-              .once("child_added", (allMesages) => {
-                allMesagesArray.push(allMesages.val());
-              })
-              .then(() => {
-                let newMessage = {
-                  userName: firebaseAuth.currentUser.displayName,
-                  imgUser: firebaseAuth.currentUser.photoURL,
-                  idUser: firebaseAuth.currentUser.uid,
-                  message: this.textMessage,
-                  date: new Date().getTime(),
-                };
-                allMesagesArray.push(newMessage);
-                allMesagesArray.sort((a, b) => {
-                  return a.date - b.date;
-                });
-
-                messagesRef.set(allMesagesArray);
-              });
-          }
-        });
-    },
-    goToUser(id) {
-      this.$router.push({
-        name: "User",
-        params: {
-          userId: id,
-        },
-      });
-    },
-  },
-  created() {
-    let userId = this.$route.params.userId;
-    let postId = this.$route.params.postId;
-    let postRef = firebaseDb.ref(
-      "toneygram/users/" + userId + "/posts/" + postId
-    );
-    postRef.once("value", (post) => {
-      const postInfo = post.val();
-      // User Info
-      if (postInfo.userInfo) {
-        this.userInfoPost = postInfo.userInfo;
-      }
-      //Description
-      if (postInfo.description) {
-        this.descriptionPost = postInfo.description;
-      }
-      // Images
-      if (postInfo.imagesUploaded) {
-        postInfo.imagesUploaded.forEach((img) => {
-          this.images.push(img);
-        });
-      }
-      // Likes
-      if (postInfo.likes) {
-        Object.values(postInfo.likes).forEach((user) => {
-          this.likeUsers.push(user);
-        });
-      }
-      // Messages
-      if (postInfo.messages) {
-        Object.values(postInfo.messages).forEach((comment) => {
-          this.comments.push(comment);
-        });
-        this.comments.sort((a, b) => {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        });
-      }
-      // Date of Post
-      if (postInfo.dateOfPost) {
-        this.dateOfPost = postInfo.dateOfPost;
-      }
-    });
+    ...mapActions("actionsOnWeb", [
+      "setNewLikesToPostAction",
+      "setNewMessagesToPostAction",
+      "changeTheImageOfAnyPostAction",
+      "likePost",
+      "unlikePost",
+      "sendText",
+      "removeThePostOnShowAction",
+      "goToUser",
+      "getPostOnShowAction",
+    ]),
   },
   computed: {
-    ...mapState("settingsUser", ["currentUserId"]),
+    ...mapGetters("settingsUser", ["getCurrentUserIndex"]),
+    ...mapGetters("actionsOnWeb", ["getPostOnShow", "getPostOnShowReady"]),
   },
-  mounted() {
-    this.actualUserId = this.currentUserId;
+  unmounted() {
+    if (this.getPostOnShow != null) {
+      this.removeThePostOnShowAction();
+    }
+  },
+  async mounted() {
+    if (Object.keys(this.getPostOnShow).length === 0) {
+      let payload = {
+        indexPost: this.$route.params.postId,
+        userId: this.$route.params.userId,
+      };
+      await this.getPostOnShowAction(payload);
+    }
   },
 };
 </script>

@@ -13,18 +13,38 @@
         <!-- Search -->
         <div class="relative-position searchBaseLayout">
           <q-input
+            v-model="textSearch"
+            label="Search"
+            dense
+            outlined
             @focus="focusInput"
             @blur="focusOutput"
-            outlined
-            v-model="textSearch"
-            dense
+            @keyup="searchUser"
             color="black"
             label-color="black"
-            bg-color="grey-2"
-            label="Search"
-            class=""
-            @keyup.enter.prevent="searchAction(textSearch)"
-          />
+            class="p-2 no-border"
+            style="padding: 1rem; border: solid 1px"
+          >
+            <template v-slot:append v-if="!this.loading">
+              <q-icon
+                v-if="textSearch !== ''"
+                name="close"
+                @click="clearSearch"
+                class="cursor-pointer"
+              />
+              <q-icon name="search" />
+            </template>
+
+            <template v-slot:append v-else>
+              <q-icon
+                v-if="textSearch !== ''"
+                name="close"
+                @click="textSearch = ''"
+                class="cursor-pointer"
+              />
+              <q-spinner-ios color="grey" size="1em" />
+            </template>
+          </q-input>
 
           <q-list
             class="baseSearch shadow-2"
@@ -94,7 +114,7 @@
           />
           <!-- Log Out -->
           <q-btn
-            color="red"
+            color="black"
             round
             dense
             flat
@@ -189,22 +209,16 @@ export default {
       showSearch: false,
       textSearch: "",
       usersFound: [],
+      usersFoundOther: [],
+      timeout: 0,
+      loading: false,
     };
   },
   methods: {
     footer(footerName, routeName) {
       this.$router.push({ name: routeName });
     },
-    logOff() {
-      firebaseAuth.signOut().then(() => {
-        this.$router.push({ name: "Auth" }).then(() => {
-          Notify.create({
-            message: "You have logged off",
-            color: "light-blue-5",
-          });
-        });
-      });
-    },
+    ...mapActions("actionsOnWeb", ["logOff"]),
     sendToUserPage() {
       this.$router.push({
         name: "User",
@@ -250,26 +264,43 @@ export default {
         this.showSearch = false;
       }, 100);
     },
-    searchAction(val) {
+    searchUser: function () {
+      // clear timeout variable
+      this.loading = true;
+      clearTimeout(this.timeout);
       this.usersFound = [];
-      const allUsers = firebaseDb
-        .ref("toneygram/users")
-        .once("value", (allUsers) => {
-          let users = allUsers.val();
-          Object.values(users).forEach((User) => {
-            let name = User.userInformation.name;
-            if (name.includes(val)) {
-              this.usersFound.push(User);
-              this.usersFound = this.usersFound.filter((user) => {
-                return user.userInformation.name === user.userInformation.name;
-              });
-            }
+      var self = this;
+      this.timeout = setTimeout(function () {
+        // enter this block of code after 1 second
+        // handle stuff, call search API etc.
+        const allUsers = firebaseDb
+          .ref("toneygram/users")
+          .once("value", async (allUsers) => {
+            const users = await allUsers.val();
+            Object.values(users).forEach((User) => {
+              console.log(User);
+
+              const name = User.userInformation.name;
+              if (name.includes(self.textSearch)) {
+                return self.usersFound.push(User);
+              }
+            });
+            self.loading = false;
           });
-        });
+      }, 1000);
+    },
+    clearSearch: function () {
+      clearTimeout(this.timeout);
+      self.loading = false;
+      this.usersFound = [];
+      this.textSearch = "";
     },
   },
   computed: {
     ...mapState("settingsUser", ["currentUserIndex"]),
+  },
+  watch: {
+    textSearch(val) {},
   },
 };
 </script>
@@ -335,7 +366,7 @@ export default {
     max-height: 20rem;
     position: absolute;
     bottom: -21rem;
-    right: -4rem;
+    right: -3rem;
     border-radius: 1rem;
   }
   .itemUser:hover {

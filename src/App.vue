@@ -13,24 +13,36 @@ export default {
       "sendUserInformation",
       "sendUserInformationForIndex",
     ]),
+    ...mapActions("actionsOnWeb", ["showPostsAction"]),
   },
+  computed: {},
   mounted() {
-    firebaseAuth.onAuthStateChanged((user) => {
+    firebaseAuth.onAuthStateChanged(async (user) => {
       if (user) {
-        LocalStorage.set("loggedIn", true);
+        try {
+          LocalStorage.set("loggedIn", true);
 
-        const userInformation = firebaseDb.ref("toneygram/users/" + user.uid);
-        userInformation.on("value", (allData) => {
-          let allInfoUser = allData.val();
-          this.sendUserInformation(allInfoUser);
-        });
-        const userInformationIndex = firebaseDb.ref(
-          "toneygram/users/" + user.uid + "/userInformation"
-        );
-        userInformationIndex.on("value", (allData) => {
-          let allInfoUser = allData.val();
-          this.sendUserInformationForIndex(allInfoUser);
-        });
+          // All User Data
+          const userInformation = await firebaseDb
+            .ref("toneygram/users/" + user.uid)
+            .once("value", async (allData) => {
+              let allInfoUser = allData.val();
+              this.sendUserInformation(allInfoUser);
+            });
+
+          // User Index
+          const userInformationIndex = await firebaseDb
+            .ref("toneygram/users/" + user.uid + "/userInformation")
+            .once("value", (allData) => {
+              let allInfoUser = allData.val();
+              this.sendUserInformationForIndex(allInfoUser);
+            });
+
+          // Action get posts
+          await this.showPostsAction(user.uid);
+        } catch (error) {
+          console.log(error);
+        }
       } else {
         LocalStorage.set("loggedIn", false);
         this.$router.push("/auth");
@@ -42,23 +54,5 @@ export default {
 <style lang="scss">
 .baseAll {
   font-family: "Raleway";
-}
-::-webkit-scrollbar {
-  width: 5px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: #020202;
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
 }
 </style>

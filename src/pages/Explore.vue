@@ -4,10 +4,11 @@
     style="max-width: 940px; margin: auto"
   >
     <q-img
-      class="col cursor-pointer"
+      class="cursor-pointer imgExplore shadow-1 bg-white"
       v-for="(post, index) in postsExplore"
       :key="index"
-      :ratio="1"
+      style=""
+      fit="cover"
       :src="post.imagesUploaded[0]"
       @click="goToUser(post.userInfo.userId)"
     />
@@ -95,7 +96,13 @@ export default {
   .container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 0.2rem;
+    gap: 0.3rem;
+  }
+  .imgExplore {
+    max-height: 150px;
+    min-height: 150px;
+    height: 150px;
+    width: 100%;
   }
 }
 //Tablet
@@ -108,6 +115,11 @@ export default {
     grid-template-columns: 1fr 1fr 1fr;
     gap: 0.8rem;
   }
+  .imgExplore {
+    max-height: 270px;
+    height: 270px;
+    width: 100%;
+  }
 }
 //Desktop
 @media (min-width: 768px) {
@@ -118,6 +130,11 @@ export default {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 1.8rem;
+  }
+  .imgExplore {
+    max-height: 270px;
+    height: 270px;
+    width: 100%;
   }
 }
 </style>

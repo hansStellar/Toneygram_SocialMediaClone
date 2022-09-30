@@ -75,24 +75,6 @@
           <RegisterSteps :showing="visible" />
         </q-tab-panel>
       </q-tab-panels>
-      <!-- OR -->
-      <div
-        class="row text-center items-center justify-between"
-        style="max-width: 240px; margin: auto"
-      >
-        <q-separator size="1px" style="width: 35%" color="grey-5" />
-        <div class="text-weight-regular text-grey-6" style="width: 10%">OR</div>
-        <q-separator size="1px" style="width: 35%" color="grey-5" />
-      </div>
-      <!-- Log in with Google -->
-      <div class="q-pa-md">
-        <q-btn
-          label="Use your Google Account"
-          color="light-blue-6"
-          type="submit"
-          class="col full-width"
-        />
-      </div>
       <q-inner-loading :showing="visible">
         <q-spinner-ios size="50px" color="grey-6" />
       </q-inner-loading>
@@ -141,7 +123,6 @@ export default {
         .then((userCredentials) => {
           this.$router.push({ name: "Home" }).then(() => {
             Notify.create({
-              avatar: userCredentials.user.photoURL,
               message: `Welcome, ${userCredentials.user.displayName}`,
               color: "positive",
             });

@@ -7,7 +7,7 @@
         <!-- Img -->
         <div style="align-self: start">
           <div
-            v-if="Object.values(getInfoUserPage.userInfomation).length"
+            v-if="getInfoUserPage.userInfomation !== null"
             class="imgBaseUser"
           >
             <q-img
@@ -19,20 +19,12 @@
             />
           </div>
           <!-- Skeleton Mobile -->
-          <q-skeleton
-            v-if="!Object.values(getInfoUserPage.userInfomation).length"
-            type="circle"
-            size="90px"
-            class="skeletonMobile"
-          />
+          <q-skeleton v-else type="circle" size="90px" class="skeletonMobile" />
         </div>
 
         <!-- Followers, following and posts -->
         <div class="row q-py-md text-center upperFFP">
-          <div
-            v-if="Object.values(getInfoUserPage.userInfomation).length"
-            class="row"
-          >
+          <div v-if="getInfoUserPage.userInfomation !== null" class="row">
             <!-- Post -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
@@ -61,16 +53,16 @@
 
         <!-- Resume Mobile Version -->
         <div class="resumeBaseMobile">
-          <div v-if="Object.values(getInfoUserPage.userInfomation).length">
+          <div v-if="getInfoUserPage.userInfomation !== null">
             <!-- Name -->
-            <div class="text-weight-medium ellipsis" style="max-width: 10rem">
+            <div class="text-weight-medium" style="">
               {{ getInfoUserPage.userInfomation.fullname }}
             </div>
             <!-- Description -->
             <div
               v-if="getInfoUserPage.userInfomation.description"
-              class="ellipsis"
-              style="max-width: 10rem"
+              class=""
+              style=""
             >
               {{ getInfoUserPage.userInfomation.description }}
             </div>
@@ -96,12 +88,18 @@
           @click="this.settingsDialog = !this.settingsDialog"
           flat
           icon-right="settings"
-          style="min-width: 9rem; max-height: 2rem; border: solid 1px lightgray"
+          style="
+            min-width: 9rem;
+            max-height: 2rem;
+            border: solid 1px lightgray;
+            max-width: 12rem;
+          "
           size=".8rem"
           no-caps
         >
           Edit Profile&nbsp;
         </q-btn>
+
         <!-- Follow -->
         <q-btn
           v-if="
@@ -114,10 +112,11 @@
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           text-color="white"
           dense
-          @click="followUser"
+          @click="this.followUser(getInfoUserPage.userInfomation.id)"
         >
           Follow
         </q-btn>
+
         <!-- Remove Follower -->
         <q-btn
           v-if="
@@ -130,21 +129,20 @@
           no-caps
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           class="q-mr-md"
-          @click="unfollowUser"
+          @click="this.unFollowUser(getInfoUserPage.userInfomation.id)"
         >
           Unfollow
         </q-btn>
+
         <!-- Message -->
         <q-btn
           no-caps
           @click="goToChat(getInfoUserPage.userInfomation.id)"
           v-if="getInfoUserPage.userInfomation.id !== currentUserIndex.id"
-          outline
-          color="black"
+          color="light-blue"
           class="q-px-md q-ml-sm"
           style="width: 96%; border: solid 1px lightgray; max-height: 2rem"
-          text-color="black"
-          flat
+          text-color="white"
           dense
         >
           Message
@@ -155,14 +153,24 @@
       <q-separator size="1px" color="grey-4" />
 
       <!-- Images -->
-      <div class="postsBase" v-if="getInfoUserPage.userInfomation.id">
+      <div class="postsBase" v-if="getInfoUserPage.userInfomation !== null">
         <div
           class="cursor-pointer imgPost"
           v-for="(post, index) in posts"
           :key="index"
-          @click="goToPost(post.idPost, post.userInfo.userId)"
+          @click="
+            getPostOnShowAction({
+              indexPost: post.idPost,
+              userId: post.userInfo.userId,
+            })
+          "
         >
-          <q-img :ratio="1" class="no-shadow" :src="post.imagesUploaded[0]" />
+          <q-img
+            fit="cover"
+            class="no-shadow"
+            style="max-height: 100%; height: 180px"
+            :src="post.imagesUploaded[0]"
+          />
         </div>
       </div>
 
@@ -180,7 +188,7 @@
         <!-- Img -->
         <div style="align-self: start">
           <div
-            v-if="Object.values(getInfoUserPage.userInfomation).length"
+            v-if="getInfoUserPage.userInfomation !== null"
             class="imgBaseUser"
           >
             <q-img
@@ -191,7 +199,7 @@
           </div>
           <!-- Skeleton -->
           <q-skeleton
-            v-if="!Object.values(getInfoUserPage.userInfomation).length"
+            v-else
             type="circle"
             size="150px"
             class="skeletonDesktop"
@@ -203,7 +211,7 @@
           <div class="userNameUpperBase">
             <!-- Info -->
             <div
-              v-if="Object.values(getInfoUserPage.userInfomation).length"
+              v-if="getInfoUserPage.userInfomation !== null"
               class="nameAndSettingsPart"
             >
               <!-- Name -->
@@ -241,7 +249,7 @@
                 style="height: 0.5rem; width: 6rem"
                 text-color="white"
                 dense
-                @click="followUser"
+                @click="this.followUser(user.userInformation.id)"
               >
                 Follow
               </q-btn>
@@ -261,7 +269,7 @@
                   max-height: 2rem;
                 "
                 class="q-mr-md"
-                @click="unfollowUser"
+                @click="this.unFollowUser(user.userInformation.id)"
               />
               <!-- Message -->
               <q-btn
@@ -291,10 +299,7 @@
           </div>
           <!-- Followers, following and posts -->
           <div class="row q-py-md text-center upperFFP">
-            <div
-              v-if="Object.values(getInfoUserPage.userInfomation).length"
-              class="row"
-            >
+            <div v-if="getInfoUserPage.userInfomation !== null" class="row">
               <!-- Post -->
               <div class="row">
                 <div class="text-weight-medium q-mr-sm">
@@ -322,7 +327,7 @@
           </div>
           <!-- Resume -->
           <div class="resumeBaseUpper">
-            <div v-if="Object.values(getInfoUserPage.userInfomation).length">
+            <div v-if="getInfoUserPage.userInfomation !== null">
               <!-- Name -->
               <div class="text-weight-medium">
                 {{ getInfoUserPage.userInfomation.fullname }}
@@ -330,8 +335,8 @@
               <!-- Description -->
               <div
                 v-if="getInfoUserPage.userInfomation.description"
-                class="ellipsis"
-                style="max-width: 17rem"
+                class=""
+                style=""
               >
                 {{ getInfoUserPage.userInfomation.description }}
               </div>
@@ -353,14 +358,25 @@
       <!-- Bar Desktop -->
       <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
       <!-- Images -->
-      <div class="postsBase" v-if="getInfoUserPage.userInfomation.id">
+      <div class="postsBase" v-if="getInfoUserPage.userInfomation !== null">
         <div
           class="cursor-pointer imgPost"
+          style=""
           v-for="(post, index) in posts"
           :key="index"
-          @click="goToPost(post.idPost, post.userInfo.userId)"
+          @click="
+            getPostOnShowAction({
+              indexPost: post.idPost,
+              userId: post.userInfo.userId,
+            })
+          "
         >
-          <q-img :ratio="1" class="no-shadow" :src="post.imagesUploaded[0]" />
+          <q-img
+            fit="contain"
+            class="shadow-1 bg-white"
+            style="max-height: 270px; height: 270px; width: 100%"
+            :src="post.imagesUploaded[0]"
+          />
         </div>
       </div>
       <!-- Skeleton -->
@@ -381,14 +397,13 @@
 </template>
 <script>
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapState } from "vuex";
+import { mapState, mapActions } from "vuex";
 import SettingsDialog from "components/ModalsSettings/SettingsDialog.vue";
 import UsernameDialog from "components/ModalsSettings/Username.vue";
 import FullnameDialog from "components/ModalsSettings/Fullname.vue";
 import WebsiteDialog from "components/ModalsSettings/Website.vue";
 import BioDialog from "components/ModalsSettings/Bio.vue";
 import Picture from "components/ModalsSettings/Picture.vue";
-import { Dialog } from "quasar";
 export default {
   data() {
     return {
@@ -414,6 +429,8 @@ export default {
     Picture,
   },
   methods: {
+    ...mapActions("actionsOnWeb", ["getPostOnShowAction"]),
+    ...mapActions("settingsUser", ["followUser", "unfollowUser"]),
     actionModal(option) {
       if (option === "username") this.username = !this.username;
       else if (option === "fullname") this.fullname = !this.fullname;
@@ -427,77 +444,6 @@ export default {
         name: "Post",
         params: { userId: userId, postId: indexPost },
       });
-    },
-    followUser() {
-      let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = this.currentUserIndex.id;
-      // Following Steps
-      const currentUserRouteFollowing = firebaseDb.ref(
-        "toneygram/users/" + currentUserIdPage
-      );
-      currentUserRouteFollowing.once("value", (userInfo) => {
-        let user = userInfo.val();
-        // Search for our route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + currentUserId + "/following/" + currentUserIdPage
-        );
-        currentUserRoute.set(user.userInformation);
-      });
-      // Followers Steps
-      const currentUserRouteFollowers = firebaseDb.ref(
-        "toneygram/users/" + currentUserId
-      );
-      currentUserRouteFollowers.once("value", (userInfo) => {
-        let user = userInfo.val();
-        // Search for his route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + currentUserIdPage + "/followers/" + currentUserId
-        );
-        currentUserRoute.set(user.userInformation);
-      });
-
-      // Read from firebase database User Actual Page (Followers)
-      const followerActRef = firebaseDb
-        .ref("toneygram/users/" + currentUserIdPage + "/followers/")
-        .on("child_added", (newFollower) => {
-          let follower = newFollower.val();
-          this.followers[newFollower.key] = follower;
-        });
-    },
-    unfollowUser() {
-      let currentUserIdPage = this.$route.params.userId;
-      let currentUserId = this.currentUserIndex.id;
-      // Following Steps
-      const currentUserRouteFollowing = firebaseDb.ref(
-        "toneygram/users/" + currentUserIdPage + "/userInformation/"
-      );
-      currentUserRouteFollowing.once("value", (userInfo) => {
-        // Search for our route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + currentUserId + "/following/" + currentUserIdPage
-        );
-        currentUserRoute.remove();
-      });
-      // Followers Steps
-      const currentUserRouteFollowers = firebaseDb.ref(
-        "toneygram/users/" + currentUserId + "/userInformation/"
-      );
-      currentUserRouteFollowers.once("value", (userInfo) => {
-        // Search for his route
-        const currentUserRoute = firebaseDb.ref(
-          "toneygram/users/" + currentUserIdPage + "/followers/" + currentUserId
-        );
-        currentUserRoute.remove();
-      });
-
-      // Read from firebase database User Actual Page (Followers)
-      const UnfollowerActRef = firebaseDb
-        .ref(
-          "toneygram/users/" + currentUserIdPage + "/followers/" + currentUserId
-        )
-        .once("value", (newFollower) => {
-          delete this.followers[newFollower.key];
-        });
     },
     goWebsite(page) {
       window.location.replace(`https://${page}`);
@@ -573,7 +519,7 @@ export default {
   .myCardBaseUser {
     display: grid;
     grid-template-columns: 0.1fr 1fr;
-    grid-template-rows: 1fr 0.5fr;
+    grid-template-rows: auto auto;
     grid-template-areas:
       ". ."
       "resumeBaseMobile resumeBaseMobile"
@@ -588,6 +534,7 @@ export default {
   .resumeBaseMobile {
     grid-area: resumeBaseMobile;
     justify-self: flex-start;
+    width: 100%;
   }
   .infoUpper {
     margin-top: 0.6rem;
@@ -636,7 +583,7 @@ export default {
   }
   .showButtonDesktopSettings {
     display: flex;
-    place-self: center;
+    place-self: flex-start;
     grid-area: showButtonDesktopSettings;
     width: 100%;
   }
@@ -670,15 +617,20 @@ export default {
   .postsBase {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr;
     gap: 0.3rem;
     width: 100%;
     margin: 0;
+    align-items: start;
+    max-height: fit-content;
   }
   .imgPost {
     width: 100%;
     height: 100%;
     cursor: pointer;
     background-repeat: round;
+    display: flex;
+    align-items: center;
   }
 
   /* Versions */
@@ -700,7 +652,7 @@ export default {
   .myCardBaseUser {
     display: grid;
     grid-template-columns: auto auto;
-    grid-template-rows: 1fr 0.5fr;
+    grid-template-rows: auto auto;
     grid-template-areas:
       ". ."
       "resumeBaseMobile resumeBaseMobile"
@@ -763,7 +715,7 @@ export default {
   }
   .showButtonDesktopSettings {
     display: flex;
-    place-self: center;
+    place-self: flex-start;
     grid-area: showButtonDesktopSettings;
     width: 100%;
   }
@@ -800,12 +752,17 @@ export default {
     gap: 0.3rem;
     width: 100%;
     margin: 0;
+    align-items: start;
+    max-height: fit-content;
+    grid-template-rows: 1fr;
   }
   .imgPost {
     width: 100%;
     height: 100%;
     cursor: pointer;
     background-repeat: round;
+    display: flex;
+    align-items: center;
   }
 
   /* Versions */
@@ -871,9 +828,11 @@ export default {
   }
   .usernameDesktop {
     margin-right: 1rem;
+    margin-bottom: 0;
   }
   .resumeBaseUpper {
     display: flex;
+    width: 100%;
   }
   //Following follower post section
   .ffpBase {

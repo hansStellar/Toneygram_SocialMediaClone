@@ -154,6 +154,7 @@
 import { firebaseAuth, firebaseDb, firebaseStorage } from "src/boot/firebase";
 import { Notify, openURL } from "quasar";
 import { mapActions } from "vuex";
+import imageProfile from "../assets/default.png";
 export default {
   props: ["showing"],
   data() {
@@ -166,9 +167,9 @@ export default {
         password: "",
         fullName: "",
       },
-      newFile: {},
+      newFile: null,
       imageToShow:
-        "background-image: url(https://i.ibb.co/X5HrbCj/default.png);",
+        "background-image: url('https://i.ibb.co/X5HrbCj/default.png');",
       imageUploaded: "",
     };
   },
@@ -208,43 +209,70 @@ export default {
                 const namesRef = firebaseDb.ref(
                   "toneygram/names/" + registerData.username
                 );
-                const imagesStorageRef = firebaseStorage
-                  .ref(firebaseAuth.currentUser.uid + "/userImg")
-                  .put(this.newFile)
-                  .then(() => {
-                    firebaseStorage
-                      .ref(firebaseAuth.currentUser.uid + "/userImg")
-                      .getDownloadURL()
-                      .then((url) => {
-                        this.imageUploaded = url;
-                      })
-                      .then(() => {
-                        registeredUser.user
-                          .updateProfile({
-                            displayName: registerData.username.toLowerCase(),
-                            photoURL: this.imageUploaded,
-                          })
-                          .then(() => {
-                            usersRef.set({
-                              img: registeredUser.user.photoURL,
-                              name: registeredUser.user.displayName.toLowerCase(),
-                              id: registeredUser.user.uid,
-                              fullname: registerData.fullName,
-                            });
-                            namesRef.set(registerData.username);
-                          })
-                          .then(() => {
-                            this.$router.push({ name: "Home" }).then(() => {
-                              Notify.create({
-                                avatar: firebaseAuth.currentUser.photoURL,
-                                message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
-                                color: "positive",
+                if (this.newFile != null) {
+                  const imagesStorageRef = firebaseStorage
+                    .ref(firebaseAuth.currentUser.uid + "/userImg")
+                    .put(this.newFile)
+                    .then(() => {
+                      firebaseStorage
+                        .ref(firebaseAuth.currentUser.uid + "/userImg")
+                        .getDownloadURL()
+                        .then((url) => {
+                          this.imageUploaded = url;
+                        })
+                        .then(() => {
+                          registeredUser.user
+                            .updateProfile({
+                              displayName: registerData.username.toLowerCase(),
+                              photoURL: this.imageUploaded,
+                            })
+                            .then(() => {
+                              usersRef.set({
+                                img: registeredUser.user.photoURL,
+                                name: registeredUser.user.displayName.toLowerCase(),
+                                id: registeredUser.user.uid,
+                                fullname: registerData.fullName,
                               });
-                              this.visible = false;
+                              namesRef.set(registerData.username);
+                            })
+                            .then(() => {
+                              this.$router.push({ name: "Home" }).then(() => {
+                                Notify.create({
+                                  avatar: firebaseAuth.currentUser.photoURL,
+                                  message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
+                                  color: "positive",
+                                });
+                                this.visible = false;
+                              });
                             });
-                          });
+                        });
+                    });
+                } else {
+                  registeredUser.user
+                    .updateProfile({
+                      displayName: registerData.username.toLowerCase(),
+                      photoURL: "https://i.ibb.co/X5HrbCj/default.png",
+                    })
+                    .then(() => {
+                      usersRef.set({
+                        img: registeredUser.user.photoURL,
+                        name: registeredUser.user.displayName.toLowerCase(),
+                        id: registeredUser.user.uid,
+                        fullname: registerData.fullName,
                       });
-                  });
+                      namesRef.set(registerData.username);
+                    })
+                    .then(() => {
+                      this.$router.push({ name: "Home" }).then(() => {
+                        Notify.create({
+                          avatar: firebaseAuth.currentUser.photoURL,
+                          message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
+                          color: "positive",
+                        });
+                        this.visible = false;
+                      });
+                    });
+                }
               })
               .catch((error) => {
                 this.visible = false;
@@ -278,21 +306,22 @@ export default {
     },
     addFiles(file) {
       let pictureUser = file.target.files[0];
-      this.newFile = pictureUser;
+      console.log(file);
       if (
         pictureUser.type !== "image/png" &&
         pictureUser.type !== "image/jpeg" &&
         pictureUser.type !== "image/jpg"
       ) {
-        Notify.create({
+        return Notify.create({
           message: "This uploader only accepts png, jpeg and jpg",
           color: "negative",
           icon: "error",
         });
-      } else {
-        let newFile = URL.createObjectURL(pictureUser);
-        this.imageToShow = `background-image: url(${newFile})`;
       }
+      this.newFile = {};
+      this.newFile = pictureUser;
+      let newImg = URL.createObjectURL(pictureUser);
+      this.imageToShow = `background-image: url(${newImg})`;
     },
   },
 };
