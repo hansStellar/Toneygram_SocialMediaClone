@@ -7,6 +7,9 @@ const state = {
   allSetForPostsOnIndex: false,
   postOnShow: {},
   postOnShowReady: false,
+  userOnPage: {},
+  userOnPageReady: false,
+  itsSameUser: null,
 };
 
 const mutations = {
@@ -49,6 +52,26 @@ const mutations = {
   removeThePostOnShow(state) {
     state.postOnShow = {};
     state.postOnShowReady = false;
+  },
+  setUserPageGlobal(state, payload) {
+    state.userOnPage = payload.userOnPage;
+    state.userOnPageReady = true;
+
+    if (payload.userOnPage.userInformation.id === payload.userIdLoggedIn) {
+      return (state.itsSameUser = true);
+    }
+
+    if (payload.userOnPage.userInformation.id !== payload.userIdLoggedIn) {
+      return (state.itsSameUser = false);
+    }
+  },
+  removeTheUserPageGlobal(state) {
+    state.userOnPage = {};
+    state.userOnPageReady = false;
+  },
+  updateFollowersListFromUserOnPage(state, payload) {
+    if (Object.keys(state.userOnPage).length != 0)
+      state.userOnPage.followers = payload;
   },
 };
 
@@ -358,13 +381,30 @@ const actions = {
   async removeThePostOnShowAction({ commit }) {
     commit("removeThePostOnShow");
   },
-  async goToUser({}, id) {
+  async goToUser({ commit }, payload) {
+    // console.log(payload, "llegado");
+    const currentUserInformationRef = await firebaseDb
+      .ref("toneygram/users/" + payload.userId)
+      .once("value", (userInPage) => {
+        let payloadx2 = {
+          userOnPage: userInPage.val(),
+          userIdLoggedIn: payload.userIdLoggedIn,
+        };
+        commit("setUserPageGlobal", payloadx2);
+      });
+
     this.$router.push({
       name: "User",
       params: {
-        userId: id,
+        userId: payload.userId,
       },
     });
+  },
+  async removeTheUserOnPageAction({ commit }) {
+    commit("removeTheUserPageGlobal");
+  },
+  async updateFollowersListFromUserOnPageAction({ commit }, payload) {
+    commit("updateFollowersListFromUserOnPage", payload);
   },
 };
 
@@ -383,6 +423,15 @@ const getters = {
   },
   getPostOnShowReady(state) {
     return state.postOnShowReady;
+  },
+  getUserOnPageGlobal(state) {
+    return state.userOnPage;
+  },
+  getUserOnPageGlobalReady(state) {
+    return state.userOnPageReady;
+  },
+  getItsSameUser(state) {
+    return state.itsSameUser;
   },
 };
 

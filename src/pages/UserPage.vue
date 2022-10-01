@@ -1,18 +1,241 @@
 <template>
   <div class="items-center userPageBase">
+    <!-- Desktop -->
+    <div class="desktopVersionUserPage">
+      <!-- Top -->
+      <div class="myCardBaseUser">
+        <!-- Img -->
+        <div style="align-self: start">
+          <div v-if="getUserOnPageGlobalReady" class="imgBaseUser">
+            <q-img
+              :ratio="16 / 9"
+              :src="getUserOnPageGlobal.userInformation.img"
+              class="imageMyCardProfile"
+            />
+          </div>
+          <!-- Skeleton -->
+          <q-skeleton
+            v-else
+            type="circle"
+            size="150px"
+            class="skeletonDesktop"
+          />
+        </div>
+        <!-- Info Upper -->
+        <div class="infoUpper">
+          <!-- Username -->
+          <div class="userNameUpperBase">
+            <!-- Info -->
+            <div v-if="getUserOnPageGlobalReady" class="nameAndSettingsPart">
+              <!-- Name -->
+              <div class="text-weight-light text-h5 usernameDesktop">
+                {{ getUserOnPageGlobal.userInformation.name }}
+              </div>
+
+              <!-- Edit profile -->
+              <q-btn
+                v-if="
+                  getCurrentUserIndex.id ===
+                  getUserOnPageGlobal.userInformation.id
+                "
+                class="showButtonDesktopSettings"
+                dense
+                color="black"
+                @click="this.settingsDialog = !this.settingsDialog"
+                flat
+                icon-right="settings"
+                style="
+                  min-width: 9rem;
+                  max-height: 2rem;
+                  border: solid 1px lightgray;
+                "
+                size=".8rem"
+                no-caps
+              >
+                Edit Profile&nbsp;
+              </q-btn>
+
+              <!-- Follow -->
+              <q-btn
+                v-if="
+                  getUserOnPageGlobal.userInformation.id !==
+                    getCurrentUserIndex.id &&
+                  !(
+                    getUserOnPageGlobal.userInformation.id in
+                    getFollowingFromCurrentUser
+                  )
+                "
+                no-caps
+                color="light-blue"
+                class="q-px-md no-shadow"
+                style="height: 0.5rem; width: 6rem"
+                text-color="white"
+                dense
+                @click="followUser(getUserOnPageGlobal.userInformation.id)"
+              >
+                Follow
+              </q-btn>
+
+              <!-- Remove Follower -->
+              <q-btn
+                v-if="
+                  getUserOnPageGlobal.userInformation.id !==
+                    getCurrentUserIndex.id &&
+                  getUserOnPageGlobal.userInformation.id in
+                    getFollowingFromCurrentUser
+                "
+                flat
+                icon="person_remove_alt_1"
+                color="black"
+                dense
+                style="
+                  width: 4rem;
+                  border: solid 1px lightgray;
+                  max-height: 2rem;
+                "
+                class="q-mr-md"
+                @click="unFollowUser(getUserOnPageGlobal.userInformation.id)"
+              />
+
+              <!-- Message -->
+              <q-btn
+                no-caps
+                @click="goToChat(getUserOnPageGlobal.userInformation.id)"
+                v-if="
+                  getUserOnPageGlobal.userInformation.id !==
+                    getCurrentUserIndex.id &&
+                  getUserOnPageGlobal.userInformation.id in
+                    getFollowingFromCurrentUser
+                "
+                outline
+                color="black"
+                class="q-px-md"
+                style="
+                  width: 7rem;
+                  border: solid 1px lightgray;
+                  max-height: 2rem;
+                "
+                text-color="black"
+                flat
+                dense
+              >
+                Message
+              </q-btn>
+            </div>
+            <!-- Skeleton -->
+            <q-skeleton width="180px" height="2rem" v-else />
+          </div>
+          <!-- Followers, following and posts -->
+          <div class="row q-py-md text-center upperFFP">
+            <div v-if="getUserOnPageGlobalReady" class="row">
+              <!-- Post -->
+              <div class="row">
+                <div class="text-weight-medium q-mr-sm">
+                  {{
+                    getUserOnPageGlobal.posts !== undefined
+                      ? Object.keys(getUserOnPageGlobal.posts).length
+                      : "0"
+                  }}
+                </div>
+                <div class="text-black text-weight-light">posts</div>
+              </div>
+              <!-- Following -->
+              <div class="row q-mx-lg">
+                <div class="text-weight-medium q-mr-sm">
+                  {{
+                    getUserOnPageGlobal.following !== undefined
+                      ? Object.keys(getUserOnPageGlobal.following).length
+                      : "0"
+                  }}
+                </div>
+                <div class="text-black text-weight-light">following</div>
+              </div>
+              <!-- Followers -->
+              <div class="row">
+                <div class="text-weight-medium q-mr-sm">
+                  {{
+                    getUserOnPageGlobal.followers !== undefined
+                      ? Object.keys(getUserOnPageGlobal.followers).length
+                      : "0"
+                  }}
+                </div>
+                <div class="text-black text-weight-light">followers</div>
+              </div>
+            </div>
+            <!-- Skeleton -->
+            <q-skeleton width="250px" height="2rem" v-else />
+          </div>
+          <!-- Resume -->
+          <div class="resumeBaseUpper">
+            <div v-if="getUserOnPageGlobalReady">
+              <!-- Name -->
+              <div class="text-weight-medium">
+                {{ getUserOnPageGlobal.userInformation.fullname }}
+              </div>
+              <!-- Description -->
+              <div v-if="getUserOnPageGlobal.userInformation.description">
+                {{ getUserOnPageGlobal.userInformation.description }}
+              </div>
+              <!-- Pagina web -->
+              <div
+                class="text-blue-10 text-weight-bold cursor-pointer"
+                style="max-width: fit-content"
+                v-if="getUserOnPageGlobal.userInformation.website"
+                @click="goWebsite(getUserOnPageGlobal.userInformation.website)"
+              >
+                {{ getUserOnPageGlobal.userInformation.website }}
+              </div>
+            </div>
+            <!-- Skeleton -->
+            <q-skeleton width="150px" v-else />
+          </div>
+        </div>
+      </div>
+      <!-- Bar Desktop -->
+      <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
+      <!-- Images -->
+      <div class="postsBase" v-if="getUserOnPageGlobalReady">
+        <div
+          class="cursor-pointer imgPost"
+          style=""
+          v-for="(post, index) in getUserOnPageGlobal.posts"
+          :key="index"
+          @click="
+            getPostOnShowAction({
+              indexPost: post.idPost,
+              userId: post.userInfo.userId,
+            })
+          "
+        >
+          <q-img
+            fit="contain"
+            class="shadow-1 bg-white"
+            style="max-height: 270px; height: 270px; width: 100%"
+            :src="post.imagesUploaded[0]"
+          />
+        </div>
+      </div>
+      <!-- Skeleton -->
+      <div class="postsBase" v-else>
+        <q-img :ratio="1" v-for="times in 10" :key="times">
+          <q-skeleton width="100%" height="100%" />
+        </q-img>
+      </div>
+    </div>
     <!-- Mobile & Tablet -->
     <div class="mobileVersionUserPage">
       <!-- Top -->
       <div class="myCardBaseUser">
         <!-- Img -->
         <div style="align-self: start">
-          <div
-            v-if="getInfoUserPage.userInfomation !== null"
-            class="imgBaseUser"
-          >
+          <div v-if="getUserOnPageGlobalReady" class="imgBaseUser">
             <q-img
               :ratio="16 / 9"
-              :src="getInfoUserPage.userInfomation.img"
+              :src="
+                getUserOnPageGlobalReady
+                  ? getUserOnPageGlobal.userInfomation.img
+                  : null
+              "
               class="imageMyCardProfile"
               height="75px"
               width="75px"
@@ -24,25 +247,25 @@
 
         <!-- Followers, following and posts -->
         <div class="row q-py-md text-center upperFFP">
-          <div v-if="getInfoUserPage.userInfomation !== null" class="row">
+          <div v-if="getUserOnPageGlobalReady" class="row">
             <!-- Post -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getInfoUserPage.posts).length }}
+                {{ Object.values(getUserOnPageGlobal.posts).length }}
               </div>
               <div class="text-black text-weight-light">Posts</div>
             </div>
             <!-- Following -->
             <div class="column q-mx-lg">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getInfoUserPage.following).length }}
+                {{ Object.values(getUserOnPageGlobal.following).length }}
               </div>
               <div class="text-black text-weight-light">Following</div>
             </div>
             <!-- Followers -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getInfoUserPage.followers).length }}
+                {{ Object.values(getUserOnPageGlobal.followers).length }}
               </div>
               <div class="text-black text-weight-light">Followers</div>
             </div>
@@ -53,26 +276,22 @@
 
         <!-- Resume Mobile Version -->
         <div class="resumeBaseMobile">
-          <div v-if="getInfoUserPage.userInfomation !== null">
+          <div v-if="getUserOnPageGlobalReady">
             <!-- Name -->
             <div class="text-weight-medium" style="">
-              {{ getInfoUserPage.userInfomation.fullname }}
+              {{ getUserOnPageGlobal.userInfomation.fullname }}
             </div>
             <!-- Description -->
-            <div
-              v-if="getInfoUserPage.userInfomation.description"
-              class=""
-              style=""
-            >
-              {{ getInfoUserPage.userInfomation.description }}
+            <div v-if="getUserOnPageGlobal.userInfomation.description">
+              {{ getUserOnPageGlobal.userInfomation.description }}
             </div>
             <!-- Pagina web -->
             <div
               class="text-blue-10 text-weight-bold cursor-pointer"
-              v-if="getInfoUserPage.userInfomation.website"
-              @click="goWebsite(getInfoUserPage.userInfomation.website)"
+              v-if="getUserOnPageGlobal.userInfomation.website"
+              @click="goWebsite(getUserOnPageGlobal.userInfomation.website)"
             >
-              {{ getInfoUserPage.userInfomation.website }}
+              {{ getUserOnPageGlobal.userInfomation.website }}
             </div>
           </div>
           <!-- Skeleton -->
@@ -81,7 +300,7 @@
 
         <!-- Edit profile -->
         <q-btn
-          v-if="currentUserIndex.id === getInfoUserPage.userInfomation.id"
+          v-if="currentUserIndex.id === getUserOnPageGlobal.userInfomation.id"
           class="showButtonDesktopSettings"
           dense
           color="black"
@@ -103,8 +322,8 @@
         <!-- Follow -->
         <q-btn
           v-if="
-            !(currentUserIndex.id in getInfoUserPage.followers) &&
-            getInfoUserPage.userInfomation.id !== currentUserIndex.id
+            !(currentUserIndex.id in getUserOnPageGlobal.followers) &&
+            getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id
           "
           no-caps
           color="light-blue"
@@ -112,7 +331,7 @@
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           text-color="white"
           dense
-          @click="this.followUser(getInfoUserPage.userInfomation.id)"
+          @click="this.followUser(getUserOnPageGlobal.userInfomation.id)"
         >
           Follow
         </q-btn>
@@ -120,8 +339,8 @@
         <!-- Remove Follower -->
         <q-btn
           v-if="
-            currentUserIndex.id in getInfoUserPage.followers &&
-            getInfoUserPage.userInfomation.id !== currentUserIndex.id
+            currentUserIndex.id in getUserOnPageGlobal.followers &&
+            getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id
           "
           flat
           color="black"
@@ -129,7 +348,7 @@
           no-caps
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           class="q-mr-md"
-          @click="this.unFollowUser(getInfoUserPage.userInfomation.id)"
+          @click="this.unFollowUser(getUserOnPageGlobal.userInfomation.id)"
         >
           Unfollow
         </q-btn>
@@ -137,8 +356,8 @@
         <!-- Message -->
         <q-btn
           no-caps
-          @click="goToChat(getInfoUserPage.userInfomation.id)"
-          v-if="getInfoUserPage.userInfomation.id !== currentUserIndex.id"
+          @click="goToChat(getUserOnPageGlobal.userInfomation.id)"
+          v-if="getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id"
           color="light-blue"
           class="q-px-md q-ml-sm"
           style="width: 96%; border: solid 1px lightgray; max-height: 2rem"
@@ -153,7 +372,7 @@
       <q-separator size="1px" color="grey-4" />
 
       <!-- Images -->
-      <div class="postsBase" v-if="getInfoUserPage.userInfomation !== null">
+      <div class="postsBase" v-if="getUserOnPageGlobalReady">
         <div
           class="cursor-pointer imgPost"
           v-for="(post, index) in posts"
@@ -181,211 +400,6 @@
         </q-img>
       </div>
     </div>
-    <!-- Desktop -->
-    <div class="desktopVersionUserPage">
-      <!-- Top -->
-      <div class="myCardBaseUser">
-        <!-- Img -->
-        <div style="align-self: start">
-          <div
-            v-if="getInfoUserPage.userInfomation !== null"
-            class="imgBaseUser"
-          >
-            <q-img
-              :ratio="16 / 9"
-              :src="getInfoUserPage.userInfomation.img"
-              class="imageMyCardProfile"
-            />
-          </div>
-          <!-- Skeleton -->
-          <q-skeleton
-            v-else
-            type="circle"
-            size="150px"
-            class="skeletonDesktop"
-          />
-        </div>
-        <!-- Info Upper -->
-        <div class="infoUpper">
-          <!-- Username -->
-          <div class="userNameUpperBase">
-            <!-- Info -->
-            <div
-              v-if="getInfoUserPage.userInfomation !== null"
-              class="nameAndSettingsPart"
-            >
-              <!-- Name -->
-              <div class="text-weight-light text-h5 usernameDesktop">
-                {{ getInfoUserPage.userInfomation.name }}
-              </div>
-              <!-- Edit profile -->
-              <q-btn
-                v-if="currentUserIndex.id === getInfoUserPage.userInfomation.id"
-                class="showButtonDesktopSettings"
-                dense
-                color="black"
-                @click="this.settingsDialog = !this.settingsDialog"
-                flat
-                icon-right="settings"
-                style="
-                  min-width: 9rem;
-                  max-height: 2rem;
-                  border: solid 1px lightgray;
-                "
-                size=".8rem"
-                no-caps
-              >
-                Edit Profile&nbsp;
-              </q-btn>
-              <!-- Follow -->
-              <q-btn
-                v-if="
-                  !(currentUserIndex.id in getInfoUserPage.followers) &&
-                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
-                "
-                no-caps
-                color="light-blue"
-                class="q-px-md no-shadow"
-                style="height: 0.5rem; width: 6rem"
-                text-color="white"
-                dense
-                @click="this.followUser(user.userInformation.id)"
-              >
-                Follow
-              </q-btn>
-              <!-- Remove Follower -->
-              <q-btn
-                v-if="
-                  currentUserIndex.id in followers &&
-                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
-                "
-                flat
-                icon="person_remove_alt_1"
-                color="black"
-                dense
-                style="
-                  width: 4rem;
-                  border: solid 1px lightgray;
-                  max-height: 2rem;
-                "
-                class="q-mr-md"
-                @click="this.unFollowUser(user.userInformation.id)"
-              />
-              <!-- Message -->
-              <q-btn
-                no-caps
-                @click="goToChat(getInfoUserPage.userInfomation.id)"
-                v-if="
-                  currentUserIndex.id in followers &&
-                  getInfoUserPage.userInfomation.id !== currentUserIndex.id
-                "
-                outline
-                color="black"
-                class="q-px-md"
-                style="
-                  width: 7rem;
-                  border: solid 1px lightgray;
-                  max-height: 2rem;
-                "
-                text-color="black"
-                flat
-                dense
-              >
-                Message
-              </q-btn>
-            </div>
-            <!-- Skeleton -->
-            <q-skeleton width="180px" height="2rem" v-else />
-          </div>
-          <!-- Followers, following and posts -->
-          <div class="row q-py-md text-center upperFFP">
-            <div v-if="getInfoUserPage.userInfomation !== null" class="row">
-              <!-- Post -->
-              <div class="row">
-                <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(getInfoUserPage.posts).length }}
-                </div>
-                <div class="text-black text-weight-light">posts</div>
-              </div>
-              <!-- Following -->
-              <div class="row q-mx-lg">
-                <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(getInfoUserPage.following).length }}
-                </div>
-                <div class="text-black text-weight-light">following</div>
-              </div>
-              <!-- Followers -->
-              <div class="row">
-                <div class="text-weight-medium q-mr-sm">
-                  {{ Object.values(getInfoUserPage.followers).length }}
-                </div>
-                <div class="text-black text-weight-light">followers</div>
-              </div>
-            </div>
-            <!-- Skeleton -->
-            <q-skeleton width="250px" height="2rem" v-else />
-          </div>
-          <!-- Resume -->
-          <div class="resumeBaseUpper">
-            <div v-if="getInfoUserPage.userInfomation !== null">
-              <!-- Name -->
-              <div class="text-weight-medium">
-                {{ getInfoUserPage.userInfomation.fullname }}
-              </div>
-              <!-- Description -->
-              <div
-                v-if="getInfoUserPage.userInfomation.description"
-                class=""
-                style=""
-              >
-                {{ getInfoUserPage.userInfomation.description }}
-              </div>
-              <!-- Pagina web -->
-              <div
-                class="text-blue-10 text-weight-bold cursor-pointer"
-                style="max-width: fit-content"
-                v-if="getInfoUserPage.userInfomation.website"
-                @click="goWebsite(getInfoUserPage.userInfomation.website)"
-              >
-                {{ getInfoUserPage.userInfomation.website }}
-              </div>
-            </div>
-            <!-- Skeleton -->
-            <q-skeleton width="150px" v-else />
-          </div>
-        </div>
-      </div>
-      <!-- Bar Desktop -->
-      <q-separator size="1px" color="grey-4" class="barOnlyDesktop" />
-      <!-- Images -->
-      <div class="postsBase" v-if="getInfoUserPage.userInfomation !== null">
-        <div
-          class="cursor-pointer imgPost"
-          style=""
-          v-for="(post, index) in posts"
-          :key="index"
-          @click="
-            getPostOnShowAction({
-              indexPost: post.idPost,
-              userId: post.userInfo.userId,
-            })
-          "
-        >
-          <q-img
-            fit="contain"
-            class="shadow-1 bg-white"
-            style="max-height: 270px; height: 270px; width: 100%"
-            :src="post.imagesUploaded[0]"
-          />
-        </div>
-      </div>
-      <!-- Skeleton -->
-      <div class="postsBase" v-else>
-        <q-img :ratio="1" v-for="times in 10" :key="times">
-          <q-skeleton width="100%" height="100%" />
-        </q-img>
-      </div>
-    </div>
     <!-- Dialogs -->
     <SettingsDialog v-model="settingsDialog" v-on:modalChange="actionModal" />
     <UsernameDialog v-model="username" />
@@ -396,8 +410,7 @@
   </div>
 </template>
 <script>
-import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapState, mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import SettingsDialog from "components/ModalsSettings/SettingsDialog.vue";
 import UsernameDialog from "components/ModalsSettings/Username.vue";
 import FullnameDialog from "components/ModalsSettings/Fullname.vue";
@@ -407,17 +420,13 @@ import Picture from "components/ModalsSettings/Picture.vue";
 export default {
   data() {
     return {
-      userInfomation: {},
-      posts: [],
-      followers: {},
-      following: {},
-      timesShow: 9,
       settingsDialog: false,
       username: false,
       fullname: false,
       website: false,
       bio: false,
       picture: false,
+      checkNull: {},
     };
   },
   components: {
@@ -429,8 +438,12 @@ export default {
     Picture,
   },
   methods: {
-    ...mapActions("actionsOnWeb", ["getPostOnShowAction"]),
-    ...mapActions("settingsUser", ["followUser", "unfollowUser"]),
+    ...mapActions("actionsOnWeb", [
+      "getPostOnShowAction",
+      "goToUser",
+      "removeTheUserOnPageAction",
+    ]),
+    ...mapActions("settingsUser", ["followUser", "unFollowUser"]),
     actionModal(option) {
       if (option === "username") this.username = !this.username;
       else if (option === "fullname") this.fullname = !this.fullname;
@@ -439,12 +452,6 @@ export default {
       else if (option === "picture") this.picture = !this.picture;
       this.settingsDialog = false;
     },
-    goToPost(indexPost, userId) {
-      this.$router.push({
-        name: "Post",
-        params: { userId: userId, postId: indexPost },
-      });
-    },
     goWebsite(page) {
       window.location.replace(`https://${page}`);
     },
@@ -452,55 +459,32 @@ export default {
       this.$router.push({ name: "Chat", params: idChat });
     },
   },
-  computed: {
-    getInfoUserPage() {
-      let infoUserPage;
-      let currentUserId = this.$route.params.userId;
-      const currentUserInformationRef = firebaseDb.ref(
-        "toneygram/users/" + currentUserId
-      );
-      // Change user on page
-      currentUserInformationRef.on("value", (userInPage) => {
-        let userInformation = userInPage.val();
-        // User information
-
-        this.userInfomation = {
-          id: userInformation.userInformation.id,
-          img: userInformation.userInformation.img,
-          name: userInformation.userInformation.name,
-          fullname: userInformation.userInformation.fullname,
-          website: userInformation.userInformation.website,
-          description: userInformation.userInformation.bio,
-        };
-
-        // User pictures
-        if (!userInformation.posts) {
-          this.posts = [];
-        } else {
-          this.posts = userInformation.posts;
-        }
-        // User Followers
-        if (userInformation.followers) {
-          this.followers = userInformation.followers;
-        } else {
-          this.followers = {};
-        }
-        // User Following
-        if (userInformation.following) {
-          this.following = userInformation.following;
-        } else {
-          this.following = {};
-        }
-      });
-      infoUserPage = {
-        following: this.following,
-        followers: this.followers,
-        posts: this.posts,
-        userInfomation: this.userInfomation,
+  async mounted() {
+    if (Object.keys(this.getUserOnPageGlobal).length === 0) {
+      let userId = this.$route.params.userId;
+      let payload = {
+        userId: userId,
+        userIdLoggedIn: await this.getCurrentUserIndex.id,
       };
-      return infoUserPage;
-    },
-    ...mapState("settingsUser", ["currentUserId", "currentUserIndex"]),
+      console.log(payload);
+      await this.goToUser(payload);
+    }
+  },
+  unmounted() {
+    if (this.getUserOnPageGlobal != null) {
+      this.removeTheUserOnPageAction();
+    }
+  },
+  computed: {
+    ...mapGetters("settingsUser", [
+      "getCurrentUserIndex",
+      "getFollowingFromCurrentUser",
+    ]),
+    ...mapGetters("actionsOnWeb", [
+      "getUserOnPageGlobal",
+      "getUserOnPageGlobalReady",
+      "getItsSameUser",
+    ]),
   },
 };
 </script>

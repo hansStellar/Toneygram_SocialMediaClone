@@ -31,7 +31,12 @@
               <q-img
                 class="cursor-pointer"
                 style="border-radius: 100%"
-                @click="goToUser(post.userInfo.userId)"
+                @click="
+                  goToUser({
+                    userId: post.userInfo.userId,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  })
+                "
                 :ratio="1"
                 :src="post.userInfo.userImg"
                 width="32px"
@@ -43,7 +48,12 @@
 
             <q-item-section>
               <q-item-label
-                @click="goToUser(post.userInfo.userId)"
+                @click="
+                  goToUser({
+                    userId: post.userInfo.userId,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  })
+                "
                 class="cursor-pointer text-weight-bold"
                 v-if="getStatusForPostsOnIndex"
                 style="max-width: max-content"
@@ -153,7 +163,12 @@
           <q-card-actions class="q-py-none">
             <span
               class="cursor-pointer text-weight-bold"
-              @click="goToUser(post.userInfo.userId)"
+              @click="
+                goToUser({
+                  userId: post.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
             >
               {{ post.userInfo.userName }} &nbsp;
             </span>
@@ -173,7 +188,12 @@
           >
             <span
               class="cursor-pointer text-weight-bold"
-              @click="goToUser(comment.idUser)"
+              @click="
+                goToUser({
+                  userId: comment.idUser,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
             >
               {{ comment.userName }} &nbsp;
             </span>

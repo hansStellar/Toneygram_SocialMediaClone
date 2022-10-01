@@ -54,11 +54,22 @@ const actions = {
         currentUserRoute.set(user.userInformation);
       });
 
-      // Read from firebase database User Actual Page (Followers)
-      const followerActRef = await firebaseDb
+      // Read from firebase database User Actual Page (Following Actual User)
+      const followingActRef = await firebaseDb
         .ref("toneygram/users/" + userIdAuth + "/following/")
         .once("value", (followingList) => {
           dispatch("addFollowingToCurrentUserAction", followingList.val());
+        });
+
+      // Read from firebase database User Actual Page (Followers Users On Page)
+      const followersActRef = await firebaseDb
+        .ref("toneygram/users/" + idUserAdd + "/followers/")
+        .once("value", (followersList) => {
+          dispatch(
+            "actionsOnWeb/updateFollowersListFromUserOnPageAction",
+            followersList.val(),
+            { root: true }
+          );
         });
     } catch (error) {}
   },
@@ -88,11 +99,22 @@ const actions = {
         currentUserRoute.remove();
       });
 
-      // Read from firebase database User Actual Page (Followers)
-      const UnfollowerActRef = await firebaseDb
+      // Read from firebase database User Actual Page (Following Actual User)
+      const UnfollowingActRef = await firebaseDb
         .ref("toneygram/users/" + userIdAuth + "/following/")
         .once("value", (followingList) => {
           dispatch("addFollowingToCurrentUserAction", followingList.val());
+        });
+
+      // Read from firebase database User Actual Page (Followers Users On Page)
+      const UnfollowersActRef = await firebaseDb
+        .ref("toneygram/users/" + idUserRemove + "/followers/")
+        .once("value", (followersList) => {
+          dispatch(
+            "actionsOnWeb/updateFollowersListFromUserOnPageAction",
+            followersList.val(),
+            { root: true }
+          );
         });
     } catch (error) {}
   },

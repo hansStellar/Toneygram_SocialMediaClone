@@ -57,7 +57,12 @@
               v-ripple
               v-for="(user, index) in usersFound"
               :key="index"
-              @click="sendToUserPageSearch(user.userInformation.id)"
+              @click="
+                goToUser({
+                  userId: user.userInformation.id,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
             >
               <q-item-section avatar>
                 <q-img
@@ -127,8 +132,13 @@
             height="26px"
             width="26px"
             :ratio="1"
-            :src="currentUserIndex.img"
-            @click="sendToUserPage"
+            :src="getCurrentUserIndex.img"
+            @click="
+              goToUser({
+                userId: getCurrentUserIndex.id,
+                userIdLoggedIn: getCurrentUserIndex.id,
+              })
+            "
             class="q-ml-md cursor-pointer profileUpperButton"
             style="border-radius: 100%; border: solid 1px lightgray"
           />
@@ -188,7 +198,7 @@
           <q-img
             height="26px"
             width="26px"
-            :src="currentUserIndex.img"
+            :src="getCurrentUserIndex.img"
             @click="sendToUserPage('user')"
             class="cursor-pointer"
             style="border-radius: 100%; border: solid 1px lightgray"
@@ -200,7 +210,7 @@
 </template>
 <script>
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapActions, mapState } from "vuex";
+import { mapActions, mapGetters, mapState } from "vuex";
 export default {
   data() {
     return {
@@ -218,19 +228,7 @@ export default {
     footer(footerName, routeName) {
       this.$router.push({ name: routeName });
     },
-    ...mapActions("actionsOnWeb", ["logOff"]),
-    sendToUserPage() {
-      this.$router.push({
-        name: "User",
-        params: { userId: firebaseAuth.currentUser.uid },
-      });
-    },
-    sendToUserPageSearch(idUser) {
-      this.$router.push({
-        name: "User",
-        params: { userId: idUser },
-      });
-    },
+    ...mapActions("actionsOnWeb", ["logOff", "goToUser"]),
     sendUserToHome() {
       this.$router.push({
         name: "Home",
@@ -297,10 +295,7 @@ export default {
     },
   },
   computed: {
-    ...mapState("settingsUser", ["currentUserIndex"]),
-  },
-  watch: {
-    textSearch(val) {},
+    ...mapGetters("settingsUser", ["getCurrentUserIndex"]),
   },
 };
 </script>

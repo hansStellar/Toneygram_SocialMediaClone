@@ -67,7 +67,12 @@
             <q-img
               class="cursor-pointer"
               style="border-radius: 100%"
-              @click="goToUser(getPostOnShow.userInfo.userId)"
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
               :ratio="1"
               :src="getPostOnShow.userInfo.userImg"
               width="32px"
@@ -79,7 +84,12 @@
 
           <q-item-section>
             <q-item-label
-              @click="goToUser(getPostOnShow.userInfo.userId)"
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
               class="cursor-pointer text-weight-bold"
               v-if="getPostOnShowReady"
               >{{ getPostOnShow.userInfo.userName }}</q-item-label
@@ -99,7 +109,12 @@
               class="q-my-sm q-px-md row items-center"
             >
               <q-img
-                @click="goToUser(getPostOnShow.userInfo.userId)"
+                @click="
+                  goToUser({
+                    userId: getPostOnShow.userInfo.userId,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  })
+                "
                 :src="getPostOnShow.userInfo.userImg"
                 :ratio="1"
                 width="32px"
@@ -108,7 +123,12 @@
                 style="border-radius: 100%; border: 1px solid grey"
               />
               <span
-                @click="goToUser(getPostOnShow.userInfo.userId)"
+                @click="
+                  goToUser({
+                    userId: getPostOnShow.userInfo.userId,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  })
+                "
                 class="cursor-pointer q-ml-md q-mr-sm text-weight-bold"
                 >{{ getPostOnShow.userInfo.userName }}</span
               ><span>{{ getPostOnShow.description }}</span>
@@ -129,11 +149,20 @@
                   height="32px"
                   class="cursor-pointer"
                   style="border-radius: 100%; border: 1px solid grey"
-                  @click="goToUser(comment.idUser)"
+                  @click="
+                    goToUser({
+                      userId: comment.idUser,
+                      userIdLoggedIn: getCurrentUserIndex.id,
+                    })
+                  "
                 />
-
                 <span
-                  @click="goToUser(comment.idUser)"
+                  @click="
+                    goToUser({
+                      userId: comment.idUser,
+                      userIdLoggedIn: getCurrentUserIndex.id,
+                    })
+                  "
                   class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
                   >{{ comment.userName }}</span
                 >
@@ -238,7 +267,12 @@
             <q-img
               class="cursor-pointer"
               style="border-radius: 100%"
-              @click="goToUser(getPostOnShow.userInfo.userId)"
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
               :ratio="1"
               :src="getPostOnShow.userInfo.userImg"
               width="32px"
@@ -250,7 +284,12 @@
 
           <q-item-section>
             <q-item-label
-              @click="goToUser(getPostOnShow.userInfo.userId)"
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
               class="cursor-pointer text-weight-bold"
               v-if="getPostOnShowReady"
               >{{ getPostOnShow.userInfo.userName }}</q-item-label
@@ -352,7 +391,12 @@
         <q-card-actions class="q-py-none">
           <span
             class="cursor-pointer text-weight-bold"
-            @click="goToUser(getPostOnShow.userInfo.userId)"
+            @click="
+              goToUser({
+                userId: getPostOnShow.userInfo.userId,
+                userIdLoggedIn: getCurrentUserIndex.id,
+              })
+            "
           >
             {{ getPostOnShow.userInfo.userName }} &nbsp;
           </span>
@@ -373,7 +417,12 @@
         >
           <span
             class="cursor-pointer text-weight-bold"
-            @click="goToUser(comment.idUser)"
+            @click="
+              goToUser({
+                userId: comment.userId,
+                userIdLoggedIn: getCurrentUserIndex.id,
+              })
+            "
           >
             {{ comment.userName }} &nbsp;
           </span>
