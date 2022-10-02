@@ -495,6 +495,7 @@ export default {
     ...mapGetters("settingsUser", [
       "getCurrentUserIndex",
       "getFollowingFromCurrentUser",
+      "getUserOnPageReadySettings",
     ]),
     ...mapGetters("actionsOnWeb", [
       "showPostsGetter",

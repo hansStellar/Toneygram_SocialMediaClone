@@ -12,6 +12,7 @@ export default {
     ...mapActions("settingsUser", [
       "sendUserInformation",
       "sendUserInformationForIndex",
+      "setUserOnPageReadySettingsActions",
     ]),
     ...mapActions("actionsOnWeb", [
       "showPostsAction",
@@ -46,6 +47,7 @@ export default {
 
           // Get Posts from explore
           await this.getPostsFromExploreAction();
+          await this.setUserOnPageReadySettingsActions();
         } catch (error) {}
       } else {
         LocalStorage.set("loggedIn", false);

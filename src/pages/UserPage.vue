@@ -26,7 +26,10 @@
           <!-- Username -->
           <div class="userNameUpperBase">
             <!-- Info -->
-            <div v-if="getUserOnPageGlobalReady" class="nameAndSettingsPart">
+            <div
+              v-if="getUserOnPageGlobalReady && getUserOnPageReadySettings"
+              class="nameAndSettingsPart"
+            >
               <!-- Name -->
               <div class="text-weight-light text-h5 usernameDesktop">
                 {{ getUserOnPageGlobal.userInformation.name }}
@@ -324,6 +327,7 @@
         <q-btn
           v-if="
             getUserOnPageGlobalReady &&
+            getUserOnPageReadySettings &&
             getCurrentUserIndex.id === getUserOnPageGlobal.userInformation.id
           "
           class="showButtonDesktopSettings"
@@ -348,6 +352,7 @@
         <q-btn
           v-if="
             getUserOnPageGlobalReady &&
+            getUserOnPageReadySettings &&
             getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id &&
             !(
               getUserOnPageGlobal.userInformation.id in
@@ -369,6 +374,7 @@
         <q-btn
           v-if="
             getUserOnPageGlobalReady &&
+            getUserOnPageReadySettings &&
             getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id &&
             getUserOnPageGlobal.userInformation.id in
               getFollowingFromCurrentUser
@@ -390,6 +396,7 @@
           @click="goToChat(getUserOnPageGlobal.userInformation.id)"
           v-if="
             getUserOnPageGlobalReady &&
+            getUserOnPageReadySettings &&
             getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id
           "
           color="light-blue"
@@ -478,6 +485,7 @@ export default {
       "removeTheUserOnPageAction",
     ]),
     ...mapActions("settingsUser", ["followUser", "unFollowUser"]),
+    ...mapActions("actionsOnWeb", ["setUserOnPageReadySettingsActions"]),
     actionModal(option) {
       if (option === "username") this.username = !this.username;
       else if (option === "fullname") this.fullname = !this.fullname;
@@ -513,6 +521,7 @@ export default {
     ...mapGetters("settingsUser", [
       "getCurrentUserIndex",
       "getFollowingFromCurrentUser",
+      "getUserOnPageReadySettings",
     ]),
     ...mapGetters("actionsOnWeb", [
       "getUserOnPageGlobal",

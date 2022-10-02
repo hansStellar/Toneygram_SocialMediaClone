@@ -4,6 +4,7 @@ const state = {
   currentUserInfoData: {},
   currentUserChat: {},
   currentUserIndex: {},
+  userOnPageReadySettings: false,
 };
 
 const mutations = {
@@ -19,9 +20,15 @@ const mutations = {
   addFollowingToCurrentUser(state, payload) {
     state.currentUserInfoData.following = payload;
   },
+  setUserOnPageReadySettings(state) {
+    state.userOnPageReadySettings = true;
+  },
 };
 
 const actions = {
+  setUserOnPageReadySettingsActions({ commit }) {
+    commit("setUserOnPageReadySettings");
+  },
   addFollowingToCurrentUserAction({ commit }, payload) {
     commit("addFollowingToCurrentUser", payload);
   },
@@ -134,7 +141,14 @@ const getters = {
     return state.currentUserIndex;
   },
   getFollowingFromCurrentUser(state) {
+    if (state.currentUserInfoData.following === undefined) {
+      return (state.currentUserInfoData.following = {});
+    }
+
     return state.currentUserInfoData.following;
+  },
+  getUserOnPageReadySettings(state) {
+    return state.userOnPageReadySettings;
   },
 };
 
