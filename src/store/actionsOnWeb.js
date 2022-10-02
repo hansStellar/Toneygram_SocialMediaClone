@@ -10,6 +10,7 @@ const state = {
   userOnPage: {},
   userOnPageReady: false,
   itsSameUser: null,
+  postsInExplore: [],
 };
 
 const mutations = {
@@ -72,6 +73,11 @@ const mutations = {
   updateFollowersListFromUserOnPage(state, payload) {
     if (Object.keys(state.userOnPage).length != 0)
       state.userOnPage.followers = payload;
+
+    if (payload == null) state.userOnPage.followers = {};
+  },
+  getPostsFromExplore(state, postsInExplore) {
+    state.postsInExplore = postsInExplore;
   },
 };
 
@@ -382,29 +388,73 @@ const actions = {
     commit("removeThePostOnShow");
   },
   async goToUser({ commit }, payload) {
-    // console.log(payload, "llegado");
-    const currentUserInformationRef = await firebaseDb
-      .ref("toneygram/users/" + payload.userId)
-      .once("value", (userInPage) => {
-        let payloadx2 = {
-          userOnPage: userInPage.val(),
-          userIdLoggedIn: payload.userIdLoggedIn,
-        };
-        commit("setUserPageGlobal", payloadx2);
-      });
+    try {
+      const currentUserInformationRef = await firebaseDb
+        .ref("toneygram/users/" + payload.userId)
+        .once("value", (userInPage) => {
+          let payloadx2 = {
+            userOnPage: userInPage.val(),
+            userIdLoggedIn: payload.userIdLoggedIn,
+          };
+          commit("setUserPageGlobal", payloadx2);
+        });
 
-    this.$router.push({
-      name: "User",
-      params: {
-        userId: payload.userId,
-      },
-    });
+      this.$router.push({
+        name: "User",
+        params: {
+          userId: payload.userId,
+        },
+      });
+    } catch (error) {
+      console.log(new Error("Error"));
+    }
   },
   async removeTheUserOnPageAction({ commit }) {
     commit("removeTheUserPageGlobal");
   },
   async updateFollowersListFromUserOnPageAction({ commit }, payload) {
     commit("updateFollowersListFromUserOnPage", payload);
+  },
+  async getPostsFromExploreAction({ commit }) {
+    // Loop through the no following users
+    const postsRef = firebaseDb.ref("toneygram/posts");
+    postsRef.once("value", (allUsers) => {
+      // First we loop on the all users section
+      let allUsersVar = allUsers.val();
+      let allUsersVarArray = Object.values(allUsersVar);
+      let arrayUsers = [];
+      let postsExplore = [];
+
+      // We loop 5 times the object, so we ended passing 5 users to the arrayUsers
+      do {
+        for (let index = 0; index <= allUsersVarArray.length; index++) {
+          let user =
+            allUsersVarArray[
+              Math.floor(Math.random() * allUsersVarArray.length)
+            ];
+          arrayUsers.push(user);
+          arrayUsers.length = allUsersVarArray.length;
+        }
+        arrayUsers = arrayUsers.filter(function (item, pos) {
+          return arrayUsers.indexOf(item) == pos;
+        });
+      } while (arrayUsers.length < allUsersVarArray.length);
+      // We loop every user that is in the array in order to get 1 post of each one of them
+      arrayUsers.forEach((User) => {
+        // For every user we must have one post
+        if (Object.values(User).length > 1) {
+          postsExplore.push(
+            Object.values(User)[
+              Math.floor(Math.random() * Object.values(User).length)
+            ]
+          );
+          commit("getPostsFromExplore", postsExplore);
+        } else {
+          postsExplore.push(Object.values(User)[0]);
+          commit("getPostsFromExplore", postsExplore);
+        }
+      });
+    });
   },
 };
 
@@ -432,6 +482,9 @@ const getters = {
   },
   getItsSameUser(state) {
     return state.itsSameUser;
+  },
+  getPostsInExplore(state) {
+    return state.postsInExplore;
   },
 };
 

@@ -33,15 +33,26 @@
           <q-spinner-ios color="grey" size="1em" />
         </template>
       </q-input>
-      <q-list class="baseSearch" style="overflow: auto">
+      <!-- Users -->
+      <q-list
+        class="baseSearch q-mt-md"
+        style="overflow: auto"
+        v-if="usersFound.length >= 1"
+      >
         <q-item
           class="q-mb-sm itemUser q-px-sm"
           clickable
           v-ripple
           v-for="(user, index) in usersFound"
           :key="index"
-          @click="sendToUserPageSearch(user.userInformation.id)"
+          @click="
+            goToUser({
+              userId: user.userInformation.id,
+              userIdLoggedIn: getCurrentUserIndex.id,
+            })
+          "
         >
+          <!-- Users -->
           <q-item-section avatar>
             <q-img
               :ratio="1"
@@ -62,11 +73,23 @@
           </q-item-section>
         </q-item>
       </q-list>
+
+      <!-- Nothing -->
+      <q-list v-if="active">
+        <q-item>
+          <q-item-section>
+            <q-item-label class="text-black text-weight-bold" caption lines="1">
+              No user has been found, please, try again
+            </q-item-label>
+          </q-item-section>
+        </q-item>
+      </q-list>
     </div>
   </q-page>
 </template>
 <script>
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
+import { mapActions, mapGetters } from "vuex";
 export default {
   data() {
     return {
@@ -75,9 +98,11 @@ export default {
       usersFoundOther: [],
       timeout: 0,
       loading: false,
+      active: false,
     };
   },
   methods: {
+    ...mapActions("actionsOnWeb", ["goToUser"]),
     searchUser: function () {
       // clear timeout variable
       this.loading = true;
@@ -93,11 +118,17 @@ export default {
             const users = await allUsers.val();
             Object.values(users).forEach((User) => {
               const name = User.userInformation.name;
-              if (name.includes(self.textSearch.toLowerCase())) {
-                return self.usersFound.push(User);
-              }
+
+              if (self.textSearch == "")
+                return (self.usersFound = []), (self.active = false);
+
+              if (name.includes(self.textSearch.toLowerCase()))
+                return self.usersFound.push(User), (self.active = false);
             });
             self.loading = false;
+
+            if (self.usersFound.length < 1 && self.textSearch != "")
+              return (self.active = true);
           });
       }, 1000);
     },
@@ -107,12 +138,9 @@ export default {
       this.usersFound = [];
       this.textSearch = "";
     },
-    sendToUserPageSearch(idUser) {
-      this.$router.push({
-        name: "User",
-        params: { userId: idUser },
-      });
-    },
+  },
+  computed: {
+    ...mapGetters("settingsUser", ["getCurrentUserIndex"]),
   },
 };
 </script>

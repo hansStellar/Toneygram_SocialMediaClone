@@ -13,7 +13,10 @@ export default {
       "sendUserInformation",
       "sendUserInformationForIndex",
     ]),
-    ...mapActions("actionsOnWeb", ["showPostsAction"]),
+    ...mapActions("actionsOnWeb", [
+      "showPostsAction",
+      "getPostsFromExploreAction",
+    ]),
   },
   computed: {},
   mounted() {
@@ -40,9 +43,10 @@ export default {
 
           // Action get posts
           await this.showPostsAction(user.uid);
-        } catch (error) {
-          console.log(error);
-        }
+
+          // Get Posts from explore
+          await this.getPostsFromExploreAction();
+        } catch (error) {}
       } else {
         LocalStorage.set("loggedIn", false);
         this.$router.push("/auth");

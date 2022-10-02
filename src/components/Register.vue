@@ -306,7 +306,7 @@ export default {
     },
     addFiles(file) {
       let pictureUser = file.target.files[0];
-      console.log(file);
+
       if (
         pictureUser.type !== "image/png" &&
         pictureUser.type !== "image/jpeg" &&

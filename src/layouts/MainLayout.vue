@@ -5,6 +5,18 @@
         style="max-width: 970px; margin: auto"
         class="row justify-between"
       >
+        <!-- Go Back -->
+        <q-btn
+          round
+          dense
+          flat
+          color="black"
+          class="buttonGoBack"
+          icon="arrow_back_ios_new"
+          v-if="this.$route.name !== 'Home'"
+          @click="this.$router.go(-1)"
+        />
+
         <!-- Title -->
         <div class="text-h5 text-black cursor-pointer" @click="sendUserToHome">
           toneygram
@@ -88,16 +100,6 @@
 
         <!-- Buttons layer -->
         <div class="buttonsLayerBase q-gutter-sm">
-          <!-- Add Post -->
-          <q-btn
-            round
-            dense
-            flat
-            color="black"
-            icon="add_circle_outline"
-            @click="this.$router.push({ name: 'Add' })"
-          />
-
           <!-- Explore -->
           <q-btn
             dense
@@ -108,17 +110,19 @@
             icon="explore"
             @click="footer('explore', 'Explore')"
           />
-          <!-- DM Messages -->
+
           <q-btn
-            round
             dense
+            round
             flat
             color="black"
-            icon="mail_outline"
-            @click="sendUserToDM"
+            class="profileUpperButton"
+            icon="add_circle_outline"
+            @click="footer('add', 'Add')"
           />
+
           <!-- Log Out -->
-          <q-btn
+          <!-- <q-btn
             color="black"
             round
             dense
@@ -126,7 +130,7 @@
             icon="logout"
             class="notShowDesktop"
             @click="logOff"
-          />
+            /> -->
           <!-- User -->
           <q-img
             height="26px"
@@ -143,6 +147,16 @@
             style="border-radius: 100%; border: solid 1px lightgray"
           />
 
+          <!-- DM Messages -->
+          <q-btn
+            round
+            dense
+            flat
+            color="black"
+            icon="send"
+            class="q-ml-md"
+            @click="sendUserToDM"
+          />
           <!-- Likes Button -->
           <!-- <q-btn-dropdown
             rounded
@@ -164,16 +178,8 @@
     </q-page-container>
 
     <q-footer elevated class="bg-grey-8 text-white baseFooter">
-      <q-tabs
-        v-model="tab"
-        align="justify"
-        indicator-color="transparent"
-        active-bg-color="light-blue-2"
-        class="bg-white full-width text-black shadow-2"
-      >
-        <q-tab name="home" icon="home" @click="footer('home', 'Home')" />
-
-        <!-- <q-tab name="search" icon="search" @click="sendUserToSearch" /> -->
+      <q-tabs align="justify" class="bg-white full-width text-black shadow-2">
+        <q-tab icon="cottage" @click="footer('home', 'Home')" />
 
         <!-- <q-tab
           alert="red"
@@ -182,10 +188,12 @@
           @click="sendUserToLikes"
         /> -->
 
+        <q-tab icon="explore" @click="footer('explore', 'Explore')" />
+
         <q-tab
-          name="explore"
-          icon="explore"
-          @click="footer('explore', 'Explore')"
+          name="add"
+          icon="add_circle_outline"
+          @click="footer('add', 'Add')"
         />
 
         <q-tab
@@ -194,12 +202,19 @@
           @click="footer('search', 'Search')"
         />
 
-        <q-tab name="user" @click="sendToUserPage('user')">
+        <q-tab
+          name="user"
+          @click="
+            goToUser({
+              userId: getCurrentUserIndex.id,
+              userIdLoggedIn: getCurrentUserIndex.id,
+            })
+          "
+        >
           <q-img
             height="26px"
             width="26px"
             :src="getCurrentUserIndex.img"
-            @click="sendToUserPage('user')"
             class="cursor-pointer"
             style="border-radius: 100%; border: solid 1px lightgray"
           />
@@ -214,7 +229,6 @@ import { mapActions, mapGetters, mapState } from "vuex";
 export default {
   data() {
     return {
-      tab: "home",
       userPicture: "",
       showSearch: false,
       textSearch: "",
@@ -276,8 +290,6 @@ export default {
           .once("value", async (allUsers) => {
             const users = await allUsers.val();
             Object.values(users).forEach((User) => {
-              console.log(User);
-
               const name = User.userInformation.name;
               if (name.includes(self.textSearch)) {
                 return self.usersFound.push(User);
@@ -302,6 +314,9 @@ export default {
 <style lang="scss">
 //iPhone
 @media (max-width: 480px) {
+  .buttonGoBack {
+    display: flex;
+  }
   .buttonFooter {
     display: none;
   }
@@ -320,6 +335,9 @@ export default {
 
 //Tablet
 @media (min-width: 480px) {
+  .buttonGoBack {
+    display: none;
+  }
   .buttonFooter {
     display: none;
   }
@@ -338,6 +356,9 @@ export default {
 
 //Desktop
 @media (min-width: 768px) {
+  .buttonGoBack {
+    display: none;
+  }
   .buttonsLayerBase {
     display: flex;
     align-items: center;

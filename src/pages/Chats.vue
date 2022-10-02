@@ -145,12 +145,7 @@
             <q-banner
               inline-actions
               rounded
-              class="
-                bg-white
-                text-black
-                q-py-none q-pl-none q-pr-md
-                no-border-radius
-              "
+              class="bg-white text-black q-py-none q-pl-none q-pr-md no-border-radius"
             >
               <q-item class="q-my-none">
                 <q-item-section avatar>
@@ -280,12 +275,7 @@
             <q-banner
               inline-actions
               rounded
-              class="
-                bg-white
-                text-black
-                q-py-none q-pl-none q-pr-md
-                no-border-radius
-              "
+              class="bg-white text-black q-py-none q-pl-none q-pr-md no-border-radius"
             >
               <q-item class="q-my-none">
                 <q-btn
@@ -717,7 +707,7 @@ export default {
           });
         });
       });
-      console.log(messages, "mensajito");
+
       return messages;
     },
     getKeyChat() {

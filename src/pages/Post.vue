@@ -181,7 +181,10 @@
               dense
               round
               flat
-              v-if="getCurrentUserIndex.id in getPostOnShow.likes"
+              v-if="
+                getPostOnShow.hasOwnProperty(`likes`) &&
+                getCurrentUserIndex.id in getPostOnShow.likes
+              "
               @click="
                 this.unlikePost({
                   idPost: getPostOnShow.idPost,
@@ -196,7 +199,10 @@
               round
               flat
               icon="favorite_border"
-              v-else
+              v-if="
+                !getPostOnShow.hasOwnProperty(`likes`) ||
+                !(getCurrentUserIndex.id in getPostOnShow.likes)
+              "
               @click="
                 this.likePost({
                   idPost: getPostOnShow.idPost,
@@ -350,7 +356,10 @@
           dense
           round
           flat
-          v-if="getCurrentUserIndex.id in getPostOnShow.likes"
+          v-if="
+            getPostOnShow.hasOwnProperty(`likes`) &&
+            getCurrentUserIndex.id in getPostOnShow.likes
+          "
           @click="
             this.unlikePost({
               idPost: getPostOnShow.idPost,
@@ -365,7 +374,10 @@
           round
           flat
           icon="favorite_border"
-          v-else
+          v-if="
+            !getPostOnShow.hasOwnProperty(`likes`) ||
+            !(getCurrentUserIndex.id in getPostOnShow.likes)
+          "
           @click="
             this.likePost({
               idPost: getPostOnShow.idPost,
@@ -419,7 +431,7 @@
             class="cursor-pointer text-weight-bold"
             @click="
               goToUser({
-                userId: comment.userId,
+                userId: comment.idUser,
                 userIdLoggedIn: getCurrentUserIndex.id,
               })
             "
@@ -512,6 +524,7 @@ export default {
   }
   .mobileScript {
     padding: 0;
+    align-content: flex-start;
   }
   .desktopVersion {
     display: none;
@@ -525,6 +538,9 @@ export default {
   .desktopVersion {
     display: none;
   }
+  .mobileScript {
+    align-content: center;
+  }
 }
 
 //Desktop
@@ -534,6 +550,9 @@ export default {
   }
   .desktopVersion {
     display: flex;
+  }
+  .mobileScript {
+    align-content: center;
   }
 }
 </style>

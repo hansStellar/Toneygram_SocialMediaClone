@@ -173,17 +173,24 @@
                 {{ getUserOnPageGlobal.userInformation.fullname }}
               </div>
               <!-- Description -->
-              <div v-if="getUserOnPageGlobal.userInformation.description">
-                {{ getUserOnPageGlobal.userInformation.description }}
+              <div>
+                {{
+                  getUserOnPageGlobal.userInformation.hasOwnProperty("bio")
+                    ? getUserOnPageGlobal.userInformation.bio
+                    : ""
+                }}
               </div>
               <!-- Pagina web -->
               <div
                 class="text-blue-10 text-weight-bold cursor-pointer"
                 style="max-width: fit-content"
-                v-if="getUserOnPageGlobal.userInformation.website"
                 @click="goWebsite(getUserOnPageGlobal.userInformation.website)"
               >
-                {{ getUserOnPageGlobal.userInformation.website }}
+                {{
+                  getUserOnPageGlobal.userInformation.hasOwnProperty("website")
+                    ? getUserOnPageGlobal.userInformation.website
+                    : ""
+                }}
               </div>
             </div>
             <!-- Skeleton -->
@@ -223,19 +230,15 @@
       </div>
     </div>
     <!-- Mobile & Tablet -->
-    <div class="mobileVersionUserPage">
+    <section class="mobileVersionUserPage">
       <!-- Top -->
-      <div class="myCardBaseUser">
+      <header class="myCardBaseUser">
         <!-- Img -->
         <div style="align-self: start">
           <div v-if="getUserOnPageGlobalReady" class="imgBaseUser">
             <q-img
               :ratio="16 / 9"
-              :src="
-                getUserOnPageGlobalReady
-                  ? getUserOnPageGlobal.userInfomation.img
-                  : null
-              "
+              :src="getUserOnPageGlobal.userInformation.img"
               class="imageMyCardProfile"
               height="75px"
               width="75px"
@@ -251,21 +254,33 @@
             <!-- Post -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getUserOnPageGlobal.posts).length }}
+                {{
+                  getUserOnPageGlobal.posts !== undefined
+                    ? Object.values(getUserOnPageGlobal.posts).length
+                    : "0"
+                }}
               </div>
               <div class="text-black text-weight-light">Posts</div>
             </div>
             <!-- Following -->
             <div class="column q-mx-lg">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getUserOnPageGlobal.following).length }}
+                {{
+                  getUserOnPageGlobal.following !== undefined
+                    ? Object.values(getUserOnPageGlobal.following).length
+                    : "0"
+                }}
               </div>
               <div class="text-black text-weight-light">Following</div>
             </div>
             <!-- Followers -->
             <div class="column">
               <div class="text-weight-medium q-mr-sm">
-                {{ Object.values(getUserOnPageGlobal.followers).length }}
+                {{
+                  getUserOnPageGlobal.followers !== undefined
+                    ? Object.values(getUserOnPageGlobal.followers).length
+                    : "0"
+                }}
               </div>
               <div class="text-black text-weight-light">Followers</div>
             </div>
@@ -279,19 +294,26 @@
           <div v-if="getUserOnPageGlobalReady">
             <!-- Name -->
             <div class="text-weight-medium" style="">
-              {{ getUserOnPageGlobal.userInfomation.fullname }}
+              {{ getUserOnPageGlobal.userInformation.fullname }}
             </div>
             <!-- Description -->
-            <div v-if="getUserOnPageGlobal.userInfomation.description">
-              {{ getUserOnPageGlobal.userInfomation.description }}
+            <div>
+              {{
+                getUserOnPageGlobal.userInformation.hasOwnProperty("bio")
+                  ? getUserOnPageGlobal.userInformation.bio
+                  : ""
+              }}
             </div>
             <!-- Pagina web -->
             <div
               class="text-blue-10 text-weight-bold cursor-pointer"
-              v-if="getUserOnPageGlobal.userInfomation.website"
-              @click="goWebsite(getUserOnPageGlobal.userInfomation.website)"
+              @click="goWebsite(getUserOnPageGlobal.userInformation.website)"
             >
-              {{ getUserOnPageGlobal.userInfomation.website }}
+              {{
+                getUserOnPageGlobal.userInformation.hasOwnProperty("website")
+                  ? getUserOnPageGlobal.userInformation.website
+                  : ""
+              }}
             </div>
           </div>
           <!-- Skeleton -->
@@ -300,7 +322,10 @@
 
         <!-- Edit profile -->
         <q-btn
-          v-if="currentUserIndex.id === getUserOnPageGlobal.userInfomation.id"
+          v-if="
+            getUserOnPageGlobalReady &&
+            getCurrentUserIndex.id === getUserOnPageGlobal.userInformation.id
+          "
           class="showButtonDesktopSettings"
           dense
           color="black"
@@ -322,8 +347,12 @@
         <!-- Follow -->
         <q-btn
           v-if="
-            !(currentUserIndex.id in getUserOnPageGlobal.followers) &&
-            getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id
+            getUserOnPageGlobalReady &&
+            getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id &&
+            !(
+              getUserOnPageGlobal.userInformation.id in
+              getFollowingFromCurrentUser
+            )
           "
           no-caps
           color="light-blue"
@@ -331,7 +360,7 @@
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           text-color="white"
           dense
-          @click="this.followUser(getUserOnPageGlobal.userInfomation.id)"
+          @click="this.followUser(getUserOnPageGlobal.userInformation.id)"
         >
           Follow
         </q-btn>
@@ -339,8 +368,10 @@
         <!-- Remove Follower -->
         <q-btn
           v-if="
-            currentUserIndex.id in getUserOnPageGlobal.followers &&
-            getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id
+            getUserOnPageGlobalReady &&
+            getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id &&
+            getUserOnPageGlobal.userInformation.id in
+              getFollowingFromCurrentUser
           "
           flat
           color="black"
@@ -348,7 +379,7 @@
           no-caps
           style="width: 100%; border: solid 1px lightgray; max-height: 2rem"
           class="q-mr-md"
-          @click="this.unFollowUser(getUserOnPageGlobal.userInfomation.id)"
+          @click="this.unFollowUser(getUserOnPageGlobal.userInformation.id)"
         >
           Unfollow
         </q-btn>
@@ -356,8 +387,11 @@
         <!-- Message -->
         <q-btn
           no-caps
-          @click="goToChat(getUserOnPageGlobal.userInfomation.id)"
-          v-if="getUserOnPageGlobal.userInfomation.id !== currentUserIndex.id"
+          @click="goToChat(getUserOnPageGlobal.userInformation.id)"
+          v-if="
+            getUserOnPageGlobalReady &&
+            getUserOnPageGlobal.userInformation.id !== getCurrentUserIndex.id
+          "
           color="light-blue"
           class="q-px-md q-ml-sm"
           style="width: 96%; border: solid 1px lightgray; max-height: 2rem"
@@ -366,7 +400,7 @@
         >
           Message
         </q-btn>
-      </div>
+      </header>
 
       <!-- Bar Desktop -->
       <q-separator size="1px" color="grey-4" />
@@ -375,7 +409,7 @@
       <div class="postsBase" v-if="getUserOnPageGlobalReady">
         <div
           class="cursor-pointer imgPost"
-          v-for="(post, index) in posts"
+          v-for="(post, index) in getUserOnPageGlobal.posts"
           :key="index"
           @click="
             getPostOnShowAction({
@@ -399,7 +433,7 @@
           <q-skeleton width="100%" height="100%" />
         </q-img>
       </div>
-    </div>
+    </section>
     <!-- Dialogs -->
     <SettingsDialog v-model="settingsDialog" v-on:modalChange="actionModal" />
     <UsernameDialog v-model="username" />
@@ -466,7 +500,7 @@ export default {
         userId: userId,
         userIdLoggedIn: await this.getCurrentUserIndex.id,
       };
-      console.log(payload);
+
       await this.goToUser(payload);
     }
   },
@@ -483,7 +517,6 @@ export default {
     ...mapGetters("actionsOnWeb", [
       "getUserOnPageGlobal",
       "getUserOnPageGlobalReady",
-      "getItsSameUser",
     ]),
   },
 };
