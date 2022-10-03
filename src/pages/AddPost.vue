@@ -57,6 +57,7 @@
 <script>
 import { firebaseAuth, firebaseStorage, firebaseDb } from "boot/firebase";
 import { Loading, Notify, uid } from "quasar";
+import { mapActions } from "vuex";
 export default {
   data() {
     return {
@@ -66,6 +67,7 @@ export default {
     };
   },
   methods: {
+    ...mapActions("actionsOnWeb", ["showPostsAction"]),
     addFiles(file) {
       Object.values(file.target.files).forEach((file) => {
         if (
@@ -102,7 +104,7 @@ export default {
             firebaseStorage
               .ref(firebaseAuth.currentUser.uid + "/posts/" + randomId)
               .getDownloadURL()
-              .then((url) => {
+              .then(async (url) => {
                 imagesUploaded.push(url);
                 // Create post in own user
                 const userPosts = firebaseDb
@@ -163,6 +165,7 @@ export default {
                 this.images = [];
                 this.$refs.uploader.value = "";
                 this.descriptionPost = "";
+                await this.showPostsAction(firebaseAuth.currentUser.uid);
               })
               .catch((error) => {
                 Loading.hide();

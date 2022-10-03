@@ -20,7 +20,6 @@ const mutations = {
     });
 
     // Likes
-
     state.postsToShow = posts;
   },
   sendSuggetedUsers(state, users) {
@@ -383,7 +382,7 @@ const actions = {
     }
   },
   async getPostOnShowAction({ commit }, payload) {
-    let indexPost = payload.indexPost;
+    let indexPost = payload.indexPost || payload.postId;
     let userId = payload.userId;
     try {
       // Get the post and set it to the state
@@ -394,10 +393,12 @@ const actions = {
         })
         .then(() => {
           // Go to the page
-          this.$router.push({
-            name: "Post",
-            params: { userId: userId, postId: indexPost },
-          });
+          if (payload.mode != "index") {
+            this.$router.push({
+              name: "Post",
+              params: { userId: userId, postId: indexPost },
+            });
+          }
         });
     } catch (error) {
       console.log(error);
@@ -474,6 +475,171 @@ const actions = {
         }
       });
     });
+  },
+  async deletePost({ dispatch }, payload) {
+    if (payload.mode === "comment") {
+      // Urls
+      let postsRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          payload.userId +
+          "/" +
+          payload.postId +
+          "/messages/" +
+          payload.commentIndex
+      );
+      let usersRef = firebaseDb.ref(
+        "toneygram/users/" +
+          payload.userId +
+          "/posts/" +
+          payload.postId +
+          "/messages/" +
+          payload.commentIndex
+      );
+
+      // Remove
+      await postsRef.remove();
+      await usersRef.remove();
+
+      // get the array from the database
+      let newArrayMessages = [];
+      let messagesArrayPostsRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          payload.userId +
+          "/" +
+          payload.postId +
+          "/messages/"
+      );
+
+      let messagesArrayUsersRef = firebaseDb.ref(
+        "toneygram/users/" +
+          payload.userId +
+          "/posts/" +
+          payload.postId +
+          "/messages/"
+      );
+
+      await messagesArrayPostsRef.once("value", (arrayMessages) => {
+        if (arrayMessages.val() === null) {
+          return (newArrayMessages = []);
+        }
+
+        Object.values(arrayMessages.val()).forEach((m) => {
+          return newArrayMessages.push(m);
+        });
+      });
+
+      // set the new array on the database
+      await messagesArrayPostsRef.set(newArrayMessages);
+      await messagesArrayUsersRef.set(newArrayMessages);
+
+      // Update the State
+      return (
+        await dispatch("showPostsAction", payload.currentUserId),
+        await dispatch("getPostOnShowAction", {
+          indexPost: payload.postId,
+          userId: payload.userId,
+          mode: payload.secondMode,
+        })
+      );
+    }
+
+    if (payload.mode === "post") {
+      // Urls
+      let postsRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          payload.userId +
+          "/" +
+          payload.postId +
+          "/description"
+      );
+      let usersRef = firebaseDb.ref(
+        "toneygram/users/" + payload.userId + "/posts/" + payload.postId
+      );
+
+      // Remove
+      await postsRef.remove();
+      await usersRef.remove();
+
+      // Update the State
+      await dispatch("showPostsAction", payload.userId);
+
+      if (payload.secondMode != "index") {
+        // Redirect User
+        return this.$router.push({
+          name: "User",
+          params: { userId: payload.userId },
+        });
+      }
+    }
+  },
+  async updatePost({ dispatch }, payload) {
+    if (payload.mode === "comment") {
+      // Urls
+      let postsRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          payload.userId +
+          "/" +
+          payload.postId +
+          "/messages/" +
+          payload.commentIndex +
+          "/message/"
+      );
+      let usersRef = firebaseDb.ref(
+        "toneygram/users/" +
+          payload.userId +
+          "/posts/" +
+          payload.postId +
+          "/messages/" +
+          payload.commentIndex +
+          "/message/"
+      );
+
+      // Update
+      await postsRef.set(payload.newComment);
+      await usersRef.set(payload.newComment);
+
+      // Update the State
+      return (
+        await dispatch("showPostsAction", payload.actualUserId),
+        await dispatch("getPostOnShowAction", {
+          indexPost: payload.postId,
+          userId: payload.userId,
+          mode: payload.secondMode,
+        })
+      );
+    }
+
+    if (payload.mode === "post") {
+      // Urls
+      let postsRef = firebaseDb.ref(
+        "toneygram/posts/" +
+          payload.userId +
+          "/" +
+          payload.postId +
+          "/description"
+      );
+      let usersRef = firebaseDb.ref(
+        "toneygram/users/" +
+          payload.userId +
+          "/posts/" +
+          payload.postId +
+          "/description"
+      );
+
+      // Update
+      await postsRef.set(payload.newCaption);
+      await usersRef.set(payload.newCaption);
+
+      // Update the State
+
+      await dispatch("showPostsAction", payload.userId);
+
+      await dispatch("getPostOnShowAction", {
+        indexPost: payload.postId,
+        userId: payload.userId,
+        mode: payload.secondMode,
+      });
+    }
   },
 };
 

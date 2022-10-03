@@ -4,6 +4,57 @@
     class="flex row justify-between q-pt-md baseFeed"
     style="max-width: 940px; margin: auto"
   >
+    <!-- Modal Edit Post -->
+    <q-dialog v-model="icon">
+      <q-card style="min-width: 20rem">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Edit Post</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form class="q-gutter-md">
+            <q-input
+              filled
+              type="textarea"
+              v-model="newText"
+              label="Caption"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.trim() != '') ||
+                  'Please type something',
+              ]"
+            />
+
+            <div class="flex justify-end">
+              <q-btn
+                @click="
+                  updatePost({
+                    userId: postOnUserId,
+                    postId: postOnPostId,
+                    actualUserId: this.getCurrentUserIndex.id,
+                    newCaption: newText,
+                    newComment: newText,
+                    commentIndex: commentIndex,
+                    mode: mode,
+                    secondMode: 'index',
+                  })
+                "
+                label="Submit"
+                class="col"
+                type="submit"
+                color="primary"
+                :disabled="
+                  newText.length <= 0 || newText.trim() == '' ? true : false
+                "
+              />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
     <!-- No Activity -->
     <section
       class="col-12 col-sm-8 items-center relative-position"
@@ -16,7 +67,7 @@
     </section>
     <!-- Left Side -->
     <section class="col-sm-8 LeftSideBase" v-if="showPostsGetter.length > 0">
-      <!-- Base -->
+      <!-- Base Post  -->
       <q-card
         class="no-shadow no-border-radius col column CardLeft"
         style=""
@@ -27,6 +78,7 @@
         <q-card-section class="no-padding">
           <!-- Banner name and avatar -->
           <q-item>
+            <!-- Left Side -->
             <q-item-section avatar>
               <q-img
                 class="cursor-pointer"
@@ -46,6 +98,7 @@
               <q-skeleton type="circle" size="32px" v-else />
             </q-item-section>
 
+            <!-- Middle Side -->
             <q-item-section>
               <q-item-label
                 @click="
@@ -64,9 +117,56 @@
                 Subhead
               </q-item-label>
             </q-item-section>
+
+            <!-- Right Side -->
+            <q-item-section
+              v-if="getCurrentUserIndex.id === post.userInfo.userId"
+              side
+            >
+              <q-btn-dropdown
+                color="black"
+                dropdown-icon="more_vert"
+                flat
+                dense
+                no-icon-animation
+                label=""
+              >
+                <q-list>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="(this.modeUpdate = 'post'), showModalEditPost(post)"
+                  >
+                    <q-item-section>
+                      <q-item-label>Edit</q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="
+                      (postOnPostId = post.idPost),
+                        (postOnUserId = post.userInfo.userId);
+                      deletePost({
+                        postId: postOnPostId,
+                        userId: postOnUserId,
+                        mode: 'post',
+                        secondMode: 'index',
+                      });
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>Delete Post</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown></q-item-section
+            >
           </q-item>
         </q-card-section>
         <q-separator color="grey-3" size="1px" />
+
         <!-- Img -->
         <q-carousel
           v-model="post.scrollIndex"
@@ -107,6 +207,7 @@
             />
           </q-carousel-slide>
         </q-carousel>
+
         <!-- Skeleton -->
         <q-img
           style="height: 420px; max-height: 420px"
@@ -116,6 +217,7 @@
           <q-skeleton class="no-border-radius" height="100%" width="100%" />
         </q-img>
         <q-separator color="grey-3" size="1px" />
+
         <!-- Like and comment -->
         <q-card-actions class="q-pb-none q-px-none full-width" align="left">
           <q-btn
@@ -147,6 +249,7 @@
           />
           <q-btn dense round flat icon="far fa-comment" />
         </q-card-actions>
+
         <!-- Likes -->
         <q-card-actions
           v-if="getStatusForPostsOnIndex"
@@ -158,6 +261,7 @@
           </div>
           <div v-else>0 likes</div>
         </q-card-actions>
+
         <!-- Description -->
         <q-list class="q-py-none full-width">
           <q-card-actions class="q-py-none">
@@ -175,6 +279,7 @@
             <span> {{ post.description }} </span>
           </q-card-actions>
         </q-list>
+
         <!-- Comments -->
         <q-list
           style="max-height: 120px; overflow: overlay"
@@ -182,25 +287,74 @@
           v-if="post.messages"
         >
           <q-card-actions
-            class="q-py-none"
+            class="q-py-none justify-between"
             v-for="(comment, index) in post.messages"
             :key="index"
           >
-            <span
-              class="cursor-pointer text-weight-bold"
-              @click="
-                goToUser({
-                  userId: comment.idUser,
-                  userIdLoggedIn: getCurrentUserIndex.id,
-                })
-              "
-            >
-              {{ comment.userName }} &nbsp;
-            </span>
-            <span class="ellipsis"> {{ comment.message }} </span>
+            <!-- Left Side -->
+            <div>
+              <span
+                class="cursor-pointer text-weight-bold"
+                @click="
+                  goToUser({
+                    userId: comment.idUser,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  })
+                "
+              >
+                {{ comment.userName }}&nbsp;
+              </span>
+              <span class="ellipsis"> {{ comment.message }} </span>
+            </div>
+            <!-- Right Side -->
+            <div v-if="comment.idUser === getCurrentUserIndex.id">
+              <q-btn-dropdown
+                color="black"
+                dropdown-icon="more_horiz"
+                flat
+                dense
+                no-icon-animation
+                label=""
+              >
+                <q-list>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="
+                      (this.modeUpdate = 'comment'),
+                        showModalEditPost(post, comment, index)
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>Edit</q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="
+                      deletePost({
+                        postId: post.idPost,
+                        userId: post.userInfo.userId,
+                        commentIndex: index,
+                        mode: 'comment',
+                        secondMode: 'index',
+                        currentUserId: comment.idUser,
+                      })
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>Delete Post</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
           </q-card-actions>
         </q-list>
         <q-separator color="grey-3" size="1px" />
+
         <!-- Create Comment -->
         <div class="bg-white full-width q-px-sm ccInfo">
           <q-input
@@ -472,6 +626,13 @@ export default {
     return {
       skeletonTimes: [1, 2, 3],
       textMessage: "",
+      icon: false,
+      mode: "",
+      newText: "",
+      postOnUserId: "",
+      postOnPostId: "",
+      modeUpdate: "",
+      commentIndex: null,
     };
   },
   methods: {
@@ -484,12 +645,33 @@ export default {
       "unlikePost",
       "sendText",
       "goToUser",
+      "deletePost",
+      "updatePost",
     ]),
     ...mapActions("settingsUser", [
       "addFollowingToCurrentUserAction",
       "followUser",
       "unFollowUser",
     ]),
+    showModalEditPost(post, comment, index) {
+      if (this.modeUpdate === "post") {
+        this.icon = !this.icon;
+        this.newText = post.description;
+        this.postOnUserId = post.userInfo.userId;
+        this.postOnPostId = post.idPost;
+        this.mode = "post";
+        this.commentIndex = index;
+      }
+
+      if (this.modeUpdate === "comment") {
+        this.icon = !this.icon;
+        this.newText = comment.message;
+        this.postOnUserId = post.userInfo.userId;
+        this.postOnPostId = post.idPost;
+        this.mode = "comment";
+        this.commentIndex = index;
+      }
+    },
   },
   computed: {
     ...mapGetters("settingsUser", [

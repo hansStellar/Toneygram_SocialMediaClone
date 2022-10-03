@@ -5,8 +5,8 @@
       class="row no-shadow no-border-radius col desktopVersion"
       style="border: solid 1px lightgray; max-width: 850px; max-height: 480px"
     >
-      <!-- Img -->
-      <div class="no-padding col-8" style="align-self: center">
+      <!-- Left Side / Picture -->
+      <section class="no-padding col-8" style="align-self: center">
         <q-carousel
           v-model="slide"
           transition-prev="jump-right"
@@ -51,9 +51,9 @@
         >
           <q-skeleton class="no-border-radius" height="100%" width="100%" />
         </q-img>
-      </div>
+      </section>
 
-      <!-- Info Section -->
+      <!-- Right Side / Information -->
       <q-card-section
         class="col-4 no-padding"
         style="
@@ -63,6 +63,7 @@
       >
         <!-- Banner name and avatar -->
         <q-item>
+          <!-- Left Side -->
           <q-item-section avatar>
             <q-img
               class="cursor-pointer"
@@ -81,7 +82,7 @@
             />
             <q-skeleton type="circle" size="32px" v-else />
           </q-item-section>
-
+          <!-- Middle Side -->
           <q-item-section>
             <q-item-label
               @click="
@@ -96,6 +97,42 @@
             >
             <q-skeleton width="150px" v-else />
             <q-item-label caption> Subhead </q-item-label>
+          </q-item-section>
+          <!-- Right Side -->
+          <q-item-section side v-if="getPostOnShowReady">
+            <q-btn-dropdown
+              color="black"
+              v-if="getPostOnShow.userInfo.userId === getCurrentUserIndex.id"
+              dropdown-icon="more_vert"
+              flat
+              dense
+              no-icon-animation
+              label=""
+            >
+              <q-list>
+                <q-item clickable v-close-popup @click="icon = !icon">
+                  <q-item-section>
+                    <q-item-label>Edit</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="
+                    deletePost({
+                      postId: getPostOnShow.idPost,
+                      userId: getPostOnShow.userInfo.userId,
+                      mode: 'post',
+                    })
+                  "
+                >
+                  <q-item-section>
+                    <q-item-label>Delete Post</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
           </q-item-section>
         </q-item>
         <q-separator color="grey-3" size="1px" />
@@ -141,38 +178,83 @@
                 :key="index"
                 class="row items-center q-py-sm"
               >
-                <!-- img -->
-                <q-img
-                  :src="comment.imgUser"
-                  :ratio="1"
-                  width="32px"
-                  height="32px"
-                  class="cursor-pointer"
-                  style="border-radius: 100%; border: 1px solid grey"
-                  @click="
-                    goToUser({
-                      userId: comment.idUser,
-                      userIdLoggedIn: getCurrentUserIndex.id,
-                    })
-                  "
-                />
-                <span
-                  @click="
-                    goToUser({
-                      userId: comment.idUser,
-                      userIdLoggedIn: getCurrentUserIndex.id,
-                    })
-                  "
-                  class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
-                  >{{ comment.userName }}</span
+                <!-- Left Side -->
+                <div class="row col-10 items-center">
+                  <!-- img -->
+                  <q-img
+                    :src="comment.imgUser"
+                    :ratio="1"
+                    width="32px"
+                    height="32px"
+                    class="cursor-pointer"
+                    style="border-radius: 100%; border: 1px solid grey"
+                    @click="
+                      goToUser({
+                        userId: comment.idUser,
+                        userIdLoggedIn: getCurrentUserIndex.id,
+                      })
+                    "
+                  />
+                  <span
+                    @click="
+                      goToUser({
+                        userId: comment.idUser,
+                        userIdLoggedIn: getCurrentUserIndex.id,
+                      })
+                    "
+                    class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
+                    >{{ comment.userName }}</span
+                  >
+                  <span class="">{{ comment.message }}</span>
+                </div>
+                <!-- Right Side -->
+                <q-btn-dropdown
+                  color="black"
+                  dropdown-icon="more_vert"
+                  flat
+                  dense
+                  v-if="comment.idUser === getCurrentUserIndex.id"
+                  no-icon-animation
+                  label=""
+                  class="col-2 self-start"
                 >
-                <span class="ellipsis">{{ comment.message }}</span>
+                  <q-list>
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="showDialogEditComment(comment, index)"
+                    >
+                      <q-item-section>
+                        <q-item-label>Edit</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item
+                      clickable
+                      v-close-popup
+                      @click="
+                        deletePost({
+                          postId: getPostOnShow.idPost,
+                          userId: getPostOnShow.userInfo.userId,
+                          commentIndex: index,
+                          mode: 'comment',
+                          currentUserId: comment.idUser,
+                        })
+                      "
+                    >
+                      <q-item-section>
+                        <q-item-label>Delete Post</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-btn-dropdown>
               </div>
             </div>
             <q-skeleton class="q-ma-md" width="210px" v-else />
           </div>
         </q-responsive>
         <q-separator color="grey-3" size="1px" />
+
         <!-- Like, likes, date -->
         <div class="col lldInfo" v-if="getPostOnShowReady">
           <!-- Like and Comment -->
@@ -224,6 +306,7 @@
         </div>
         <q-skeleton width="150px" class="q-mx-md q-mb-md" v-else />
         <q-separator color="grey-3" size="1px" />
+
         <!-- Create Comment -->
         <div class="bg-white full-width q-px-sm ccInfo">
           <q-input
@@ -254,6 +337,7 @@
         </div>
       </q-card-section>
     </q-card>
+
     <!-- Base Mobile -->
     <q-card
       class="no-shadow no-border-radius col column mobileVersion"
@@ -263,6 +347,7 @@
       <q-card-section class="no-padding">
         <!-- Banner name and avatar -->
         <q-item>
+          <!-- Left Side -->
           <q-item-section avatar>
             <q-img
               class="cursor-pointer"
@@ -282,6 +367,7 @@
             <q-skeleton type="circle" size="32px" v-else />
           </q-item-section>
 
+          <!-- Middle Side -->
           <q-item-section>
             <q-item-label
               @click="
@@ -297,6 +383,42 @@
             <q-skeleton width="150px" v-else />
             <q-item-label caption> Subhead </q-item-label>
           </q-item-section>
+
+          <!-- Right Side -->
+          <q-item-section side>
+            <q-btn-dropdown
+              color="black"
+              dropdown-icon="more_vert"
+              flat
+              dense
+              no-icon-animation
+              label=""
+            >
+              <q-list>
+                <q-item clickable v-close-popup @click="icon = !icon">
+                  <q-item-section>
+                    <q-item-label>Edit</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="
+                    deletePost({
+                      postId: getPostOnShow.idPost,
+                      userId: getPostOnShow.userInfo.userId,
+                      mode: 'post',
+                    })
+                  "
+                >
+                  <q-item-section>
+                    <q-item-label>Delete Post</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown></q-item-section
+          >
         </q-item>
       </q-card-section>
       <q-separator color="grey-3" size="1px" />
@@ -459,6 +581,105 @@
         </q-input>
       </div>
     </q-card>
+
+    <!-- Modal Edit Post -->
+    <q-dialog v-model="icon">
+      <q-card style="min-width: 20rem">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Edit Post</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+            <q-input
+              filled
+              type="textarea"
+              v-model="newText"
+              label="Caption"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.trim() != '') ||
+                  'Please type something',
+              ]"
+            />
+
+            <div class="flex justify-end">
+              <q-btn
+                @click="
+                  updatePost({
+                    postId: getPostOnShow.idPost,
+                    actualUserId: this.getCurrentUserIndex.id,
+                    userId: getPostOnShow.userInfo.userId,
+                    newCaption: newText,
+                    mode: 'post',
+                  })
+                "
+                label="Submit"
+                class="col"
+                type="submit"
+                color="primary"
+                :disabled="
+                  newText.length <= 0 || newText.trim() == '' ? true : false
+                "
+              />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
+
+    <!-- Modal Edit Comment -->
+    <q-dialog v-model="commentDialog">
+      <q-card style="min-width: 20rem">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6">Edit Comment</div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section>
+          <q-form @submit="onSubmit" @reset="onReset" class="q-gutter-md">
+            <q-input
+              filled
+              type="textarea"
+              v-model="newTextComment"
+              label="Comment"
+              lazy-rules
+              :rules="[
+                (val) =>
+                  (val && val.length > 0 && val.trim() != '') ||
+                  'Please type something',
+              ]"
+            />
+
+            <div class="flex justify-end">
+              <q-btn
+                @click="
+                  updatePost({
+                    userId: idUserOnPost,
+                    actualUserId: this.getCurrentUserIndex.id,
+                    postId: idPostOnPost,
+                    newComment: newTextComment,
+                    commentIndex: commentIndex,
+                    mode: 'comment',
+                  })
+                "
+                label="Submit"
+                class="col"
+                type="submit"
+                color="primary"
+                :disabled="
+                  newText.length <= 0 || newText.trim() == '' ? true : false
+                "
+              />
+            </div>
+          </q-form>
+        </q-card-section>
+      </q-card>
+    </q-dialog>
   </q-page>
 </template>
 <script>
@@ -468,6 +689,13 @@ export default {
     return {
       slide: 0,
       textMessage: "",
+      icon: false,
+      commentDialog: false,
+      newText: "",
+      newTextComment: "",
+      idUserOnPost: "",
+      idPostOnPost: "",
+      commentIndex: "",
     };
   },
   methods: {
@@ -481,7 +709,17 @@ export default {
       "removeThePostOnShowAction",
       "goToUser",
       "getPostOnShowAction",
+      "deletePost",
+      "updatePost",
     ]),
+
+    showDialogEditComment(comment, index) {
+      this.newTextComment = comment.message;
+      this.idUserOnPost = this.getPostOnShow.userInfo.userId;
+      this.idPostOnPost = this.getPostOnShow.idPost;
+      this.commentIndex = index;
+      this.commentDialog = !this.commentDialog;
+    },
   },
   computed: {
     ...mapGetters("settingsUser", ["getCurrentUserIndex"]),
@@ -500,6 +738,7 @@ export default {
       };
       await this.getPostOnShowAction(payload);
     }
+    this.newText = this.getPostOnShow.description;
   },
 };
 </script>
