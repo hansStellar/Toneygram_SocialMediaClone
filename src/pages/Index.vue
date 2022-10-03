@@ -205,7 +205,7 @@
         <div class="bg-white full-width q-px-sm ccInfo">
           <q-input
             color="grey-6"
-            v-model="textMessage"
+            v-model="post.textMessage"
             label="Add a comment ..."
             autocomplete="off"
             borderless
@@ -220,10 +220,10 @@
                   this.sendText({
                     userId: post.userInfo.userId,
                     idPost: post.idPost,
-                    message: this.textMessage,
+                    message: post.textMessage,
                   })
                 "
-                :disable="textMessage.length <= 0"
+                :disable="post.textMessage.length <= 0"
               />
             </template>
           </q-input>

@@ -15,6 +15,12 @@ const state = {
 
 const mutations = {
   sendPostsToShow(state, posts) {
+    posts.forEach((p) => {
+      p.textMessage = "";
+    });
+
+    // Likes
+
     state.postsToShow = posts;
   },
   sendSuggetedUsers(state, users) {
@@ -31,11 +37,14 @@ const mutations = {
   setNewLikesToPost(state, payload) {
     // Index
     state.postsToShow.forEach((p) => {
-      if (payload.idPost === p.idPost) p.likes = payload.likes;
+      if (payload.idPost === p.idPost) return (p.likes = payload.likes);
     });
     // Post Single
+    if (payload.likes === null) {
+      return (state.postOnShow.likes = {});
+    }
     if (Object.values(state.postOnShow).length != 0)
-      state.postOnShow.likes = payload.likes;
+      return (state.postOnShow.likes = payload.likes);
   },
   setNewMessagesToPost(state, payload) {
     // Index
@@ -45,10 +54,20 @@ const mutations = {
     // Post Single
     if (Object.values(state.postOnShow).length != 0)
       state.postOnShow.messages = payload.messages;
+
+    // Clear text message
+    state.postsToShow.forEach((p) => {
+      return (p.textMessage = "");
+    });
   },
   getPostOnShow(state, payload) {
     state.postOnShow = payload;
+
     state.postOnShowReady = true;
+
+    if (!payload.hasOwnProperty("likes")) {
+      return (state.postOnShow.likes = {});
+    }
   },
   removeThePostOnShow(state) {
     state.postOnShow = {};

@@ -17,8 +17,35 @@
           @click="this.$router.go(-1)"
         />
 
+        <!-- Username -->
+        <div
+          class="text-h5 text-black cursor-pointer titleMobile"
+          v-if="getUserOnPageGlobalReady && this.$route.name === 'User'"
+        >
+          {{ changeTitleNavBar }}
+        </div>
+
+        <!-- Username Post -->
+        <div
+          class="text-h5 text-black cursor-pointer titleMobile"
+          v-if="getPostOnShowReady && this.$route.name === 'Post'"
+        >
+          {{ changeTitleNavBar }}
+        </div>
+
+        <!-- Others -->
+        <div
+          class="text-h5 text-black cursor-pointer titleMobile"
+          v-if="!getPostOnShowReady && this.$route.name !== 'User'"
+        >
+          {{ changeTitleNavBar }}
+        </div>
+
         <!-- Title -->
-        <div class="text-h5 text-black cursor-pointer" @click="sendUserToHome">
+        <div
+          class="text-h5 text-black cursor-pointer titleDesktop"
+          @click="sendUserToHome"
+        >
           toneygram
         </div>
 
@@ -253,11 +280,7 @@ export default {
         name: "Settings",
       });
     },
-    sendUserToSearch() {
-      this.$router.push({
-        name: "Search",
-      });
-    },
+
     sendUserToDM() {
       this.$router.push({
         name: "Main",
@@ -307,7 +330,49 @@ export default {
     },
   },
   computed: {
-    ...mapGetters("settingsUser", ["getCurrentUserIndex"]),
+    ...mapGetters("settingsUser", [
+      "getCurrentUserIndex",
+      "getUserOnPageReadySettings",
+    ]),
+    ...mapGetters("actionsOnWeb", [
+      "getUserOnPageGlobal",
+      "getUserOnPageGlobalReady",
+      "getPostOnShow",
+      "getPostOnShowReady",
+    ]),
+    changeTitleNavBar() {
+      let output;
+
+      if (this.$route.name === "Home") {
+        output = "toneygram";
+      }
+
+      if (this.$route.name === "User") {
+        output = this.getUserOnPageGlobal.userInformation.name;
+      }
+
+      if (this.$route.name === "Add") {
+        output = "New Post";
+      }
+
+      if (this.$route.name === "Explore") {
+        output = "Explore";
+      }
+
+      if (this.$route.name === "Settings") {
+        output = "Settings";
+      }
+
+      if (this.$route.name === "Search") {
+        output = "Search";
+      }
+
+      if (this.$route.name === "Post") {
+        output = this.getCurrentUserIndex.name;
+      }
+
+      return output;
+    },
   },
 };
 </script>
@@ -331,6 +396,12 @@ export default {
   .searchBaseLayout {
     display: none;
   }
+  .titleMobile {
+    display: flex;
+  }
+  .titleDesktop {
+    display: none;
+  }
 }
 
 //Tablet
@@ -351,6 +422,12 @@ export default {
   }
   .searchBaseLayout {
     display: none;
+  }
+  .titleMobile {
+    display: none;
+  }
+  .titleDesktop {
+    display: flex;
   }
 }
 
@@ -389,6 +466,12 @@ export default {
     background: rgb(238, 238, 238);
   }
   .searchBaseLayout {
+    display: flex;
+  }
+  .titleMobile {
+    display: none;
+  }
+  .titleDesktop {
     display: flex;
   }
 }

@@ -181,10 +181,7 @@
               dense
               round
               flat
-              v-if="
-                getPostOnShow.hasOwnProperty(`likes`) &&
-                getCurrentUserIndex.id in getPostOnShow.likes
-              "
+              v-if="getCurrentUserIndex.id in getPostOnShow.likes"
               @click="
                 this.unlikePost({
                   idPost: getPostOnShow.idPost,
@@ -199,10 +196,7 @@
               round
               flat
               icon="favorite_border"
-              v-if="
-                !getPostOnShow.hasOwnProperty(`likes`) ||
-                !(getCurrentUserIndex.id in getPostOnShow.likes)
-              "
+              v-else
               @click="
                 this.likePost({
                   idPost: getPostOnShow.idPost,
@@ -356,10 +350,7 @@
           dense
           round
           flat
-          v-if="
-            getPostOnShow.hasOwnProperty(`likes`) &&
-            getCurrentUserIndex.id in getPostOnShow.likes
-          "
+          v-if="getCurrentUserIndex.id in getPostOnShow.likes"
           @click="
             this.unlikePost({
               idPost: getPostOnShow.idPost,
@@ -374,10 +365,7 @@
           round
           flat
           icon="favorite_border"
-          v-if="
-            !getPostOnShow.hasOwnProperty(`likes`) ||
-            !(getCurrentUserIndex.id in getPostOnShow.likes)
-          "
+          v-else
           @click="
             this.likePost({
               idPost: getPostOnShow.idPost,
