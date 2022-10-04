@@ -30,7 +30,7 @@
 
             <div class="flex justify-end">
               <q-btn
-                @click="
+                @click.prevent="
                   updatePost({
                     userId: postOnUserId,
                     postId: postOnPostId,
@@ -40,7 +40,8 @@
                     commentIndex: commentIndex,
                     mode: mode,
                     secondMode: 'index',
-                  })
+                  }),
+                    (this.icon = false)
                 "
                 label="Submit"
                 class="col"
@@ -113,7 +114,11 @@
                 >{{ post.userInfo.userName }}</q-item-label
               >
               <q-skeleton width="150px" v-else />
-              <q-item-label caption style="max-width: max-content">
+              <q-item-label
+                v-if="post.location"
+                caption
+                style="max-width: max-content"
+              >
                 Subhead
               </q-item-label>
             </q-item-section>
@@ -143,9 +148,10 @@
                   </q-item>
 
                   <q-item
+                    class="bg-red-2 text-red-9"
                     clickable
                     v-close-popup
-                    @click="
+                    @click.prevent="
                       (postOnPostId = post.idPost),
                         (postOnUserId = post.userInfo.userId);
                       deletePost({
@@ -247,7 +253,6 @@
               })
             "
           />
-          <q-btn dense round flat icon="far fa-comment" />
         </q-card-actions>
 
         <!-- Likes -->
@@ -280,10 +285,23 @@
           </q-card-actions>
         </q-list>
 
+        <!-- Date -->
+        <div class="q-mx-sm text-grey text-overline">
+          {{
+            new Date(post.fullD).toLocaleDateString("en-us", {
+              weekday: "long",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          }}
+        </div>
+        <q-separator color="grey-3" size="1px" />
+
         <!-- Comments -->
         <q-list
           style="max-height: 120px; overflow: overlay"
-          class="q-py-none full-width"
+          class="q-py-sm full-width"
           v-if="post.messages"
         >
           <q-card-actions
@@ -332,6 +350,7 @@
 
                   <q-item
                     clickable
+                    class="bg-red-2 text-red-9"
                     v-close-popup
                     @click="
                       deletePost({
@@ -345,7 +364,7 @@
                     "
                   >
                     <q-item-section>
-                      <q-item-label>Delete Post</q-item-label>
+                      <q-item-label>Delete Comment</q-item-label>
                     </q-item-section>
                   </q-item>
                 </q-list>
@@ -557,6 +576,9 @@
               </q-btn>
             </q-item-section>
           </q-item>
+          <p v-if="getSuggetedsUsers.length === 0" class="q-pl-md">
+            There is no more users to follow :(
+          </p>
         </q-list>
 
         <!-- Footer -->

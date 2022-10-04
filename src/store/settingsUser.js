@@ -35,7 +35,8 @@ const actions = {
   async followUser({ dispatch }, idUserAdd) {
     try {
       let userIdAuth = firebaseAuth.currentUser.uid;
-      // Following Steps
+
+      // Following Section
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + idUserAdd
       );
@@ -48,7 +49,7 @@ const actions = {
         currentUserRoute.set(user.userInformation);
       });
 
-      // Followers Steps
+      // Followers Section
       const currentUserRouteFollowers = firebaseDb.ref(
         "toneygram/users/" + userIdAuth
       );
@@ -78,12 +79,19 @@ const actions = {
             { root: true }
           );
         });
+
+      // Update The Global State from the current user
+      dispatch("actionsOnWeb/showPostsAction", userIdAuth, { root: true });
+      dispatch("actionsOnWeb/getSuggetedsUsersAction", userIdAuth, {
+        root: true,
+      });
     } catch (error) {}
   },
   async unFollowUser({ dispatch }, idUserRemove) {
     try {
       let userIdAuth = firebaseAuth.currentUser.uid;
-      // Following Steps
+
+      // Following Section
       const currentUserRouteFollowing = firebaseDb.ref(
         "toneygram/users/" + idUserRemove + "/userInformation/"
       );
@@ -94,7 +102,7 @@ const actions = {
         );
         currentUserRoute.remove();
       });
-      // Followers Steps
+      // Followers Section
       const currentUserRouteFollowers = firebaseDb.ref(
         "toneygram/users/" + userIdAuth + "/userInformation/"
       );
@@ -123,6 +131,12 @@ const actions = {
             { root: true }
           );
         });
+
+      // Update The Global State from the current user
+      dispatch("actionsOnWeb/showPostsAction", userIdAuth, { root: true });
+      dispatch("actionsOnWeb/getSuggetedsUsersAction", userIdAuth, {
+        root: true,
+      });
     } catch (error) {}
   },
   sendUserInformation({ commit }, data) {

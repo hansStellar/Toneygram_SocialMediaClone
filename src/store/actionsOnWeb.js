@@ -4,6 +4,7 @@ import { Notify } from "quasar";
 const state = {
   postsToShow: [],
   suggestedUsers: [],
+  suggetedsUsersReady: false,
   allSetForPostsOnIndex: false,
   postOnShow: {},
   postOnShowReady: false,
@@ -75,6 +76,11 @@ const mutations = {
   setUserPageGlobal(state, payload) {
     state.userOnPage = payload.userOnPage;
     state.userOnPageReady = true;
+    state.userOnPage.posts = Object.values(state.userOnPage.posts).sort(
+      (a, b) => {
+        return b.fullD - a.fullD;
+      }
+    );
 
     if (payload.userOnPage.userInformation.id === payload.userIdLoggedIn) {
       return (state.itsSameUser = true);
@@ -97,6 +103,9 @@ const mutations = {
   getPostsFromExplore(state, postsInExplore) {
     state.postsInExplore = postsInExplore;
   },
+  setSuggestedUsersReady(state) {
+    state.suggetedsUsersReady = true;
+  },
 };
 
 const actions = {
@@ -106,12 +115,19 @@ const actions = {
   setNewLikesToPostAction({ commit }, payload) {
     commit("setNewLikesToPost", payload);
   },
-  showPostsAction({ commit }, id) {
+  logOff({ commit }) {
+    firebaseAuth.signOut().then(() => {
+      commit("setLogOff");
+      this.$router.push({ name: "Auth" });
+    });
+  },
+
+  async showPostsAction({ commit }, id) {
     let postsToShow = [];
-    let suggestedUsers = [];
+
     let userId = id;
     let baseRef = firebaseDb.ref("toneygram");
-    baseRef
+    await baseRef
       .once("value", async (allData) => {
         let allDataVar = await allData.val();
       })
@@ -154,44 +170,9 @@ const actions = {
         }
 
         commit("sendPostsToShow", postsToShow);
-
-        // ------ Suggested Users --------- //
-        let allUsers = await value.val().users;
-        // if user doesnt has any following
-        if (!followingSectionCurrentUser.following) {
-          Object.values(allUsers).forEach((User) => {
-            if (User.userInformation.id !== userId) {
-              suggestedUsers.push(User);
-              if (suggestedUsers.length > 5) {
-                suggestedUsers.splice(5, suggestedUsers.length);
-                commit("sendSuggetedUsers", suggestedUsers);
-              }
-            }
-          });
-        }
-        // ------- If the user follows any user --------- //
-        else {
-          for (const user in allUsers) {
-            if (!(user in postsCurrentUser.following) && user !== userId) {
-              suggestedUsers.push(allUsers[user]);
-              if (suggestedUsers.length > 5) {
-                suggestedUsers.splice(5, suggestedUsers.length);
-                commit("sendSuggetedUsers", suggestedUsers);
-              }
-            }
-          }
-        }
-
         commit("setAllSetForPostsOnIndex", true);
       });
   },
-  logOff({ commit }) {
-    firebaseAuth.signOut().then(() => {
-      commit("setLogOff");
-      this.$router.push({ name: "Auth" });
-    });
-  },
-
   async likePost({ dispatch, getters }, payload) {
     try {
       let idUser = payload.userId;
@@ -389,7 +370,8 @@ const actions = {
       let postRef = await firebaseDb
         .ref("toneygram/users/" + userId + "/posts/" + indexPost)
         .once("value", (post) => {
-          commit("getPostOnShow", post.val());
+          if (payload.mode != "index")
+            return commit("getPostOnShow", post.val());
         })
         .then(() => {
           // Go to the page
@@ -546,11 +528,7 @@ const actions = {
     if (payload.mode === "post") {
       // Urls
       let postsRef = firebaseDb.ref(
-        "toneygram/posts/" +
-          payload.userId +
-          "/" +
-          payload.postId +
-          "/description"
+        "toneygram/posts/" + payload.userId + "/" + payload.postId
       );
       let usersRef = firebaseDb.ref(
         "toneygram/users/" + payload.userId + "/posts/" + payload.postId
@@ -640,6 +618,55 @@ const actions = {
         mode: payload.secondMode,
       });
     }
+  },
+  async getSuggetedsUsersAction({ commit }, payload) {
+    let baseRef = firebaseDb.ref("toneygram");
+    let userId = payload;
+
+    let suggestedUsers = [];
+    await baseRef
+      .once("value", () => {})
+      .then(async (value) => {
+        // vars
+
+        let followingSectionCurrentUser = await value.val().users[userId];
+
+        let allUsers = await value.val().users;
+
+        // if user doesnt has any following
+        if (!followingSectionCurrentUser.following) {
+          Object.values(allUsers).forEach((User) => {
+            if (User.userInformation.id !== userId) {
+              suggestedUsers.push(User);
+
+              if (suggestedUsers.length >= 5) {
+                return suggestedUsers.splice(5, suggestedUsers.length);
+              }
+
+              commit("sendSuggetedUsers", suggestedUsers);
+            }
+          });
+        }
+        // ------- If the user follows any user --------- //
+        if (followingSectionCurrentUser.following) {
+          for (const user in allUsers) {
+            if (
+              !(user in followingSectionCurrentUser.following) &&
+              user !== userId
+            ) {
+              suggestedUsers.push(allUsers[user]);
+
+              if (suggestedUsers.length >= 5) {
+                return suggestedUsers.splice(5, suggestedUsers.length);
+              }
+
+              commit("sendSuggetedUsers", suggestedUsers);
+            }
+          }
+        }
+
+        commit("setSuggestedUsersReady");
+      });
   },
 };
 

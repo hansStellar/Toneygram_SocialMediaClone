@@ -96,7 +96,9 @@
               >{{ getPostOnShow.userInfo.userName }}</q-item-label
             >
             <q-skeleton width="150px" v-else />
-            <q-item-label caption> Subhead </q-item-label>
+            <q-item-label v-if="getPostOnShow.location" caption>
+              Subhead
+            </q-item-label>
           </q-item-section>
           <!-- Right Side -->
           <q-item-section side v-if="getPostOnShowReady">
@@ -117,6 +119,7 @@
                 </q-item>
 
                 <q-item
+                  class="bg-red-2 text-red-9"
                   clickable
                   v-close-popup
                   @click="
@@ -230,6 +233,7 @@
                     </q-item>
 
                     <q-item
+                      class="bg-red-2 text-red-9"
                       clickable
                       v-close-popup
                       @click="
@@ -243,7 +247,7 @@
                       "
                     >
                       <q-item-section>
-                        <q-item-label>Delete Post</q-item-label>
+                        <q-item-label>Delete Comment</q-item-label>
                       </q-item-section>
                     </q-item>
                   </q-list>
@@ -286,7 +290,6 @@
                 })
               "
             />
-            <q-btn dense round flat icon="far fa-comment" />
           </div>
           <!-- Likes -->
           <div v-if="getPostOnShowReady" class="q-mx-sm text-weight-bold">
@@ -301,7 +304,14 @@
             v-if="getPostOnShowReady"
             class="q-mx-sm text-grey text-overline"
           >
-            {{ getPostOnShow.fullD }}
+            {{
+              new Date(getPostOnShow.fullD).toLocaleDateString("en-us", {
+                weekday: "long",
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            }}
           </div>
         </div>
         <q-skeleton width="150px" class="q-mx-md q-mb-md" v-else />
@@ -381,17 +391,20 @@
               >{{ getPostOnShow.userInfo.userName }}</q-item-label
             >
             <q-skeleton width="150px" v-else />
-            <q-item-label caption> Subhead </q-item-label>
+            <q-item-label caption v-if="getPostOnShow.location">
+              Subhead
+            </q-item-label>
           </q-item-section>
 
           <!-- Right Side -->
-          <q-item-section side>
+          <q-item-section side v-if="getPostOnShowReady">
             <q-btn-dropdown
               color="black"
               dropdown-icon="more_vert"
               flat
               dense
               no-icon-animation
+              v-if="getPostOnShow.userInfo.userId === getCurrentUserIndex.id"
               label=""
             >
               <q-list>
@@ -403,6 +416,7 @@
 
                 <q-item
                   clickable
+                  class="bg-red-2 text-red-9"
                   v-close-popup
                   @click="
                     deletePost({
@@ -495,7 +509,6 @@
             })
           "
         />
-        <q-btn dense round flat icon="far fa-comment" />
       </q-card-actions>
       <!-- Likes -->
       <q-card-actions
@@ -509,7 +522,7 @@
         <div v-else>0 likes</div>
       </q-card-actions>
       <!-- Description -->
-      <q-list class="q-py-none q-pl-sm full-width" v-if="getPostOnShowReady">
+      <q-list class="q-pb-sm q-pl-sm full-width" v-if="getPostOnShowReady">
         <q-card-actions class="q-py-none">
           <span
             class="cursor-pointer text-weight-bold"
@@ -528,30 +541,78 @@
       <q-separator color="grey-3" size="1px" />
       <!-- Comments -->
       <q-list
-        v-if="getPostOnShowReady"
+        v-if="getPostOnShowReady && getPostOnShow.messages"
         style="max-height: 120px; overflow: overlay"
-        class="q-py-none q-pl-sm full-width"
+        class="q-py-sm q-pl-sm full-width"
       >
         <q-card-actions
-          class="q-py-none"
+          class="q-py-none justify-between row"
           v-for="(comment, index) in getPostOnShow.messages"
           :key="index"
         >
-          <span
-            class="cursor-pointer text-weight-bold"
-            @click="
-              goToUser({
-                userId: comment.idUser,
-                userIdLoggedIn: getCurrentUserIndex.id,
-              })
-            "
-          >
-            {{ comment.userName }} &nbsp;
-          </span>
-          <span class="ellipsis"> {{ comment.message }} </span>
+          <!-- Left Side -->
+          <div class="col-10">
+            <span
+              class="cursor-pointer text-weight-bold"
+              @click="
+                goToUser({
+                  userId: comment.idUser,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
+            >
+              {{ comment.userName }} &nbsp;
+            </span>
+            <span class="ellipsis"> {{ comment.message }} </span>
+          </div>
+          <!-- Right Side -->
+          <div class="col-2 text-center">
+            <q-btn-dropdown
+              color="black"
+              dropdown-icon="more_horiz"
+              flat
+              dense
+              v-if="comment.idUser === getCurrentUserIndex.id"
+              no-icon-animation
+              label=""
+              class="col-2 self-start"
+            >
+              <q-list>
+                <q-item
+                  clickable
+                  v-close-popup
+                  @click="showDialogEditComment(comment, index)"
+                >
+                  <q-item-section>
+                    <q-item-label>Edit</q-item-label>
+                  </q-item-section>
+                </q-item>
+
+                <q-item
+                  clickable
+                  v-close-popup
+                  class="bg-red-2 text-red-9"
+                  @click="
+                    deletePost({
+                      postId: getPostOnShow.idPost,
+                      userId: getPostOnShow.userInfo.userId,
+                      commentIndex: index,
+                      mode: 'comment',
+                      currentUserId: comment.idUser,
+                    })
+                  "
+                >
+                  <q-item-section>
+                    <q-item-label>Delete Comment</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-btn-dropdown>
+          </div>
         </q-card-actions>
       </q-list>
       <q-separator color="grey-3" size="1px" />
+
       <!-- Create Comment -->
       <div class="bg-white full-width q-px-sm ccInfo" v-if="getPostOnShowReady">
         <q-input
@@ -580,6 +641,25 @@
           </template>
         </q-input>
       </div>
+      <q-separator color="grey-3" size="1px" />
+
+      <!-- Date -->
+      <q-list
+        v-if="getPostOnShowReady"
+        style="max-height: 120px; overflow: overlay"
+        class="q-pl-sm full-width text-grey text-overline"
+      >
+        <q-card-actions class="justify-between row">
+          {{
+            new Date(getPostOnShow.fullD).toLocaleDateString("en-us", {
+              weekday: "long",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          }}
+        </q-card-actions>
+      </q-list>
     </q-card>
 
     <!-- Modal Edit Post -->

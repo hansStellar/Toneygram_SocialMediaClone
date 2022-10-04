@@ -17,6 +17,7 @@ export default {
     ...mapActions("actionsOnWeb", [
       "showPostsAction",
       "getPostsFromExploreAction",
+      "getSuggetedsUsersAction",
     ]),
   },
   computed: {},
@@ -48,6 +49,7 @@ export default {
           // Get Posts from explore
           await this.getPostsFromExploreAction();
           await this.setUserOnPageReadySettingsActions();
+          await this.getSuggetedsUsersAction(user.uid);
         } catch (error) {}
       } else {
         LocalStorage.set("loggedIn", false);

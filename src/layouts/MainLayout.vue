@@ -18,26 +18,15 @@
         />
 
         <!-- Username -->
-        <div
+        <!-- <div
           class="text-h5 text-black cursor-pointer titleMobile"
           v-if="getUserOnPageGlobalReady && this.$route.name === 'User'"
         >
           {{ changeTitleNavBar }}
-        </div>
-
-        <!-- Username Post -->
-        <div
-          class="text-h5 text-black cursor-pointer titleMobile"
-          v-if="getPostOnShowReady && this.$route.name === 'Post'"
-        >
-          {{ changeTitleNavBar }}
-        </div>
+        </div> -->
 
         <!-- Others -->
-        <div
-          class="text-h5 text-black cursor-pointer titleMobile"
-          v-if="!getPostOnShowReady && this.$route.name !== 'User'"
-        >
+        <div class="text-h5 text-black cursor-pointer titleMobile">
           {{ changeTitleNavBar }}
         </div>
 
@@ -348,7 +337,9 @@ export default {
       }
 
       if (this.$route.name === "User") {
-        output = this.getUserOnPageGlobal.userInformation.name;
+        if (this.getUserOnPageGlobalReady)
+          output = this.getUserOnPageGlobal.userInformation.name;
+        if (!this.getUserOnPageGlobalReady) output = "";
       }
 
       if (this.$route.name === "Add") {
@@ -368,7 +359,9 @@ export default {
       }
 
       if (this.$route.name === "Post") {
-        output = this.getCurrentUserIndex.name;
+        if (this.getPostOnShowReady)
+          output = this.getPostOnShow.userInfo.userName;
+        if (!this.getPostOnShowReady) output = "";
       }
 
       return output;

@@ -1,0 +1,26 @@
+* Listo
+- Textmessage al enviar un comentario en el inicio
+- Titulo en la barra de version movil (Explore en explore, nombre de usuario en UserPage...)
+- Poder eliminar los posts y editarlos
+- Poder eliminar y editar los comentarios (siempre y cuando el usuario sea el dueno del comentario)
+- username en la barra nav es incorrecto en la pagina post
+- usuario random puede editar y borrar fotos (version movil)
+- titulo toneygram desaparece al editar y borrar un comentario y un post (version movil)
+- al editar y borrar un comentario o una foto ocaciona que en explore no salga la foto que fue - seleccionada
+- al editar una foto o un comentario se reinicia la pagina
+- no se eliminan las fotos en la rama de posts
+- Actualizar el state cuando un usuario sigue y deja de seguir a otro usuario
+- Poner la cantidad necesaria de usuarios sugeridos en la parte de la derecha en el inicio
+- Ordenar los posts por fecha de creacion
+- Acomodar la fecha de creacion del post 
+
+* Urgente
+
+
+* Casual
+- Arreglar el chat
+- Agregar la seccion para configurar el usuario
+- Agregar el real time notificaciones
+- Agregar un crop al subir las fotos para que todas tengas la misma medida
+- Agregar un dialog que muestre todos mis seguidores al darle click en siguiendo/pagina de usuario
+- En los comentario y descripcion, hacer que los @ y # sea de color azul y sean vinculos
