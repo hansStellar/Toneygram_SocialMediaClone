@@ -180,6 +180,13 @@ export default {
       "setItsNewUserAction",
       "setActualFollowingToCurrentUserAction",
     ]),
+    ...mapActions("actionsOnWeb", [
+      "showPostsAction",
+      "getPostsFromExploreAction",
+      "setUserOnPageReadySettingsActions",
+      "getSuggetedsUsersAction",
+    ]),
+
     registerUser(registerData) {
       // Check usernames
       this.visible = true;
@@ -205,8 +212,9 @@ export default {
                 registerData.email,
                 registerData.password
               )
-              .then((registeredUser) => {
+              .then(async (registeredUser) => {
                 // Setting the user in the Database
+                await this.setItsNewUserAction();
                 const actualUserId = firebaseAuth.currentUser.uid;
                 const usersRef = firebaseDb.ref(
                   "toneygram/users/" + actualUserId + "/userInformation"
@@ -218,63 +226,87 @@ export default {
                   const imagesStorageRef = firebaseStorage
                     .ref(firebaseAuth.currentUser.uid + "/userImg")
                     .put(this.newFile)
-                    .then(() => {
-                      firebaseStorage
+                    .then(async () => {
+                      await firebaseStorage
                         .ref(firebaseAuth.currentUser.uid + "/userImg")
                         .getDownloadURL()
                         .then((url) => {
                           this.imageUploaded = url;
                         })
-                        .then(() => {
-                          registeredUser.user
+                        .then(async () => {
+                          await registeredUser.user
                             .updateProfile({
                               displayName: registerData.username.toLowerCase(),
                               photoURL: this.imageUploaded,
                             })
                             .then(async () => {
-                              usersRef.set({
+                              await usersRef.set({
                                 img: registeredUser.user.photoURL,
                                 name: registeredUser.user.displayName.toLowerCase(),
                                 id: registeredUser.user.uid,
                                 fullname: registerData.fullName,
                               });
-                              namesRef.set(registerData.username);
+                              await namesRef
+                                .set(registerData.username)
+                                .then(async () => {
+                                  // All User Data
+                                  console.log("se ejecuto register");
+                                  const userInformation = await firebaseDb
+                                    .ref(
+                                      "toneygram/users/" +
+                                        firebaseAuth.currentUser.uid
+                                    )
+                                    .once("value", async (allData) => {
+                                      let allInfoUser = allData.val();
+                                      await this.sendUserInformation(
+                                        allInfoUser
+                                      );
+                                      await this.setActualFollowingToCurrentUserAction(
+                                        allInfoUser
+                                      );
+                                    });
 
-                              // All User Data
-                              const userInformation = await firebaseDb
-                                .ref(
-                                  "toneygram/users/" +
+                                  // User Index
+                                  const userInformationIndex = await firebaseDb
+                                    .ref(
+                                      "toneygram/users/" +
+                                        firebaseAuth.currentUser.uid +
+                                        "/userInformation"
+                                    )
+                                    .once("value", (allData) => {
+                                      let allInfoUser = allData.val();
+                                      this.sendUserInformationForIndex(
+                                        allInfoUser
+                                      );
+                                    });
+
+                                  // Action get posts
+                                  await this.showPostsAction(
                                     firebaseAuth.currentUser.uid
-                                )
-                                .once("value", async (allData) => {
-                                  let allInfoUser = allData.val();
-                                  await this.sendUserInformation(allInfoUser);
-                                  await this.setActualFollowingToCurrentUserAction(
-                                    allInfoUser
                                   );
-                                  await this.setItsNewUserAction();
-                                });
 
-                              // User Index
-                              const userInformationIndex = await firebaseDb
-                                .ref(
-                                  "toneygram/users/" +
-                                    firebaseAuth.currentUser.uid +
-                                    "/userInformation"
-                                )
-                                .once("value", (allData) => {
-                                  let allInfoUser = allData.val();
-                                  this.sendUserInformationForIndex(allInfoUser);
+                                  // Get Posts from explore
+                                  await this.getPostsFromExploreAction();
+
+                                  // Set State
+                                  await this.setUserOnPageReadySettingsActions();
+
+                                  // Suggested Users
+                                  await this.getSuggetedsUsersAction(
+                                    firebaseAuth.currentUser.uid
+                                  );
+                                })
+                                .then(() => {
+                                  this.$router
+                                    .push({ name: "Home" })
+                                    .then(() => {
+                                      Notify.create({
+                                        message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
+                                        color: "positive",
+                                      });
+                                      this.visible = false;
+                                    });
                                 });
-                            })
-                            .then(() => {
-                              this.$router.push({ name: "Home" }).then(() => {
-                                Notify.create({
-                                  message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
-                                  color: "positive",
-                                });
-                                this.visible = false;
-                              });
                             });
                         });
                     });
@@ -302,7 +334,6 @@ export default {
                           await this.setActualFollowingToCurrentUserAction(
                             allInfoUser
                           );
-                          await this.setItsNewUserAction();
                         });
 
                       // User Index
@@ -316,6 +347,20 @@ export default {
                           let allInfoUser = allData.val();
                           this.sendUserInformationForIndex(allInfoUser);
                         });
+
+                      // Action get posts
+                      await this.showPostsAction(firebaseAuth.currentUser.uid);
+
+                      // Get Posts from explore
+                      await this.getPostsFromExploreAction();
+
+                      // Set State
+                      await this.setUserOnPageReadySettingsActions();
+
+                      // Suggested Users
+                      await this.getSuggetedsUsersAction(
+                        firebaseAuth.currentUser.uid
+                      );
                     })
                     .then(() => {
                       this.$router.push({ name: "Home" }).then(() => {

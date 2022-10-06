@@ -171,12 +171,11 @@ const actions = {
     commit("insertNewUser", newUser);
   },
   setActualFollowingToCurrentUserAction({ commit }, payload) {
-    console.log(payload);
-    if (payload.following === undefined) {
+    if (!payload.following) {
       return (payload.following = {});
     }
 
-    if (!payload.following) {
+    if (payload.following === undefined) {
       return (payload.following = {});
     }
 

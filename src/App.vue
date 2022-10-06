@@ -30,8 +30,9 @@ export default {
         try {
           LocalStorage.set("loggedIn", true);
 
-          if (!this.getItsNewUser) {
+          if (this.getItsNewUser === false) {
             // All User Data
+
             const userInformation = await firebaseDb
               .ref("toneygram/users/" + user.uid)
               .once("value", async (allData) => {
@@ -48,16 +49,19 @@ export default {
 
                 this.sendUserInformationForIndex(allInfoUser);
               });
+
+            // Action get posts
+            await this.showPostsAction(user.uid);
+
+            // Get Posts from explore
+            await this.getPostsFromExploreAction();
+
+            // Set State
+            await this.setUserOnPageReadySettingsActions();
+
+            // Suggested Users
+            await this.getSuggetedsUsersAction(user.uid);
           }
-
-          // Action get posts
-          await this.showPostsAction(user.uid);
-
-          // Get Posts from explore
-
-          await this.getPostsFromExploreAction();
-          await this.setUserOnPageReadySettingsActions();
-          await this.getSuggetedsUsersAction(user.uid);
         } catch (error) {}
       } else {
         LocalStorage.set("loggedIn", false);
