@@ -22,6 +22,7 @@
 (quedamos en el vuex store no se refleja el get current user index al crear una cuenta)
 
 * Doing
+- Eliminar la basura de firebase
 
 * Urgente
 

@@ -179,11 +179,11 @@ export default {
       "sendUserInformationForIndex",
       "setItsNewUserAction",
       "setActualFollowingToCurrentUserAction",
+      "setUserOnPageReadySettingsActions",
     ]),
     ...mapActions("actionsOnWeb", [
       "showPostsAction",
       "getPostsFromExploreAction",
-      "setUserOnPageReadySettingsActions",
       "getSuggetedsUsersAction",
     ]),
 
