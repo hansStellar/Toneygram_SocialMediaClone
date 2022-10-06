@@ -14,6 +14,7 @@ const mutations = {
     state.currentUserChat = {};
     state.currentUserIndex = {};
     state.userOnPageReadySettings = false;
+    state.itsNewUser = false;
   },
   getDataUserIndex(state, data) {
     state.currentUserIndex = data;
