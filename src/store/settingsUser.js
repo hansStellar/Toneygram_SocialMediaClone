@@ -2,7 +2,6 @@ import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 
 const state = {
   currentUserInfoData: {},
-  currentUserChat: {},
   currentUserIndex: {},
   userOnPageReadySettings: false,
   itsNewUser: false,
@@ -21,9 +20,6 @@ const mutations = {
   },
   getDataUserInfo(state, data) {
     state.currentUserInfoData = data;
-  },
-  insertNewUser(state, newUser) {
-    state.currentUserChat = newUser;
   },
   addFollowingToCurrentUser(state, payload) {
     state.currentUserInfoData.following = payload;
@@ -167,9 +163,6 @@ const actions = {
   sendUserInformationForIndex({ commit }, data) {
     commit("getDataUserIndex", data);
   },
-  changeUserChat({ commit }, newUser) {
-    commit("insertNewUser", newUser);
-  },
   setActualFollowingToCurrentUserAction({ commit }, payload) {
     if (!payload.following) {
       return (payload.following = {});
@@ -195,6 +188,9 @@ const getters = {
   },
   getItsNewUser(state) {
     return state.itsNewUser;
+  },
+  getCurrentUserInfoData(state) {
+    return state.currentUserInfoData;
   },
 };
 

@@ -1,7 +1,8 @@
-import { store } from 'quasar/wrappers'
-import { createStore } from 'vuex'
-import settingsUser from './settingsUser'
-import actionsOnWeb from './actionsOnWeb'
+import { store } from "quasar/wrappers";
+import { createStore } from "vuex";
+import settingsUser from "./settingsUser";
+import actionsOnWeb from "./actionsOnWeb";
+import chatState from "./chatState";
 
 // import example from './module-example'
 
@@ -18,13 +19,14 @@ export default store(function (/* { ssrContext } */) {
   const Store = createStore({
     modules: {
       settingsUser,
-      actionsOnWeb
+      actionsOnWeb,
+      chatState,
     },
 
     // enable strict mode (adds overhead!)
     // for dev mode and --debug builds only
-    strict: process.env.DEBUGGING
-  })
+    strict: process.env.DEBUGGING,
+  });
 
-  return Store
-})
+  return Store;
+});

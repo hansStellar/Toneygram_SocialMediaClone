@@ -23,11 +23,11 @@
 - Eliminar la basura de firebase
 
 * Doing
+- Arreglar el chat (quede en traer los chats, en el firebase, en cada id, despues de alli tenemos que meter una propiedad llamada messages, y dentro de la propiedad id vamos a poner todos los datos del usuario al cual estamos interactuando)
 
 * Urgente
 
 * Casual
-- Arreglar el chat
 - Agregar la seccion para configurar el usuario
 - Arreglar el real time de footer en version movil
 - Agregar el real time notificaciones

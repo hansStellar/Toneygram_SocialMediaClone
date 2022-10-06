@@ -361,7 +361,7 @@
         </div>
 
         <!-- Create Comment -->
-        <div class="bg-white q-py-none full-width q-px-sm ccInfo">
+        <div class="bg-white full-width q-px-sm ccInfo">
           <q-input
             color="grey-6"
             v-model="post.textMessage"

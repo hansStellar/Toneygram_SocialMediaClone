@@ -11,7 +11,7 @@
             :ratio="1"
             width="42px"
             height="42px"
-            :src="currentUserInfoData.userInformation.img"
+            :src="getCurrentUserInfoData.userInformation.img"
             style="border-radius: 100%; border: solid 1px black"
           />
 
@@ -171,270 +171,23 @@
         </q-list>
       </q-page>
     </section>
-    <!-- Dialogs -->
-    <SettingsDialog v-model="settingsDialog" v-on:modalChange="actionModal" />
-    <UsernameDialog v-model="username" />
-    <FullnameDialog v-model="fullname" />
-    <WebsiteDialog v-model="website" />
-    <BioDialog v-model="bio" />
-    <Picture v-model="picture" />
   </q-page>
 </template>
 <script>
-import { firebaseAuth, firebaseDb } from "src/boot/firebase";
-import { mapActions, mapGetters, mapState } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { Loading, uid } from "quasar";
-import SettingsDialog from "components/ModalsSettings/SettingsDialog.vue";
-import UsernameDialog from "components/ModalsSettings/Username.vue";
-import FullnameDialog from "components/ModalsSettings/Fullname.vue";
-import WebsiteDialog from "components/ModalsSettings/Website.vue";
-import BioDialog from "components/ModalsSettings/Bio.vue";
-import Picture from "components/ModalsSettings/Picture.vue";
+
 export default {
   data() {
     return {
-      tab: "contacts",
-      activeFloor: false,
-      text: "",
-      settingsDialog: false,
-      username: false,
-      fullname: false,
-      website: false,
-      bio: false,
-      picture: false,
-      loading: true,
       myInfo: {},
     };
   },
-  components: {
-    SettingsDialog,
-    UsernameDialog,
-    FullnameDialog,
-    WebsiteDialog,
-    BioDialog,
-    Picture,
-  },
   methods: {
-    actionModal(option) {
-      if (option === "username") this.username = !this.username;
-      else if (option === "fullname") this.fullname = !this.fullname;
-      else if (option === "website") this.website = !this.website;
-      else if (option === "bio") this.bio = !this.bio;
-      else if (option === "picture") this.picture = !this.picture;
-      this.settingsDialog = false;
-    },
     ...mapActions("settingsUser", ["changeUserChat"]),
-    logOut() {
-      firebaseAuth.signOut().then(() => {
-        this.$router.push({ name: "Auth" });
-      });
-    },
-    goToToney() {
-      window.location.replace("https://toneygram.netlify.app");
-    },
-    sendMessage() {
-      let messageObject = {
-        showDate:
-          new Date().getHours() +
-          ":" +
-          (new Date().getMinutes() < 10 ? "0" : "") +
-          new Date().getMinutes(),
-        date:
-          new Date().getHours() +
-          "-" +
-          (new Date().getMinutes() < 10 ? "0" : "") +
-          new Date().getMinutes() +
-          "-" +
-          (new Date().getSeconds() < 10 ? "0" : "") +
-          new Date().getSeconds() +
-          "-" +
-          new Date().getDate() +
-          "-" +
-          new Date().getMonth() +
-          "-" +
-          new Date().getFullYear() +
-          "-" +
-          firebaseAuth.currentUser.uid,
-        messageRead: false,
-        from: firebaseAuth.currentUser.uid,
-        messages: {
-          [new Date().getTime()]: this.text,
-        },
-      };
-      // Send message to current user database
-      let currentUserBaseRef = firebaseDb.ref(
-        "toneygram/users/" + firebaseAuth.currentUser.uid
-      );
-      currentUserBaseRef.once("value", (base) => {
-        let secondUserBaseRef = firebaseDb.ref(
-          "toneygram/users/" +
-            firebaseAuth.currentUser.uid +
-            "/chats/" +
-            this.currentUserChat.id +
-            "/"
-        );
-        let baseVar = base.val();
-        secondUserBaseRef.once("value", (secondBase) => {
-          let secondBaseVar = secondBase.val();
-          if (!baseVar.chats) {
-            const newRoute = firebaseDb.ref(
-              "toneygram/users/" +
-                firebaseAuth.currentUser.uid +
-                "/chats/" +
-                this.currentUserChat.id +
-                "/" +
-                messageObject.date
-            );
-            newRoute.set(messageObject);
-          } else if (baseVar.chats) {
-            let thirdUserBaseRef = firebaseDb.ref(
-              "toneygram/users/" + firebaseAuth.currentUser.uid + "/chats/"
-            );
-            thirdUserBaseRef.once("value", (thirdBase) => {
-              let thirdBaseVar = thirdBase.val();
-              if (!thirdBaseVar[this.currentUserChat.id]) {
-                const newBaseRef = firebaseDb.ref(
-                  "toneygram/users/" +
-                    firebaseAuth.currentUser.uid +
-                    "/chats/" +
-                    this.currentUserChat.id +
-                    "/" +
-                    messageObject.date
-                );
-                newBaseRef.set(messageObject);
-              } else if (thirdBaseVar[this.currentUserChat.id]) {
-                if (!secondBaseVar[messageObject.date]) {
-                  const newRoute = firebaseDb.ref(
-                    "toneygram/users/" +
-                      firebaseAuth.currentUser.uid +
-                      "/chats/" +
-                      this.currentUserChat.id +
-                      "/" +
-                      messageObject.date
-                  );
-                  newRoute.set(messageObject);
-                } else if (secondBaseVar[messageObject.date]) {
-                  const newRoute = firebaseDb.ref(
-                    "toneygram/users/" +
-                      firebaseAuth.currentUser.uid +
-                      "/chats/" +
-                      this.currentUserChat.id +
-                      "/" +
-                      messageObject.date +
-                      "/messages/" +
-                      new Date().getTime()
-                  );
-                  newRoute.set(this.text);
-                }
-              }
-            });
-          }
-        });
-      });
-
-      // Send message to other user database
-      let otherUserBaseRef = firebaseDb.ref(
-        "toneygram/users/" + this.currentUserChat.id
-      );
-      otherUserBaseRef.once("value", (base) => {
-        let secondUserBaseRef = firebaseDb.ref(
-          "toneygram/users/" +
-            this.currentUserChat.id +
-            "/chats/" +
-            firebaseAuth.currentUser.uid +
-            "/"
-        );
-        let baseVar = base.val();
-        secondUserBaseRef.once("value", (secondBase) => {
-          let secondBaseVar = secondBase.val();
-          if (!baseVar.chats) {
-            const newRoute = firebaseDb.ref(
-              "toneygram/users/" +
-                this.currentUserChat.id +
-                "/chats/" +
-                firebaseAuth.currentUser.uid +
-                "/" +
-                messageObject.date
-            );
-            newRoute.set(messageObject);
-          } else if (baseVar.chats) {
-            let thirdUserBaseRef = firebaseDb.ref(
-              "toneygram/users/" + this.currentUserChat.id + "/chats/"
-            );
-            thirdUserBaseRef.once("value", (thirdBase) => {
-              let thirdBaseVar = thirdBase.val();
-              if (!thirdBaseVar[firebaseAuth.currentUser.uid]) {
-                const newBaseRef = firebaseDb.ref(
-                  "toneygram/users/" +
-                    this.currentUserChat.id +
-                    "/chats/" +
-                    firebaseAuth.currentUser.uid +
-                    "/" +
-                    messageObject.date
-                );
-                newBaseRef.set(messageObject);
-              } else if (thirdBaseVar[firebaseAuth.currentUser.uid]) {
-                if (!secondBaseVar[messageObject.date]) {
-                  const newRoute = firebaseDb.ref(
-                    "toneygram/users/" +
-                      this.currentUserChat.id +
-                      "/chats/" +
-                      firebaseAuth.currentUser.uid +
-                      "/" +
-                      messageObject.date
-                  );
-                  newRoute.set(messageObject);
-                } else if (secondBaseVar[messageObject.date]) {
-                  const newRoute = firebaseDb.ref(
-                    "toneygram/users/" +
-                      this.currentUserChat.id +
-                      "/chats/" +
-                      firebaseAuth.currentUser.uid +
-                      "/" +
-                      messageObject.date +
-                      "/messages/" +
-                      new Date().getTime()
-                  );
-                  newRoute.set(this.text);
-                }
-              }
-            });
-          }
-        });
-      });
-      this.text = "";
-    },
-    sendUserToChat(conctact) {
-      this.$router
-        .push({
-          name: "Chat",
-          params: {
-            userId: conctact.id,
-          },
-        })
-        .then(() => {
-          this.changeUserChat(conctact);
-        });
-    },
   },
   computed: {
-    ...mapState("settingsUser", ["currentUserInfoData", "currentUserChat"]),
-
-    getChats() {
-      let allChats = this.currentUserInfoData.chats;
-      let chats = {};
-      for (const user in allChats) {
-        const userRef = firebaseDb.ref(
-          "toneygram/users/" + user + "/userInformation"
-        );
-        userRef.on("value", (allDataFromUser) => {
-          let alldata = allDataFromUser.val();
-          chats[alldata.id] = alldata;
-        });
-      }
-
-      return chats;
-    },
+    ...mapGetters("settingsUser", ["getCurrentUserInfoData"]),
   },
 };
 </script>
