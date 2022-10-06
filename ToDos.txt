@@ -13,13 +13,22 @@
 - Poner la cantidad necesaria de usuarios sugeridos en la parte de la derecha en el inicio
 - Ordenar los posts por fecha de creacion
 - Acomodar la fecha de creacion del post 
+- Cuando se crea un usuario o cuando no tiene posts genera un error al no tener nada que buclear
+- Al eliminar un post redirige a la pagina del usuario pero no elimina el post de la pagina mas si en la base de datos
+- Al darle click en usuario sugeridos habiendo creado una cuenta nueva no funciona 
+- Al darle unfollow de parte de un usuario que solo tiene un following esta propiedad se transforma en null
+- Al darle submit en editar texto en post se reinicia y no ejecuta la funcion
+- Al crear un usuario no se ve la barra nav de arriba y en el footer no aparece el icono para ir hacia el perfil
+(quedamos en el vuex store no se refleja el get current user index al crear una cuenta)
+
+* Doing
 
 * Urgente
-
 
 * Casual
 - Arreglar el chat
 - Agregar la seccion para configurar el usuario
+- Arreglar el real time de footer en version movil
 - Agregar el real time notificaciones
 - Agregar un crop al subir las fotos para que todas tengas la misma medida
 - Agregar un dialog que muestre todos mis seguidores al darle click en siguiendo/pagina de usuario

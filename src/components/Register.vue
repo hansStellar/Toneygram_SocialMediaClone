@@ -174,7 +174,12 @@ export default {
     };
   },
   methods: {
-    ...mapActions("settingsUser", ["sendUserInformation"]),
+    ...mapActions("settingsUser", [
+      "sendUserInformation",
+      "sendUserInformationForIndex",
+      "setItsNewUserAction",
+      "setActualFollowingToCurrentUserAction",
+    ]),
     registerUser(registerData) {
       // Check usernames
       this.visible = true;
@@ -226,7 +231,7 @@ export default {
                               displayName: registerData.username.toLowerCase(),
                               photoURL: this.imageUploaded,
                             })
-                            .then(() => {
+                            .then(async () => {
                               usersRef.set({
                                 img: registeredUser.user.photoURL,
                                 name: registeredUser.user.displayName.toLowerCase(),
@@ -234,11 +239,37 @@ export default {
                                 fullname: registerData.fullName,
                               });
                               namesRef.set(registerData.username);
+
+                              // All User Data
+                              const userInformation = await firebaseDb
+                                .ref(
+                                  "toneygram/users/" +
+                                    firebaseAuth.currentUser.uid
+                                )
+                                .once("value", async (allData) => {
+                                  let allInfoUser = allData.val();
+                                  await this.sendUserInformation(allInfoUser);
+                                  await this.setActualFollowingToCurrentUserAction(
+                                    allInfoUser
+                                  );
+                                  await this.setItsNewUserAction();
+                                });
+
+                              // User Index
+                              const userInformationIndex = await firebaseDb
+                                .ref(
+                                  "toneygram/users/" +
+                                    firebaseAuth.currentUser.uid +
+                                    "/userInformation"
+                                )
+                                .once("value", (allData) => {
+                                  let allInfoUser = allData.val();
+                                  this.sendUserInformationForIndex(allInfoUser);
+                                });
                             })
                             .then(() => {
                               this.$router.push({ name: "Home" }).then(() => {
                                 Notify.create({
-                                  avatar: firebaseAuth.currentUser.photoURL,
                                   message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
                                   color: "positive",
                                 });
@@ -253,7 +284,7 @@ export default {
                       displayName: registerData.username.toLowerCase(),
                       photoURL: "https://i.ibb.co/X5HrbCj/default.png",
                     })
-                    .then(() => {
+                    .then(async () => {
                       usersRef.set({
                         img: registeredUser.user.photoURL,
                         name: registeredUser.user.displayName.toLowerCase(),
@@ -261,11 +292,34 @@ export default {
                         fullname: registerData.fullName,
                       });
                       namesRef.set(registerData.username);
+
+                      // All User Data
+                      const userInformation = await firebaseDb
+                        .ref("toneygram/users/" + firebaseAuth.currentUser.uid)
+                        .once("value", async (allData) => {
+                          let allInfoUser = allData.val();
+                          await this.sendUserInformation(allInfoUser);
+                          await this.setActualFollowingToCurrentUserAction(
+                            allInfoUser
+                          );
+                          await this.setItsNewUserAction();
+                        });
+
+                      // User Index
+                      const userInformationIndex = await firebaseDb
+                        .ref(
+                          "toneygram/users/" +
+                            firebaseAuth.currentUser.uid +
+                            "/userInformation"
+                        )
+                        .once("value", (allData) => {
+                          let allInfoUser = allData.val();
+                          this.sendUserInformationForIndex(allInfoUser);
+                        });
                     })
                     .then(() => {
                       this.$router.push({ name: "Home" }).then(() => {
                         Notify.create({
-                          avatar: firebaseAuth.currentUser.photoURL,
                           message: `Welcome, ${firebaseAuth.currentUser.displayName}`,
                           color: "positive",
                         });

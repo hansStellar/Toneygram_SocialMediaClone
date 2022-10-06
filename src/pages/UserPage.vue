@@ -513,9 +513,10 @@ export default {
     }
   },
   unmounted() {
-    if (this.getUserOnPageGlobal != null) {
-      this.removeTheUserOnPageAction();
-    }
+    // Por si acaso, aca lo dejo, esto es para eliminar el objeto global de esta pagina al salirse de ella
+    // if (this.getUserOnPageGlobal != null) {
+    //   this.removeTheUserOnPageAction();
+    // }
   },
   computed: {
     ...mapGetters("settingsUser", [

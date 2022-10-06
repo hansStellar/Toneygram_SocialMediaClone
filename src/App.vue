@@ -2,7 +2,7 @@
   <router-view class="baseAll" />
 </template>
 <script>
-import { mapActions } from "vuex";
+import { mapActions, mapGetters } from "vuex";
 import { firebaseAuth, firebaseDb } from "./boot/firebase";
 import { LocalStorage } from "quasar";
 export default {
@@ -13,6 +13,7 @@ export default {
       "sendUserInformation",
       "sendUserInformationForIndex",
       "setUserOnPageReadySettingsActions",
+      "setActualFollowingToCurrentUserAction",
     ]),
     ...mapActions("actionsOnWeb", [
       "showPostsAction",
@@ -20,33 +21,40 @@ export default {
       "getSuggetedsUsersAction",
     ]),
   },
-  computed: {},
+  computed: {
+    ...mapGetters("settingsUser", ["getCurrentUserIndex", "getItsNewUser"]),
+  },
   mounted() {
     firebaseAuth.onAuthStateChanged(async (user) => {
       if (user) {
         try {
           LocalStorage.set("loggedIn", true);
 
-          // All User Data
-          const userInformation = await firebaseDb
-            .ref("toneygram/users/" + user.uid)
-            .once("value", async (allData) => {
-              let allInfoUser = allData.val();
-              this.sendUserInformation(allInfoUser);
-            });
+          if (!this.getItsNewUser) {
+            // All User Data
+            const userInformation = await firebaseDb
+              .ref("toneygram/users/" + user.uid)
+              .once("value", async (allData) => {
+                let allInfoUser = allData.val();
+                this.setActualFollowingToCurrentUserAction(allInfoUser);
+                this.sendUserInformation(allInfoUser);
+              });
 
-          // User Index
-          const userInformationIndex = await firebaseDb
-            .ref("toneygram/users/" + user.uid + "/userInformation")
-            .once("value", (allData) => {
-              let allInfoUser = allData.val();
-              this.sendUserInformationForIndex(allInfoUser);
-            });
+            // User Index
+            const userInformationIndex = await firebaseDb
+              .ref("toneygram/users/" + user.uid + "/userInformation")
+              .once("value", async (allData) => {
+                let allInfoUser = allData.val();
+
+                this.sendUserInformationForIndex(allInfoUser);
+              });
+          }
 
           // Action get posts
           await this.showPostsAction(user.uid);
 
           // Get Posts from explore
+
           await this.getPostsFromExploreAction();
           await this.setUserOnPageReadySettingsActions();
           await this.getSuggetedsUsersAction(user.uid);

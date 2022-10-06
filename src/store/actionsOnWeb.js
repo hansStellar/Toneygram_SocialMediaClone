@@ -20,16 +20,22 @@ const mutations = {
       p.textMessage = "";
     });
 
-    // Likes
     state.postsToShow = posts;
   },
   sendSuggetedUsers(state, users) {
     state.suggestedUsers = users;
   },
   setLogOff(state) {
-    state.suggestedUsers = [];
     state.postsToShow = [];
+    state.suggestedUsers = [];
+    state.suggetedsUsersReady = false;
     state.allSetForPostsOnIndex = false;
+    state.postOnShow = {};
+    state.postOnShowReady = false;
+    state.userOnPage = {};
+    state.userOnPageReady = false;
+    state.itsSameUser = null;
+    state.postsInExplore = [];
   },
   setAllSetForPostsOnIndex(state) {
     state.allSetForPostsOnIndex = true;
@@ -74,8 +80,14 @@ const mutations = {
     state.postOnShowReady = false;
   },
   setUserPageGlobal(state, payload) {
+    if (!payload.userOnPage.posts) {
+      payload.userOnPage.posts = {};
+    }
+
     state.userOnPage = payload.userOnPage;
     state.userOnPageReady = true;
+
+    // Order by pics by date
     state.userOnPage.posts = Object.values(state.userOnPage.posts).sort(
       (a, b) => {
         return b.fullD - a.fullD;
@@ -115,9 +127,10 @@ const actions = {
   setNewLikesToPostAction({ commit }, payload) {
     commit("setNewLikesToPost", payload);
   },
-  logOff({ commit }) {
+  logOff({ commit, dispatch }) {
     firebaseAuth.signOut().then(() => {
       commit("setLogOff");
+      dispatch("settingsUser/setLoggedOff", null, { root: true });
       this.$router.push({ name: "Auth" });
     });
   },
@@ -140,7 +153,7 @@ const actions = {
           Object.values(postsCurrentUser.posts).forEach((Post) => {
             // Push all the post into the array
             postsToShow.push(Post);
-            //Order the posts by date
+            // Order the posts by date
             postsToShow.sort((a, b) => {
               return b.fullD - a.fullD;
             });
@@ -543,10 +556,11 @@ const actions = {
 
       if (payload.secondMode != "index") {
         // Redirect User
-        return this.$router.push({
-          name: "User",
-          params: { userId: payload.userId },
-        });
+        dispatch("goToUser", payload);
+        // return this.$router.push({
+        //   name: "User",
+        //   params: { userId: payload.userId },
+        // });
       }
     }
   },

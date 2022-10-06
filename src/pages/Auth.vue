@@ -86,7 +86,7 @@
       style="min-width: 245px"
       class="q-mb-md"
     ></q-separator>
-    <div class="text-body1 text-grey-5">© 2021 Toneygram</div>
+    <div class="text-body1 text-grey-5">© 2022 Toneygram</div>
   </div>
 </template>
 

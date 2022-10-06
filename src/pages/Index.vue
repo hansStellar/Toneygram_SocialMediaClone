@@ -523,11 +523,9 @@
                 :ratio="1"
                 :src="user.userInformation.img"
                 @click="
-                  this.$router.push({
-                    name: 'User',
-                    params: {
-                      userId: user.userInformation.id,
-                    },
+                  goToUser({
+                    userId: user.userInformation.id,
+                    userIdLoggedIn: getCurrentUserIndex.id,
                   })
                 "
               />
@@ -536,11 +534,9 @@
             <q-item-section>
               <q-item-label
                 @click="
-                  this.$router.push({
-                    name: 'User',
-                    params: {
-                      userId: user.userInformation.id,
-                    },
+                  goToUser({
+                    userId: user.userInformation.id,
+                    userIdLoggedIn: getCurrentUserIndex.id,
                   })
                 "
                 class="cursor-pointer text-weight-medium"

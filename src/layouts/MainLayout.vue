@@ -17,14 +17,6 @@
           @click="this.$router.go(-1)"
         />
 
-        <!-- Username -->
-        <!-- <div
-          class="text-h5 text-black cursor-pointer titleMobile"
-          v-if="getUserOnPageGlobalReady && this.$route.name === 'User'"
-        >
-          {{ changeTitleNavBar }}
-        </div> -->
-
         <!-- Others -->
         <div class="text-h5 text-black cursor-pointer titleMobile">
           {{ changeTitleNavBar }}
@@ -147,8 +139,10 @@
             class="notShowDesktop"
             @click="logOff"
             /> -->
+
           <!-- User -->
           <q-img
+            v-if="getUserOnPageReadySettings"
             height="26px"
             width="26px"
             :ratio="1"

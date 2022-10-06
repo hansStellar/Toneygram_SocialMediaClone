@@ -5,9 +5,16 @@ const state = {
   currentUserChat: {},
   currentUserIndex: {},
   userOnPageReadySettings: false,
+  itsNewUser: false,
 };
 
 const mutations = {
+  logOff(state) {
+    state.currentUserInfoData = {};
+    state.currentUserChat = {};
+    state.currentUserIndex = {};
+    state.userOnPageReadySettings = false;
+  },
   getDataUserIndex(state, data) {
     state.currentUserIndex = data;
   },
@@ -23,13 +30,28 @@ const mutations = {
   setUserOnPageReadySettings(state) {
     state.userOnPageReadySettings = true;
   },
+  setActualFollowingToCurrentUser(state, payload) {
+    console.log(payload);
+    state.currentUserInfoData.following = payload;
+  },
+  setItsNewUser(state) {
+    state.itsNewUser = true;
+  },
 };
 
 const actions = {
+  setItsNewUserAction({ commit }) {
+    commit("setItsNewUser");
+  },
+  setLoggedOff({ commit }) {
+    commit("logOff");
+  },
   setUserOnPageReadySettingsActions({ commit }) {
     commit("setUserOnPageReadySettings");
   },
   addFollowingToCurrentUserAction({ commit }, payload) {
+    if (payload === null) payload = {};
+
     commit("addFollowingToCurrentUser", payload);
   },
   async followUser({ dispatch }, idUserAdd) {
@@ -148,6 +170,18 @@ const actions = {
   changeUserChat({ commit }, newUser) {
     commit("insertNewUser", newUser);
   },
+  setActualFollowingToCurrentUserAction({ commit }, payload) {
+    console.log(payload);
+    if (payload.following === undefined) {
+      return (payload.following = {});
+    }
+
+    if (!payload.following) {
+      return (payload.following = {});
+    }
+
+    commit("setActualFollowingToCurrentUser", payload.following);
+  },
 };
 
 const getters = {
@@ -155,14 +189,13 @@ const getters = {
     return state.currentUserIndex;
   },
   getFollowingFromCurrentUser(state) {
-    if (state.currentUserInfoData.following === undefined) {
-      return (state.currentUserInfoData.following = {});
-    }
-
     return state.currentUserInfoData.following;
   },
   getUserOnPageReadySettings(state) {
     return state.userOnPageReadySettings;
+  },
+  getItsNewUser(state) {
+    return state.itsNewUser;
   },
 };
 

@@ -423,6 +423,7 @@
                       postId: getPostOnShow.idPost,
                       userId: getPostOnShow.userInfo.userId,
                       mode: 'post',
+                      secondMode: 'post',
                     })
                   "
                 >
