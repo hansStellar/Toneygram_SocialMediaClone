@@ -250,7 +250,7 @@ export default {
                                 .set(registerData.username)
                                 .then(async () => {
                                   // All User Data
-                                  console.log("se ejecuto register");
+
                                   const userInformation = await firebaseDb
                                     .ref(
                                       "toneygram/users/" +

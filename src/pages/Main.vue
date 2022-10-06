@@ -140,151 +140,36 @@
       <q-page class="col-9 bg-grey-2 flex-center flex">Toneygram</q-page>
     </container>
     <!-- Mobile & Tablet -->
-    <section class="row mobileVersion full-width">
-      <q-layout view="lHh lpr lFf" container class="shadow-2 rounded-borders">
-        <!-- Header Actual User -->
-        <q-header elevated>
-          <q-banner
-            inline-actions
-            rounded
-            class="
-              bg-white
-              text-black
-              q-py-none q-pl-none q-pr-md
-              no-border-radius
-            "
+    <section class="row mobileVersion full-width bg-white q-pt-sm">
+      <!-- Base -->
+      <q-page>
+        <!-- Chats -->
+        <q-list>
+          <q-item
+            v-for="(chat, index) in getChats"
+            :key="index"
+            class="q-my-none"
+            clickable
+            v-ripple
+            @click="sendUserToChat(chat)"
           >
-            <q-item class="q-my-none">
-              <q-item-section avatar>
-                <q-img
-                  v-if="activeFloor"
-                  :ratio="1"
-                  width="42px"
-                  height="42px"
-                  :src="currentUserInfoData.userInformation.img"
-                  style="border-radius: 100%; border: solid 1px black"
-                />
-              </q-item-section>
-            </q-item>
-            <template v-slot:action>
-              <q-btn
-                dense
-                flat
-                round
-                icon="home"
-                @click="this.$router.push({ name: 'Home' })"
-                color="black"
-                no-caps
+            <q-item-section avatar>
+              <q-img
+                :ratio="1"
+                width="42px"
+                height="42px"
+                :src="chat.img"
+                style="border-radius: 100%; border: solid 1px black"
               />
-              <q-btn
-                color="black"
-                dense
-                flat
-                round
-                @click="settingsDialog = !settingsDialog"
-                icon="settings"
-              />
-              <q-btn
-                color="red-8"
-                dense
-                flat
-                round
-                @click="logOut"
-                icon="logout"
-              />
-            </template>
-          </q-banner>
-        </q-header>
-        <!-- Footer -->
-        <q-footer elevated>
-          <!-- Tabs -->
-          <q-tabs
-            v-model="tab"
-            dense
-            inline-label
-            switch-indicator
-            class="text-black full-width bg-white"
-            active-color="black"
-            indicator-color="black"
-            align="justify"
-          >
-            <q-tab name="contacts" label="Contacts" no-caps />
-            <q-tab name="chats" label="Chats" no-caps />
-          </q-tabs>
-        </q-footer>
+            </q-item-section>
 
-        <q-page-container>
-          <q-page class="q-pa-none bg-grey-2" v-if="activeFloor"
-            ><q-tab-panels
-              v-model="tab"
-              animated
-              class="bg-grey-2"
-              style="max-height: 100%; min-height: 100%; overflow: overlay"
-            >
-              <!-- Contacts -->
-              <q-tab-panel name="contacts" class="no-padding">
-                <q-list style="">
-                  <q-item
-                    v-for="(contact, index) in getContacts"
-                    :key="index"
-                    class="q-my-none"
-                    clickable
-                    v-ripple
-                    @click="sendUserToChat(contact)"
-                  >
-                    <q-item-section avatar>
-                      <q-img
-                        :ratio="1"
-                        width="42px"
-                        height="42px"
-                        :src="contact.img"
-                        style="border-radius: 100%; border: solid 1px black"
-                      />
-                    </q-item-section>
-
-                    <q-item-section>
-                      <q-item-label>{{ contact.name }}</q-item-label>
-                      <q-item-label caption lines="1">{{
-                        contact.fullname
-                      }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-tab-panel>
-              <!-- Chats -->
-              <q-tab-panel name="chats" class="no-padding">
-                <q-list style="">
-                  <q-item
-                    v-for="(chat, index) in getChats"
-                    :key="index"
-                    class="q-my-none"
-                    clickable
-                    v-ripple
-                    @click="sendUserToChat(chat)"
-                  >
-                    <q-item-section avatar>
-                      <q-img
-                        :ratio="1"
-                        width="42px"
-                        height="42px"
-                        :src="chat.img"
-                        style="border-radius: 100%; border: solid 1px black"
-                      />
-                    </q-item-section>
-
-                    <q-item-section>
-                      <q-item-label>{{ chat.name }}</q-item-label>
-                      <q-item-label caption lines="1">{{
-                        chat.fullname
-                      }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-tab-panel>
-            </q-tab-panels>
-          </q-page>
-        </q-page-container>
-      </q-layout>
+            <q-item-section>
+              <q-item-label>{{ chat.name }}</q-item-label>
+              <q-item-label caption lines="1">{{ chat.fullname }}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-page>
     </section>
     <!-- Dialogs -->
     <SettingsDialog v-model="settingsDialog" v-on:modalChange="actionModal" />
@@ -328,11 +213,6 @@ export default {
     WebsiteDialog,
     BioDialog,
     Picture,
-  },
-  mounted() {
-    setTimeout(() => {
-      this.activeFloor = true;
-    }, 2000);
   },
   methods: {
     actionModal(option) {
@@ -539,10 +419,7 @@ export default {
   },
   computed: {
     ...mapState("settingsUser", ["currentUserInfoData", "currentUserChat"]),
-    getContacts() {
-      let allContacts = this.currentUserInfoData.following;
-      return allContacts;
-    },
+
     getChats() {
       let allChats = this.currentUserInfoData.chats;
       let chats = {};

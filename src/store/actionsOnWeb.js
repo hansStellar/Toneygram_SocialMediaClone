@@ -403,26 +403,22 @@ const actions = {
     commit("removeThePostOnShow");
   },
   async goToUser({ commit }, payload) {
-    try {
-      const currentUserInformationRef = await firebaseDb
-        .ref("toneygram/users/" + payload.userId)
-        .once("value", (userInPage) => {
-          let payloadx2 = {
-            userOnPage: userInPage.val(),
-            userIdLoggedIn: payload.userIdLoggedIn,
-          };
-          commit("setUserPageGlobal", payloadx2);
-        });
+    this.$router.push({
+      name: "User",
+      params: {
+        userId: payload.userId,
+      },
+    });
 
-      this.$router.push({
-        name: "User",
-        params: {
-          userId: payload.userId,
-        },
+    const currentUserInformationRef = await firebaseDb
+      .ref("toneygram/users/" + payload.userId)
+      .once("value", (userInPage) => {
+        let payloadx2 = {
+          userOnPage: userInPage.val(),
+          userIdLoggedIn: payload.userIdLoggedIn,
+        };
+        commit("setUserPageGlobal", payloadx2);
       });
-    } catch (error) {
-      console.log(new Error("Error"));
-    }
   },
   async removeTheUserOnPageAction({ commit }) {
     commit("removeTheUserPageGlobal");

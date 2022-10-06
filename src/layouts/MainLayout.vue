@@ -166,7 +166,9 @@
             icon="send"
             class="q-ml-md"
             @click="sendUserToDM"
+            v-if="this.$route.name !== 'Main'"
           />
+          <q-btn round dense flat color="black" class="q-ml-md" v-else />
           <!-- Likes Button -->
           <!-- <q-btn-dropdown
             rounded
@@ -187,8 +189,8 @@
       <router-view />
     </q-page-container>
 
-    <q-footer elevated class="bg-grey-8 text-white baseFooter">
-      <q-tabs align="justify" class="bg-white full-width text-black shadow-2">
+    <q-footer class="baseFooter" style="border-top: 1px solid lightgrey">
+      <q-tabs align="justify" class="bg-white full-width text-black">
         <q-tab icon="cottage" @click="footer('home', 'Home')" />
 
         <!-- <q-tab
@@ -243,7 +245,6 @@ export default {
       showSearch: false,
       textSearch: "",
       usersFound: [],
-      usersFoundOther: [],
       timeout: 0,
       loading: false,
     };
@@ -263,7 +264,6 @@ export default {
         name: "Settings",
       });
     },
-
     sendUserToDM() {
       this.$router.push({
         name: "Main",
@@ -297,11 +297,17 @@ export default {
             const users = await allUsers.val();
             Object.values(users).forEach((User) => {
               const name = User.userInformation.name;
-              if (name.includes(self.textSearch)) {
-                return self.usersFound.push(User);
-              }
+
+              if (self.textSearch == "")
+                return (self.usersFound = []), (self.active = false);
+
+              if (name.includes(self.textSearch.toLowerCase()))
+                return self.usersFound.push(User), (self.active = false);
             });
             self.loading = false;
+
+            if (self.usersFound.length < 1 && self.textSearch != "")
+              return (self.active = true);
           });
       }, 1000);
     },
@@ -358,6 +364,12 @@ export default {
         if (!this.getPostOnShowReady) output = "";
       }
 
+      if (this.$route.name === "Main") {
+        if (this.getUserOnPageGlobalReady)
+          output = this.getUserOnPageGlobal.userInformation.name;
+        if (!this.getUserOnPageGlobalReady) output = "";
+      }
+
       return output;
     },
   },
@@ -394,7 +406,7 @@ export default {
 //Tablet
 @media (min-width: 480px) {
   .buttonGoBack {
-    display: none;
+    display: flex;
   }
   .buttonFooter {
     display: none;
@@ -411,10 +423,10 @@ export default {
     display: none;
   }
   .titleMobile {
-    display: none;
+    display: flex;
   }
   .titleDesktop {
-    display: flex;
+    display: none;
   }
 }
 

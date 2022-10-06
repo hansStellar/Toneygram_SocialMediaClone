@@ -20,9 +20,9 @@
 - Al darle submit en editar texto en post se reinicia y no ejecuta la funcion
 - Al crear un usuario no se ve la barra nav de arriba y en el footer no aparece el icono para ir hacia el perfil
 (quedamos en el vuex store no se refleja el get current user index al crear una cuenta)
+- Eliminar la basura de firebase
 
 * Doing
-- Eliminar la basura de firebase
 
 * Urgente
 

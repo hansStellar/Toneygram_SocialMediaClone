@@ -189,13 +189,7 @@
           <q-carousel-slide
             v-for="(image, index) in post.imagesUploaded"
             :key="index"
-            style="
-              padding: 0;
-              margin: 0;
-              width: 100%;
-              height: 420px;
-              max-height: 420px;
-            "
+            style="padding: 0; margin: 0; width: 100%; height: 100%"
             class=""
             :name="index"
           >
@@ -203,13 +197,7 @@
               fit="contain"
               class="shadow-1"
               :src="image"
-              style="
-                padding: 0;
-                margin: 0;
-                width: 100%;
-                height: 420px;
-                max-height: 420px;
-              "
+              style="padding: 0; margin: 0; width: 100%; height: auto"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -285,23 +273,10 @@
           </q-card-actions>
         </q-list>
 
-        <!-- Date -->
-        <div class="q-mx-sm text-grey text-overline">
-          {{
-            new Date(post.fullD).toLocaleDateString("en-us", {
-              weekday: "long",
-              year: "numeric",
-              month: "short",
-              day: "numeric",
-            })
-          }}
-        </div>
-        <q-separator color="grey-3" size="1px" />
-
         <!-- Comments -->
         <q-list
           style="max-height: 120px; overflow: overlay"
-          class="q-py-sm full-width"
+          class="full-width"
           v-if="post.messages"
         >
           <q-card-actions
@@ -372,10 +347,21 @@
             </div>
           </q-card-actions>
         </q-list>
-        <q-separator color="grey-3" size="1px" />
+
+        <!-- Date -->
+        <div class="q-mx-sm text-grey text-overline">
+          {{
+            new Date(post.fullD).toLocaleDateString("en-us", {
+              weekday: "long",
+              year: "numeric",
+              month: "short",
+              day: "numeric",
+            })
+          }}
+        </div>
 
         <!-- Create Comment -->
-        <div class="bg-white full-width q-px-sm ccInfo">
+        <div class="bg-white q-py-none full-width q-px-sm ccInfo">
           <q-input
             color="grey-6"
             v-model="post.textMessage"
@@ -718,7 +704,7 @@ export default {
   .CardLeft {
     margin-bottom: 0rem;
     margin-top: 0rem;
-    border-bottom: solid 1px grey;
+    border-bottom: solid 1px lightgrey;
   }
   .LeftSideBase {
     width: 100%;

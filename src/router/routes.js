@@ -42,12 +42,6 @@ const routes = [
         component: () => import("src/pages/Activity.vue"),
         name: "Activity",
       },
-    ],
-  },
-  {
-    path: "/main",
-    component: () => import("layouts/noLayout.vue"),
-    children: [
       {
         path: "/main",
         component: Main,
@@ -60,6 +54,7 @@ const routes = [
       },
     ],
   },
+
   { path: "/auth", component: () => import("pages/Auth.vue"), name: "Auth" },
 
   // Always leave this as last one,

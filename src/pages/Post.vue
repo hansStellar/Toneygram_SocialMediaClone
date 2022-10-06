@@ -3,7 +3,7 @@
     <!-- Base Desktop -->
     <q-card
       class="row no-shadow no-border-radius col desktopVersion"
-      style="border: solid 1px lightgray; max-width: 850px; max-height: 480px"
+      style="border: solid 1px lightgray; max-width: 850px; max-height: auto"
     >
       <!-- Left Side / Picture -->
       <section class="no-padding col-8" style="align-self: center">
@@ -26,20 +26,14 @@
             v-for="(image, index) in getPostOnShow.imagesUploaded"
             :key="index"
             :name="index"
-            style="padding: 0; margin: 0; width: 100%; height: 480px"
+            style="padding: 0; margin: 0; width: 100%; height: 100%"
             class=""
           >
             <q-img
               class="no-shadow"
               fit="contain"
               :src="image"
-              style="
-                padding: 0;
-                margin: 0;
-                width: 100%;
-                max-height: 480px;
-                height: 480px;
-              "
+              style="padding: 0; margin: 0; width: 100%; height: auto"
             />
           </q-carousel-slide>
         </q-carousel>
@@ -54,20 +48,14 @@
       </section>
 
       <!-- Right Side / Information -->
-      <q-card-section
-        class="col-4 no-padding"
-        style="
-          border-left: solid 1px lightgray;
-          border-bottom: solid 1px lightgray;
-        "
-      >
+      <section class="col-4 column" style="border-left: solid 1px lightgray">
         <!-- Banner name and avatar -->
-        <q-item>
+        <q-item class="" style="max-height: 300px">
           <!-- Left Side -->
           <q-item-section avatar>
             <q-img
               class="cursor-pointer"
-              style="border-radius: 100%"
+              style="border-radius: 100%; border: solid 1px grey"
               @click="
                 goToUser({
                   userId: getPostOnShow.userInfo.userId,
@@ -141,126 +129,128 @@
         <q-separator color="grey-3" size="1px" />
 
         <!-- Comments and Description -->
-        <q-responsive :ratio="1">
-          <div style="overflow: auto">
-            <!-- Description Post -->
-            <div
-              v-if="getPostOnShowReady"
-              class="q-my-sm q-px-md row items-center"
-            >
-              <q-img
-                @click="
-                  goToUser({
-                    userId: getPostOnShow.userInfo.userId,
-                    userIdLoggedIn: getCurrentUserIndex.id,
-                  })
-                "
-                :src="getPostOnShow.userInfo.userImg"
-                :ratio="1"
-                width="32px"
-                height="32px"
-                class="cursor-pointer"
-                style="border-radius: 100%; border: 1px solid grey"
-              />
-              <span
-                @click="
-                  goToUser({
-                    userId: getPostOnShow.userInfo.userId,
-                    userIdLoggedIn: getCurrentUserIndex.id,
-                  })
-                "
-                class="cursor-pointer q-ml-md q-mr-sm text-weight-bold"
-                >{{ getPostOnShow.userInfo.userName }}</span
-              ><span>{{ getPostOnShow.description }}</span>
-            </div>
-            <q-skeleton class="q-ma-md" width="190px" v-else />
-            <!-- Comments desktop -->
-            <div v-if="getPostOnShowReady" class="q-px-md bg-white" style="">
-              <div
-                v-for="(comment, index) in getPostOnShow.messages"
-                :key="index"
-                class="row items-center q-py-sm"
-              >
-                <!-- Left Side -->
-                <div class="row col-10 items-center">
-                  <!-- img -->
-                  <q-img
-                    :src="comment.imgUser"
-                    :ratio="1"
-                    width="32px"
-                    height="32px"
-                    class="cursor-pointer"
-                    style="border-radius: 100%; border: 1px solid grey"
-                    @click="
-                      goToUser({
-                        userId: comment.idUser,
-                        userIdLoggedIn: getCurrentUserIndex.id,
-                      })
-                    "
-                  />
-                  <span
-                    @click="
-                      goToUser({
-                        userId: comment.idUser,
-                        userIdLoggedIn: getCurrentUserIndex.id,
-                      })
-                    "
-                    class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
-                    >{{ comment.userName }}</span
-                  >
-                  <span class="">{{ comment.message }}</span>
-                </div>
-                <!-- Right Side -->
-                <q-btn-dropdown
-                  color="black"
-                  dropdown-icon="more_vert"
-                  flat
-                  dense
-                  v-if="comment.idUser === getCurrentUserIndex.id"
-                  no-icon-animation
-                  label=""
-                  class="col-2 self-start"
-                >
-                  <q-list>
-                    <q-item
-                      clickable
-                      v-close-popup
-                      @click="showDialogEditComment(comment, index)"
-                    >
-                      <q-item-section>
-                        <q-item-label>Edit</q-item-label>
-                      </q-item-section>
-                    </q-item>
-
-                    <q-item
-                      class="bg-red-2 text-red-9"
-                      clickable
-                      v-close-popup
-                      @click="
-                        deletePost({
-                          postId: getPostOnShow.idPost,
-                          userId: getPostOnShow.userInfo.userId,
-                          commentIndex: index,
-                          mode: 'comment',
-                          currentUserId: comment.idUser,
-                        })
-                      "
-                    >
-                      <q-item-section>
-                        <q-item-label>Delete Comment</q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-btn-dropdown>
-              </div>
-            </div>
-            <q-skeleton class="q-ma-md" width="210px" v-else />
+        <article class="col">
+          <!-- Description Post -->
+          <div
+            v-if="getPostOnShowReady"
+            class="q-my-sm q-px-md row items-center"
+          >
+            <q-img
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
+              :src="getPostOnShow.userInfo.userImg"
+              :ratio="1"
+              width="32px"
+              height="32px"
+              class="cursor-pointer"
+              style="border-radius: 100%; border: 1px solid grey"
+            />
+            <span
+              @click="
+                goToUser({
+                  userId: getPostOnShow.userInfo.userId,
+                  userIdLoggedIn: getCurrentUserIndex.id,
+                })
+              "
+              class="cursor-pointer q-ml-md q-mr-sm text-weight-bold"
+              >{{ getPostOnShow.userInfo.userName }}</span
+            ><span>{{ getPostOnShow.description }}</span>
           </div>
-        </q-responsive>
+          <q-skeleton class="q-ma-md" width="190px" v-else />
+          <!-- Comments desktop -->
+          <div v-if="getPostOnShowReady" class="q-px-md bg-white" style="">
+            <div
+              v-for="(comment, index) in getPostOnShow.messages"
+              :key="index"
+              class="row items-center q-py-sm"
+            >
+              <!-- Left Side -->
+              <div class="row col-10 items-center">
+                <!-- img -->
+                <q-img
+                  :src="comment.imgUser"
+                  :ratio="1"
+                  width="32px"
+                  height="32px"
+                  class="cursor-pointer"
+                  style="border-radius: 100%; border: 1px solid grey"
+                  @click="
+                    goToUser({
+                      userId: comment.idUser,
+                      userIdLoggedIn: getCurrentUserIndex.id,
+                    })
+                  "
+                />
+                <span
+                  @click="
+                    goToUser({
+                      userId: comment.idUser,
+                      userIdLoggedIn: getCurrentUserIndex.id,
+                    })
+                  "
+                  class="cursor-pointer q-ml-md q-mr-sm text-weight-medium text-weight-bold"
+                  >{{ comment.userName }}</span
+                >
+                <span class="">{{ comment.message }}</span>
+              </div>
+              <!-- Right Side -->
+              <q-btn-dropdown
+                color="black"
+                dropdown-icon="more_vert"
+                flat
+                dense
+                v-if="comment.idUser === getCurrentUserIndex.id"
+                no-icon-animation
+                label=""
+                class="col-2 self-start"
+              >
+                <q-list>
+                  <q-item
+                    clickable
+                    v-close-popup
+                    @click="showDialogEditComment(comment, index)"
+                  >
+                    <q-item-section>
+                      <q-item-label>Edit</q-item-label>
+                    </q-item-section>
+                  </q-item>
+
+                  <q-item
+                    class="bg-red-2 text-red-9"
+                    clickable
+                    v-close-popup
+                    @click="
+                      deletePost({
+                        postId: getPostOnShow.idPost,
+                        userId: getPostOnShow.userInfo.userId,
+                        commentIndex: index,
+                        mode: 'comment',
+                        currentUserId: comment.idUser,
+                      })
+                    "
+                  >
+                    <q-item-section>
+                      <q-item-label>Delete Comment</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+            </div>
+          </div>
+          <q-skeleton class="q-ma-md" width="210px" v-else />
+        </article>
         <q-separator color="grey-3" size="1px" />
 
         <!-- Like, likes, date -->
-        <div class="col lldInfo" v-if="getPostOnShowReady">
+        <div
+          class="lldInfo"
+          v-if="getPostOnShowReady"
+          style="max-height: 400px"
+        >
           <!-- Like and Comment -->
           <div class="bg-white lcInfo">
             <q-btn
@@ -318,7 +308,10 @@
         <q-separator color="grey-3" size="1px" />
 
         <!-- Create Comment -->
-        <div class="bg-white full-width q-px-sm ccInfo">
+        <div
+          class="bg-white full-width q-px-sm ccInfo"
+          style="max-height: 200px"
+        >
           <q-input
             color="grey-6"
             v-model="textMessage"
@@ -345,7 +338,7 @@
             </template>
           </q-input>
         </div>
-      </q-card-section>
+      </section>
     </q-card>
 
     <!-- Base Mobile -->
@@ -457,14 +450,14 @@
           v-for="(image, index) in getPostOnShow.imagesUploaded"
           :key="index"
           :name="index"
-          style="padding: 0; margin: 0; width: 100%; height: 448px"
+          style="padding: 0; margin: 0; width: 100%; height: 100%"
           class=""
         >
           <q-img
             fit="contain"
             class="no-shadow"
             :src="image"
-            style="padding: 0; margin: 0; width: 100%; height: 448px"
+            style="padding: 0; margin: 0; width: 100%; height: auto"
           />
         </q-carousel-slide>
       </q-carousel>

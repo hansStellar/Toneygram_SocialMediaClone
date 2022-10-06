@@ -32,7 +32,6 @@ const mutations = {
     state.userOnPageReadySettings = true;
   },
   setActualFollowingToCurrentUser(state, payload) {
-    console.log(payload);
     state.currentUserInfoData.following = payload;
   },
   setItsNewUser(state) {
