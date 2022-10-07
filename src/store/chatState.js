@@ -1,6 +1,8 @@
 import { firebaseAuth, firebaseDb } from "src/boot/firebase";
 
-const state = {};
+const state = {
+    chats: []
+};
 
 const mutations = {};
 

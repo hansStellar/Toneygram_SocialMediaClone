@@ -3,7 +3,12 @@
     <!-- Base Desktop -->
     <q-card
       class="row no-shadow no-border-radius col desktopVersion"
-      style="border: solid 1px lightgray; max-width: 850px; max-height: auto"
+      style="
+        border: solid 1px lightgray;
+        max-width: 850px;
+        max-height: auto;
+        min-height: 480px;
+      "
     >
       <!-- Left Side / Picture -->
       <section class="no-padding col-8" style="align-self: center">

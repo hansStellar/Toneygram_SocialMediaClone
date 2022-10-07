@@ -40,10 +40,10 @@
             @focus="focusInput"
             @blur="focusOutput"
             @keyup="searchUser"
-            color="black"
+            color=""
             label-color="black"
             class="p-2 no-border"
-            style="padding: 1rem; border: solid 1px"
+            style="padding: 1rem; min-width: 300px; outline: none"
           >
             <template v-slot:append v-if="!this.loading">
               <q-icon
@@ -60,50 +60,69 @@
                 v-if="textSearch !== ''"
                 name="close"
                 @click="textSearch = ''"
+                z-
                 class="cursor-pointer"
               />
               <q-spinner-ios color="grey" size="1em" />
             </template>
           </q-input>
 
-          <q-list
+          <div
             class="baseSearch shadow-2"
             v-show="showSearch"
             style="overflow: auto"
           >
-            <q-item
-              class="q-mb-sm itemUser"
-              clickable
-              v-ripple
-              v-for="(user, index) in usersFound"
-              :key="index"
-              @click="
-                goToUser({
-                  userId: user.userInformation.id,
-                  userIdLoggedIn: getCurrentUserIndex.id,
-                })
-              "
-            >
-              <q-item-section avatar>
-                <q-img
-                  :ratio="1"
-                  :src="user.userInformation.img"
-                  height="36px"
-                  width="36px"
-                  style="border-radius: 100%; border: solid 1px black"
-                />
-              </q-item-section>
+            <!-- Users -->
+            <q-list v-if="usersFound.length >= 1">
+              <q-item
+                class="q-py-md itemUser"
+                clickable
+                v-ripple
+                v-for="(user, index) in usersFound"
+                :key="index"
+                @click="
+                  goToUser({
+                    userId: user.userInformation.id,
+                    userIdLoggedIn: getCurrentUserIndex.id,
+                  }),
+                    focusOutput()
+                "
+              >
+                <q-item-section avatar>
+                  <q-img
+                    :ratio="1"
+                    :src="user.userInformation.img"
+                    height="36px"
+                    width="36px"
+                    style="border-radius: 100%; border: solid 1px black"
+                  />
+                </q-item-section>
 
-              <q-item-section>
-                <q-item-label class="text-black text-weight-bold">{{
-                  user.userInformation.name
-                }}</q-item-label>
-                <q-item-label caption lines="1">
-                  {{ user.userInformation.fullname }}
-                </q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
+                <q-item-section>
+                  <q-item-label class="text-black text-weight-bold">{{
+                    user.userInformation.name
+                  }}</q-item-label>
+                  <q-item-label caption lines="1">
+                    {{ user.userInformation.fullname }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+            <!-- Nothing -->
+            <q-list v-if="active">
+              <q-item>
+                <q-item-section>
+                  <q-item-label
+                    class="text-black text-weight-bold"
+                    caption
+                    lines="1"
+                  >
+                    No user has been found, please, try again
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </div>
         </div>
 
         <!-- Buttons layer -->
@@ -246,6 +265,7 @@ export default {
       textSearch: "",
       usersFound: [],
       timeout: 0,
+      timeoutDialog: 0,
       loading: false,
     };
   },
@@ -276,11 +296,12 @@ export default {
     },
     focusInput() {
       this.showSearch = true;
+      clearTimeout(this.timeoutDialog);
     },
     focusOutput() {
-      setTimeout(() => {
+      this.timeoutDialog = setTimeout(() => {
         this.showSearch = false;
-      }, 100);
+      }, 300);
     },
     searchUser: function () {
       // clear timeout variable
@@ -457,8 +478,8 @@ export default {
     height: 20rem;
     max-height: 20rem;
     position: absolute;
-    bottom: -21rem;
-    right: -3rem;
+    bottom: -19rem;
+    right: -12px;
     border-radius: 1rem;
   }
   .itemUser:hover {
