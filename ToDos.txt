@@ -23,7 +23,7 @@
 - Eliminar la basura de firebase
 
 * Doing
-- Arreglar el chat (quede en traer los chats, en el firebase, en cada id, despues de alli tenemos que meter una propiedad llamada messages, y dentro de la propiedad id vamos a poner todos los datos del usuario al cual estamos interactuando)
+- Arreglar el chat (quede en traer los chats, en el firebase, en cada id, despues de alli tenemos que meter una propiedad llamada messages, y dentro de la propiedad id vamos a poner todos los datos del usuario al cual estamos interactuando) ----- quede en poner el usuario al que hablamos en el state)
 
 * Urgente
 

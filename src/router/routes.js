@@ -48,7 +48,7 @@ const routes = [
         name: "Main",
       },
       {
-        path: "/main/:userId",
+        path: "/main/:chatId",
         component: Chats,
         name: "Chat",
       },

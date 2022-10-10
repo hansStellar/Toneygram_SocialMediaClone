@@ -20,6 +20,7 @@ export default {
       "getPostsFromExploreAction",
       "getSuggetedsUsersAction",
     ]),
+    ...mapActions("chatState", ["getChatsAction"]),
   },
   computed: {
     ...mapGetters("settingsUser", ["getCurrentUserIndex", "getItsNewUser"]),
@@ -61,6 +62,9 @@ export default {
 
             // Suggested Users
             await this.getSuggetedsUsersAction(user.uid);
+
+            // Chats
+            await this.getChatsAction(user.displayName);
           }
         } catch (error) {}
       } else {

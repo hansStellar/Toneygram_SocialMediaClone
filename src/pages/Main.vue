@@ -142,11 +142,11 @@
     <!-- Mobile & Tablet -->
     <section class="row mobileVersion full-width bg-white q-pt-sm">
       <!-- Base -->
-      <q-page>
+      <q-page class="full-width">
         <!-- Chats -->
         <q-list>
           <q-item
-            v-for="(chat, index) in getChats"
+            v-for="(chat, index) in getChatsGetter"
             :key="index"
             class="q-my-none"
             clickable
@@ -155,17 +155,57 @@
           >
             <q-item-section avatar>
               <q-img
+                v-if="
+                  getCurrentUserInfoData.userInformation.name ===
+                  chat.transmitter.name
+                "
                 :ratio="1"
                 width="42px"
                 height="42px"
-                :src="chat.img"
+                :src="chat.receiver.img"
+                style="border-radius: 100%; border: solid 1px black"
+              />
+              <q-img
+                v-if="
+                  getCurrentUserInfoData.userInformation.name ===
+                  chat.receiver.name
+                "
+                :ratio="1"
+                width="42px"
+                height="42px"
+                :src="chat.transmitter.img"
                 style="border-radius: 100%; border: solid 1px black"
               />
             </q-item-section>
 
             <q-item-section>
-              <q-item-label>{{ chat.name }}</q-item-label>
-              <q-item-label caption lines="1">{{ chat.fullname }}</q-item-label>
+              <q-item-label
+                v-if="
+                  getCurrentUserInfoData.userInformation.name ===
+                  chat.transmitter.name
+                "
+                >{{ chat.receiver.name }}</q-item-label
+              >
+              <q-item-label
+                v-if="
+                  getCurrentUserInfoData.userInformation.name ===
+                  chat.receiver.name
+                "
+                >{{ chat.transmitter.name }}</q-item-label
+              >
+              <q-item-label caption lines="1">{{
+                chat.messagesMissing.lastMessageValue
+              }}</q-item-label>
+            </q-item-section>
+
+            <q-item-section
+              avatar
+              v-if="
+                chat.messagesMissing.transmitter ===
+                getCurrentUserInfoData.userInformation.name
+              "
+            >
+              {{ chat.messagesMissing.quantityOfMessages }}
             </q-item-section>
           </q-item>
         </q-list>
@@ -185,9 +225,11 @@ export default {
   },
   methods: {
     ...mapActions("settingsUser", ["changeUserChat"]),
+    ...mapActions("chatState", ["sendUserToChat"]),
   },
   computed: {
     ...mapGetters("settingsUser", ["getCurrentUserInfoData"]),
+    ...mapGetters("chatState", ["getChatsGetter"]),
   },
 };
 </script>

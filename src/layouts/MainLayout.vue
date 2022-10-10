@@ -1,6 +1,10 @@
 <template>
   <q-layout view="hHh lpR fFf" class="baseLayout">
-    <q-header bordered class="bg-white text-white baseHeader">
+    <q-header
+      bordered
+      class="bg-white text-white baseHeader"
+      v-if="this.$route.name !== 'Chat'"
+    >
       <q-toolbar
         style="max-width: 970px; margin: auto"
         class="row justify-between"
@@ -208,7 +212,11 @@
       <router-view />
     </q-page-container>
 
-    <q-footer class="baseFooter" style="border-top: 1px solid lightgrey">
+    <q-footer
+      class="baseFooter"
+      v-if="this.$route.name !== 'Chat'"
+      style="border-top: 1px solid lightgrey"
+    >
       <q-tabs align="justify" class="bg-white full-width text-black">
         <q-tab icon="cottage" @click="footer('home', 'Home')" />
 
