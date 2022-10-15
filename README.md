@@ -25,7 +25,3 @@ yarn
 ```bash
 quasar dev
 ```
-
-## Project Review
-
-
