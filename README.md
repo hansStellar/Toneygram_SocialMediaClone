@@ -29,3 +29,23 @@ quasar dev
 
 ![Untitled](https://user-images.githubusercontent.com/55974402/195989419-e2ef4633-e85a-414f-ae5d-d7cb7c05fca4.png)
 
+## User's Profile Page
+
+![1](https://user-images.githubusercontent.com/55974402/195989457-7307930c-962b-43d6-8fc2-1746855231f6.png)
+
+## Post Page
+
+![2](https://user-images.githubusercontent.com/55974402/195989472-866a2d85-eacd-4791-8d49-ecb882786dfd.png)
+
+## Search & Explore Page
+
+![5](https://user-images.githubusercontent.com/55974402/195989505-079840bb-5d2f-4e1d-8b8f-72704f29095e.png)
+
+## Chats List Page
+
+![4](https://user-images.githubusercontent.com/55974402/195989526-1521c124-2818-47a8-976a-c8e440776834.png)
+
+## Chat Page
+
+![3](https://user-images.githubusercontent.com/55974402/195989581-4297b159-c962-4e20-b924-40da8ca9e43c.png)
+
