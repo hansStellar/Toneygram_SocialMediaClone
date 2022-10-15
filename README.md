@@ -25,3 +25,6 @@ yarn
 ```bash
 quasar dev
 ```
+## User's Feed
+
+(https://user-images.githubusercontent.com/55974402/195989382-cabb615a-6412-4bf1-a8a7-3a6db3c04680.png)
