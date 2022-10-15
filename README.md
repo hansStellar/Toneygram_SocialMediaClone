@@ -12,7 +12,7 @@ Toneygram has an authentication system where clients can log in and register thr
 
 Toneygram also has an instant messaging system, where the user can communicate with another user through their profile using the "Message" button. 
 
-Finally, the web application has an integrated option from Firebase that makes it real-time. Therefore, a user can receive notifications in real-time (messaging, liked posts.)
+Finally, the web application has an integrated option from Firebase that makes it real-time. Therefore, a user can receive notifications in real-time (messaging, liked posts.), and the chat has a real-time checked mark to confirm if the user you are chatting with has read your message.
 
 ## Project Instalation Tutorial
 
@@ -25,6 +25,12 @@ yarn
 ```bash
 quasar dev
 ```
+
+## Live Website
+```bash
+toneygram.netlify.app
+```
+
 ## User's Feed
 
 ![Untitled](https://user-images.githubusercontent.com/55974402/195989419-e2ef4633-e85a-414f-ae5d-d7cb7c05fca4.png)
